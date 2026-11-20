@@ -1,89 +1,144 @@
-import { useRef } from 'react'
-import { ArrowUpRight, AtSign } from 'lucide-react'
+import { useRef, useState } from 'react'
+import { AtSign } from 'lucide-react'
 import { useReveal } from '../hooks/useReveal'
 import { useBooking } from '../context/booking'
 import { SectionLabel } from '../components/SectionLabel'
 import { Img } from '../components/Img'
-import { barbers } from '../data/content'
+import { Button } from '../components/Button'
+import { barbers, type Barber } from '../data/content'
+
+/** Pendant lamp drawn above each mirror; glows when its barber is selected. */
+function Lamp({ on }: { on: boolean }) {
+  return (
+    <div className="relative mx-auto flex w-16 flex-col items-center" aria-hidden>
+      <span className="h-8 w-px bg-paper/25 md:h-12" />
+      <span className={`h-3 w-9 rounded-t-full transition-colors duration-700 ${on ? 'bg-paper' : 'bg-paper/30'}`} />
+      <span
+        className={`pointer-events-none absolute top-full h-40 w-48 bg-[radial-gradient(50%_100%_at_50%_0%,rgba(255,255,255,0.28),transparent_70%)] transition-opacity duration-700 ${
+          on ? 'opacity-100' : 'opacity-0'
+        }`}
+      />
+    </div>
+  )
+}
+
+function Mirror({ b, i, active, onActivate }: { b: Barber; i: number; active: boolean; onActivate: () => void }) {
+  const { bookBarber } = useBooking()
+  return (
+    <article
+      onPointerEnter={(e) => e.pointerType === 'mouse' && onActivate()}
+      onFocus={onActivate}
+      className={`flex min-w-0 flex-col transition-[flex-grow] duration-700 ease-[var(--ease-expo)] ${active ? 'grow-[3.2]' : 'grow'}`}
+      style={{ flexBasis: 0 }}
+    >
+      <Lamp on={active} />
+      <div
+        className={`relative mt-2 h-[min(64vh,620px)] overflow-hidden rounded-[22px] border p-1.5 transition-colors duration-700 ${
+          active ? 'border-paper/45' : 'border-paper/10'
+        }`}
+      >
+        <button type="button" onClick={onActivate} className="relative block h-full w-full overflow-hidden rounded-[16px] text-left" aria-label={`${b.name}, ${b.specialty}`}>
+          <Img
+            id={b.image}
+            alt={`Portrait of ${b.name}`}
+            sizes="(min-width: 1024px) 45vw, 80vw"
+            maxWidth={1080}
+            className="h-full w-full"
+            imgClassName={`transition-[filter,transform] duration-[1.2s] ease-[var(--ease-expo)] ${active ? 'brightness-100 scale-100' : 'brightness-[0.45] scale-105'}`}
+          />
+          <span className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent" />
+          <span className="absolute inset-x-0 bottom-0 p-4 md:p-5">
+            <span className="label block text-paper/60">#{i + 1}</span>
+            <span className="mt-1 block truncate text-xl font-bold [font-stretch:122%] md:text-2xl">{b.name.split(' ')[0]}</span>
+          </span>
+        </button>
+      </div>
+      <div className={`grid transition-[grid-template-rows,opacity] duration-700 ease-[var(--ease-expo)] ${active ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
+        <div className="overflow-hidden">
+          <div className="flex flex-wrap items-end justify-between gap-4 pt-5">
+            <div className="max-w-sm">
+              <div className="label text-paper/50">
+                {b.role} · {b.years} yrs
+              </div>
+              <p className="mt-2 text-sm leading-relaxed text-paper/70">
+                <b className="font-semibold text-paper">{b.specialty}.</b> {b.bio}
+              </p>
+            </div>
+            <Button variant="light" onClick={() => bookBarber(b.id)} tabIndex={active ? 0 : -1} aria-label={`Book with ${b.name}`}>
+              Book with {b.name.split(' ')[0]}
+            </Button>
+          </div>
+        </div>
+      </div>
+    </article>
+  )
+}
 
 export function Barbers() {
   const root = useRef<HTMLElement>(null)
+  const [active, setActive] = useState(0)
   const { bookBarber } = useBooking()
   useReveal(root)
 
   return (
-    <section ref={root} id="barbers" className="section-y relative overflow-hidden bg-paper text-ink">
+    <section ref={root} id="barbers" className="section-y relative overflow-hidden bg-ink text-paper">
       <div className="shell">
-        <div className="mb-12 flex flex-col justify-between gap-8 md:mb-20 md:flex-row md:items-end">
-          <div>
-            <SectionLabel index="03">The barbers</SectionLabel>
-            <h2 data-reveal="lines" className="display mt-8 text-[clamp(3rem,9vw,9rem)]">
-              Choose <span className="serif normal-case">your</span>
-              <br /> barber
-            </h2>
-          </div>
-          <p data-reveal="fade" className="max-w-sm leading-relaxed text-ink/65">
-            Four specialists, one standard. Pick the hands that suit your hair — or let us match you with whoever’s free.
+        <SectionLabel index="03">The barbers</SectionLabel>
+        <div className="mt-8 flex flex-col justify-between gap-6 md:flex-row md:items-end">
+          <h2 data-reveal="lines" className="display text-[clamp(2.6rem,6.4vw,6rem)]">
+            Four chairs. <b>Pick yours.</b>
+          </h2>
+          <p data-reveal="fade" className="max-w-sm text-sm leading-relaxed text-paper/60">
+            Every barber keeps his own station and his own diary. Choose the hands that suit your hair — or take the first
+            free chair.
           </p>
+        </div>
+
+        {/* Desktop: mirror accordion */}
+        <div data-reveal="fade" className="mt-10 hidden gap-3 lg:flex">
+          {barbers.map((b, i) => (
+            <Mirror key={b.id} b={b} i={i} active={active === i} onActivate={() => setActive(i)} />
+          ))}
         </div>
       </div>
 
-      <div
-        data-reveal="stagger"
-        className="no-scrollbar flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 md:grid md:grid-cols-2 md:gap-4 md:overflow-visible md:px-8 xl:grid-cols-4 xl:px-12 [max-width:1680px] mx-auto"
-      >
+      {/* Mobile & tablet: swipeable mirrors */}
+      <div data-reveal="stagger" className="no-scrollbar mt-6 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 md:px-8 lg:hidden">
         {barbers.map((b, i) => (
-          <article key={b.id} className="group w-[78vw] max-w-[360px] shrink-0 snap-start md:w-auto md:max-w-none">
-            <button
-              type="button"
-              onClick={() => bookBarber(b.id)}
-              className="relative block w-full overflow-hidden text-left"
-              aria-label={`Book with ${b.name}`}
-            >
-              <Img
-                id={b.image}
-                alt={`Portrait of ${b.name}`}
-                sizes="(min-width: 1280px) 25vw, (min-width: 768px) 50vw, 78vw"
-                maxWidth={1080}
-                className="aspect-[3/4] w-full"
-                imgClassName="transition-[transform,filter] duration-[1.4s] ease-[var(--ease-expo)] group-hover:scale-[1.06]"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/0 to-black/0 opacity-80 transition-opacity duration-700 group-hover:opacity-100" />
-              <span className="label absolute left-4 top-4 text-paper/80">0{i + 1}</span>
-              <span className="label absolute right-4 top-4 text-paper/80">{b.years} yrs</span>
-              <div className="absolute inset-x-0 bottom-0 p-4 text-paper md:p-5">
-                <p className="max-h-0 overflow-hidden text-sm leading-relaxed text-paper/80 opacity-0 transition-all duration-700 ease-[var(--ease-expo)] group-hover:mb-4 group-hover:max-h-28 group-hover:opacity-100">
-                  {b.bio}
-                </p>
-                <span className="flex items-center justify-between">
-                  <span className="label">Book with {b.name.split(' ')[0]}</span>
-                  <span className="grid size-10 place-items-center bg-paper text-ink transition-transform duration-500 group-hover:rotate-45">
-                    <ArrowUpRight className="size-4" strokeWidth={1.5} />
+          <article key={b.id} className="w-[78vw] max-w-[340px] shrink-0 snap-start">
+            <Lamp on />
+            <div className="mt-2 overflow-hidden rounded-[22px] border border-paper/30 p-1.5">
+              <div className="relative overflow-hidden rounded-[16px]">
+                <Img id={b.image} alt={`Portrait of ${b.name}`} sizes="78vw" maxWidth={1080} className="aspect-[3/4] w-full" />
+                <span className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                <span className="absolute inset-x-0 bottom-0 p-4">
+                  <span className="label block text-paper/60">
+                    #{i + 1} · {b.years} yrs
                   </span>
+                  <span className="mt-1 block text-xl font-bold [font-stretch:122%]">{b.name}</span>
                 </span>
               </div>
-            </button>
-            <div className="mt-4 flex items-start justify-between gap-4 border-t border-ink/15 pt-4">
-              <div>
-                <h3 className="text-xl font-bold uppercase leading-none tracking-tight [font-stretch:120%]">{b.name}</h3>
-                <p className="mt-2 text-sm text-ink/60">{b.role}</p>
-              </div>
-              <div className="text-right">
-                <p className="text-sm">{b.specialty}</p>
-                <a
-                  href={`https://instagram.com/${b.instagram.slice(1)}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-2 inline-flex items-center gap-1 text-xs text-ink/50 hover:text-ink"
-                >
-                  <AtSign className="size-3" />
-                  {b.instagram.slice(1)}
-                </a>
-              </div>
+            </div>
+            <p className="mt-4 text-sm leading-relaxed text-paper/65">
+              <b className="font-semibold text-paper">{b.specialty}.</b> {b.bio}
+            </p>
+            <div className="mt-4 flex items-center justify-between gap-3">
+              <Button variant="light" onClick={() => bookBarber(b.id)} aria-label={`Book with ${b.name}`}>
+                Book with {b.name.split(' ')[0]}
+              </Button>
+              <a
+                href={`https://instagram.com/${b.instagram.slice(1)}`}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-1 text-xs text-paper/50 hover:text-paper"
+              >
+                <AtSign className="size-3" />
+                {b.instagram.slice(1)}
+              </a>
             </div>
           </article>
         ))}
-        <div className="w-1 shrink-0 md:hidden" aria-hidden />
+        <div className="w-1 shrink-0" aria-hidden />
       </div>
     </section>
   )

@@ -22,6 +22,9 @@ export const site = {
     city: '1017 GP Amsterdam',
     country: 'Netherlands',
     mapQuery: 'Kerkstraat 118, Amsterdam',
+    /** Nearest public transport stop, used on the map card (placeholder) */
+    transit: 'Tram · Prinsengracht',
+    walk: '3 min walk from the tram',
   },
   socials: [
     { label: 'Instagram', href: 'https://instagram.com/' },
@@ -54,3 +57,11 @@ export const navLinks = [
 ]
 
 export const formatPrice = (n: number) => `${site.currency}${n}`
+
+/** Short answers shown in the Visit section. Placeholder policy — confirm before launch. */
+export const faqs = [
+  { q: 'Do you take walk-ins?', a: 'Yes, when a chair is free. Booking guarantees your time and your barber — walk-ins wait for the next gap.' },
+  { q: 'How do I pay?', a: 'In the shop after your cut, by card, phone or cash. Booking online never needs a card.' },
+  { q: 'What if I am running late?', a: 'Call us. Up to ten minutes we can usually still do the full service; after that we may need to shorten or move it.' },
+  { q: 'Do you cut kids’ hair?', a: 'Yes — the Junior Cut is for gentlemen under twelve, any day we are open.' },
+]

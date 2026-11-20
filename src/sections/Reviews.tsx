@@ -1,147 +1,105 @@
-import { useEffect, useRef, useState } from 'react'
-import { motion, useMotionValue, animate } from 'motion/react'
+import { useRef, useState } from 'react'
+import { AnimatePresence, motion } from 'motion/react'
 import { ArrowLeft, ArrowRight, Star } from 'lucide-react'
 import { useReveal } from '../hooks/useReveal'
 import { SectionLabel } from '../components/SectionLabel'
 import { reviews } from '../data/content'
 import { site } from '../data/site'
 
+const ease = [0.16, 1, 0.3, 1] as const
+
 export function Reviews() {
   const root = useRef<HTMLElement>(null)
-  const viewport = useRef<HTMLDivElement>(null)
-  const track = useRef<HTMLDivElement>(null)
-  const x = useMotionValue(0)
   const [index, setIndex] = useState(0)
-  const [bounds, setBounds] = useState({ left: 0, step: 0, max: 0 })
+  const [dir, setDir] = useState(1)
   useReveal(root)
 
-  // measure card width + drag limits
-  useEffect(() => {
-    const measure = () => {
-      const v = viewport.current
-      const t = track.current
-      if (!v || !t) return
-      const card = t.children[0] as HTMLElement | undefined
-      const gap = parseFloat(getComputedStyle(t).columnGap || '0')
-      const step = card ? card.offsetWidth + gap : 0
-      const left = -Math.max(0, t.scrollWidth - v.offsetWidth)
-      const max = step ? Math.ceil(-left / step) : 0
-      setBounds({ left, step, max })
-    }
-    measure()
-    const ro = new ResizeObserver(measure)
-    if (viewport.current) ro.observe(viewport.current)
-    return () => ro.disconnect()
-  }, [])
-
-  useEffect(() => {
-    const target = Math.max(bounds.left, -index * bounds.step)
-    const controls = animate(x, target, { duration: 0.9, ease: [0.16, 1, 0.3, 1] })
-    return () => controls.stop()
-  }, [index, bounds, x])
-
-  const go = (d: number) => setIndex((i) => Math.min(bounds.max, Math.max(0, i + d)))
+  const go = (d: number) => {
+    setDir(d)
+    setIndex((i) => (i + d + reviews.length) % reviews.length)
+  }
+  const r = reviews[index]
 
   return (
-    <section ref={root} id="reviews" className="section-y relative overflow-hidden bg-ink text-paper">
+    <section ref={root} id="reviews" className="section-y relative overflow-hidden bg-paper text-ink">
       <div className="shell">
-        <div className="grid gap-10 md:grid-cols-12 md:items-end">
-          <div className="md:col-span-7">
-            <SectionLabel index="08">Reviews</SectionLabel>
-            <h2 data-reveal="lines" className="display mt-8 text-[clamp(3rem,9vw,9rem)]">
-              Word <br />
-              <span className="serif normal-case">on the</span> street
-            </h2>
-          </div>
-          <div data-reveal="fade" className="flex items-end justify-between gap-6 md:col-span-5 md:justify-end md:gap-10">
-            <div>
-              <div className="display text-[clamp(4rem,8vw,7rem)] tabular-nums">{site.rating.score}</div>
-              <div className="mt-3 flex gap-1">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Star key={i} className="size-4 fill-paper text-paper" />
-                ))}
-              </div>
-              <div className="label mt-3 leading-relaxed text-paper/50">
-                {site.rating.count.toLocaleString('en-GB')} reviews · {site.rating.source}
-              </div>
-              {site.demoContent && <div className="mt-2 text-xs text-paper/40">Sample rating and reviews</div>}
-            </div>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => go(-1)}
-                disabled={index === 0}
-                aria-label="Previous reviews"
-                className="grid size-12 place-items-center border border-line transition-colors hover:border-paper disabled:opacity-25"
-              >
-                <ArrowLeft className="size-4" strokeWidth={1.5} />
-              </button>
-              <button
-                type="button"
-                onClick={() => go(1)}
-                disabled={index >= bounds.max}
-                aria-label="Next reviews"
-                className="grid size-12 place-items-center border border-line transition-colors hover:border-paper disabled:opacity-25"
-              >
-                <ArrowRight className="size-4" strokeWidth={1.5} />
-              </button>
-            </div>
-          </div>
-        </div>
+        <SectionLabel index="08">Reviews</SectionLabel>
 
-        <div ref={viewport} data-reveal="fade" className="mt-14 md:mt-20">
-          <motion.div
-            ref={track}
-            className="flex cursor-grab touch-pan-y gap-3 active:cursor-grabbing md:gap-4"
-            style={{ x }}
-            drag="x"
-            dragConstraints={{ left: bounds.left, right: 0 }}
-            dragElastic={0.08}
-            onDragEnd={(_, info) => {
-              const current = x.get() + info.velocity.x * 0.2
-              const next = bounds.step ? Math.round(-current / bounds.step) : 0
-              setIndex(Math.min(bounds.max, Math.max(0, next)))
-              // ensure snap even if index didn't change
-              animate(x, Math.max(bounds.left, -Math.min(bounds.max, Math.max(0, next)) * bounds.step), {
-                duration: 0.8,
-                ease: [0.16, 1, 0.3, 1],
-              })
-            }}
-          >
-            {reviews.map((r) => (
-              <figure
-                key={r.name}
-                className="flex w-[85vw] max-w-[440px] shrink-0 select-none flex-col justify-between border border-line bg-coal p-6 sm:w-[60vw] md:p-8 lg:w-[30vw]"
-              >
-                <div>
-                  <div className="flex gap-1" aria-label={`${r.rating} out of 5 stars`}>
-                    {Array.from({ length: r.rating }).map((_, i) => (
-                      <Star key={i} className="size-3.5 fill-paper text-paper" />
-                    ))}
-                  </div>
-                  <blockquote className="serif mt-6 text-[clamp(1.4rem,2vw,1.85rem)] leading-[1.18]">“{r.text}”</blockquote>
-                </div>
-                <figcaption className="mt-10 flex items-center gap-3 border-t border-line pt-5">
-                  <span className="grid size-10 place-items-center bg-paper text-sm font-bold text-ink [font-stretch:125%]">
-                    {r.name
-                      .split(' ')
-                      .map((n) => n[0])
-                      .join('')
-                      .slice(0, 2)}
+        <div className="mt-8 grid items-center gap-10 lg:grid-cols-12 lg:gap-6">
+          <div data-reveal="fade" className="lg:col-span-5">
+            <div className="display text-[clamp(7rem,22vw,17rem)] font-[200] leading-[0.85] tracking-[-0.06em] tabular-nums">
+              {site.rating.score}
+            </div>
+            <div className="label mt-4 flex flex-wrap items-center gap-2 text-ink/55">
+              <span className="flex gap-0.5">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Star key={i} className="size-3 fill-ink text-ink" />
+                ))}
+              </span>
+              {site.rating.count.toLocaleString('en-GB')} {site.rating.source} reviews
+            </div>
+            {site.demoContent && <div className="mt-2 text-xs text-ink/45">Sample rating and reviews</div>}
+          </div>
+
+          {/* Review deck */}
+          <div data-reveal="fade" className="relative lg:col-span-7">
+            <div className="relative mx-auto max-w-xl lg:ml-0">
+              {/* cards stacked behind */}
+              <div aria-hidden className="absolute inset-x-0 top-0 h-[calc(100%-4.25rem)] translate-x-3 translate-y-3 rotate-[2.5deg] rounded-3xl bg-ink/70" />
+              <div aria-hidden className="absolute inset-x-0 top-0 h-[calc(100%-4.25rem)] translate-x-1.5 translate-y-1.5 rotate-[1deg] rounded-3xl bg-ink/85" />
+              <div className="relative overflow-hidden rounded-3xl bg-ink p-7 text-paper md:p-10" aria-live="polite">
+                <AnimatePresence mode="wait" custom={dir} initial={false}>
+                  <motion.figure
+                    key={index}
+                    custom={dir}
+                    initial={{ opacity: 0, y: dir * 24 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: dir * -24 }}
+                    transition={{ duration: 0.5, ease }}
+                    className="flex min-h-[244px] cursor-grab touch-pan-y flex-col justify-between active:cursor-grabbing md:min-h-[240px]"
+                    drag="x"
+                    dragConstraints={{ left: 0, right: 0 }}
+                    dragElastic={0.25}
+                    onDragEnd={(_, info) => {
+                      if (info.offset.x < -50) go(1)
+                      else if (info.offset.x > 50) go(-1)
+                    }}
+                  >
+                    <blockquote className="text-[clamp(1.25rem,2.3vw,1.85rem)] font-medium leading-[1.22] tracking-[-0.015em] [font-stretch:110%]">
+                      “{r.text}”
+                    </blockquote>
+                    <figcaption className="label mt-8 text-paper/50">
+                      {r.name} · {r.meta}
+                    </figcaption>
+                  </motion.figure>
+                </AnimatePresence>
+              </div>
+              <div className="relative mt-6 flex items-center justify-end gap-2">
+                <span className="label mr-auto text-ink/50 tabular-nums">
+                  {index + 1} / {reviews.length}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => go(-1)}
+                  aria-label="Previous review"
+                  className="grid size-11 place-items-center rounded-full border border-ink/20 transition-colors hover:border-ink"
+                >
+                  <ArrowLeft className="size-4" strokeWidth={1.5} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => go(1)}
+                  aria-label="Next review"
+                  className="flex h-11 items-center gap-2 rounded-full bg-ink pl-5 pr-1.5 text-sm text-paper transition-colors hover:bg-black"
+                >
+                  Next
+                  <span className="grid size-8 place-items-center rounded-full bg-paper text-ink">
+                    <ArrowRight className="size-4" strokeWidth={1.75} />
                   </span>
-                  <span>
-                    <span className="block font-semibold">{r.name}</span>
-                    <span className="label mt-1 block text-paper/45">{r.meta}</span>
-                  </span>
-                </figcaption>
-              </figure>
-            ))}
-          </motion.div>
-        </div>
-        <div className="mt-8 flex gap-1.5" aria-hidden>
-          {Array.from({ length: bounds.max + 1 }).map((_, i) => (
-            <span key={i} className={`h-px flex-1 transition-colors duration-500 ${i <= index ? 'bg-paper' : 'bg-paper/20'}`} />
-          ))}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>

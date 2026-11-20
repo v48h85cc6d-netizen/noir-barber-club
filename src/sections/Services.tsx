@@ -31,31 +31,25 @@ export function Services() {
     <section
       ref={root}
       id="services"
-      className="section-y relative bg-ink text-paper"
+      className="section-y relative bg-paper text-ink"
       onPointerMove={(e) => {
         x.set(e.clientX)
         y.set(e.clientY)
       }}
     >
       <div className="shell">
-        <div className="grid gap-8 md:grid-cols-12 md:items-end">
-          <div className="md:col-span-8">
-            <SectionLabel index="04">Services & pricing</SectionLabel>
-            <h2 data-reveal="lines" className="display mt-8 text-[clamp(3rem,9vw,9rem)]">
-              The <span className="serif normal-case">work</span>
-            </h2>
-          </div>
-          <p data-reveal="fade" className="max-w-sm leading-relaxed text-paper/60 md:col-span-4">
-            Every service includes a consultation, wash and hot towel finish. Prices are fixed — no surprises at the till.
+        <SectionLabel index="04">The menu</SectionLabel>
+        <div className="mt-8 grid gap-6 md:grid-cols-12 md:items-end">
+          <h2 data-reveal="lines" className="display text-[clamp(2.6rem,6.4vw,6rem)] md:col-span-8">
+            Fixed prices. <b>No surprises.</b>
+          </h2>
+          <p data-reveal="fade" className="max-w-sm text-sm leading-relaxed text-ink/60 md:col-span-4">
+            Every price includes a consultation, the wash and a hot towel on the neck. What you see is what you pay at the
+            chair.
           </p>
         </div>
 
-        <div
-          data-reveal="fade"
-          role="tablist"
-          aria-label="Filter services"
-          className="no-scrollbar -mx-4 mt-12 flex gap-6 overflow-x-auto border-b border-line px-4 md:mx-0 md:mt-20 md:gap-10 md:px-0"
-        >
+        <div data-reveal="fade" role="tablist" aria-label="Filter services" className="no-scrollbar -mx-4 mt-10 flex gap-1.5 overflow-x-auto px-4 md:mx-0 md:mt-14 md:px-0">
           {filters.map((f) => (
             <button
               key={f}
@@ -63,71 +57,71 @@ export function Services() {
               type="button"
               aria-selected={filter === f}
               onClick={() => setFilter(f)}
-              className={`label relative shrink-0 pb-4 transition-colors ${filter === f ? 'text-paper' : 'text-paper/40 hover:text-paper/70'}`}
+              className={`relative shrink-0 rounded-full px-4 py-2 text-sm transition-colors ${
+                filter === f ? 'text-paper' : 'text-ink/55 hover:text-ink'
+              }`}
             >
-              {f}
-              <span className="ml-1.5 opacity-50">
-                {f === 'All' ? services.length : services.filter((s) => s.category === f).length}
-              </span>
               {filter === f && (
-                <motion.span layoutId="svc-tab" className="absolute inset-x-0 -bottom-px h-px bg-paper" transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }} />
+                <motion.span layoutId="svc-tab" className="absolute inset-0 -z-0 rounded-full bg-ink" transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }} />
               )}
+              <span className="relative">
+                {f}
+                <span className="ml-1.5 opacity-50">
+                  {f === 'All' ? services.length : services.filter((s) => s.category === f).length}
+                </span>
+              </span>
             </button>
           ))}
         </div>
 
-        <motion.ul layout className="relative" onPointerLeave={() => setHovered(null)}>
+        <motion.ul layout className="relative mt-6 border-t border-ink/12" onPointerLeave={() => setHovered(null)}>
           <AnimatePresence initial={false} mode="popLayout">
-            {list.map((s, i) => (
-              <motion.li
-                layout
-                key={s.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: i * 0.03 }}
-                className="border-b border-line"
-              >
-                <button
-                  type="button"
-                  onClick={() => bookService(s.id)}
-                  onPointerEnter={(e) => e.pointerType === 'mouse' && setHovered(s.id)}
-                  className="group relative grid w-full grid-cols-[1fr_auto] items-center gap-x-4 gap-y-2 py-6 text-left md:grid-cols-12 md:py-8"
+            {list.map((s) => {
+              const num = services.indexOf(s)
+              const dim = hovered && hovered !== s.id
+              return (
+                <motion.li
+                  layout
+                  key={s.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                  className="border-b border-ink/12"
                 >
-                  <span className="absolute inset-0 origin-bottom scale-y-0 bg-paper transition-transform duration-500 ease-[var(--ease-expo)] group-hover:scale-y-100" />
-                  <span className="label relative hidden text-paper/40 transition-colors duration-500 group-hover:text-ink/50 md:col-span-1 md:block md:pl-4">
-                    {String(i + 1).padStart(2, '0')}
-                  </span>
-                  <span className="relative col-start-1 row-start-1 md:col-span-5 md:col-start-auto md:row-start-auto">
-                    <span className="block text-[clamp(1.4rem,3vw,2.6rem)] font-extrabold uppercase leading-none tracking-[-0.02em] [font-stretch:122%] transition-colors duration-500 group-hover:text-ink">
-                      {s.name}
+                  <button
+                    type="button"
+                    onClick={() => bookService(s.id)}
+                    onPointerEnter={(e) => e.pointerType === 'mouse' && setHovered(s.id)}
+                    className={`group/row grid w-full grid-cols-[auto_1fr_auto] items-center gap-x-4 gap-y-1 py-5 text-left transition-opacity duration-500 md:grid-cols-12 md:gap-x-6 md:py-7 ${
+                      dim ? 'opacity-30' : 'opacity-100'
+                    }`}
+                  >
+                    <span className="display row-span-2 w-12 self-start text-[clamp(1.6rem,3vw,2.6rem)] text-ink/40 md:col-span-1 md:row-span-1 md:w-auto md:self-center">
+                      #{num}
                     </span>
-                    {s.signature && (
-                      <span className="serif mt-1 block text-lg text-paper/50 transition-colors duration-500 group-hover:text-ink/60">
-                        House signature
+                    <span className="md:col-span-5">
+                      <span className="block text-[clamp(1.15rem,2.2vw,1.9rem)] font-bold leading-tight tracking-[-0.02em] [font-stretch:122%]">
+                        {s.name}
                       </span>
-                    )}
-                  </span>
-                  <span className="relative col-span-2 row-start-2 max-w-md text-sm leading-relaxed text-paper/55 transition-colors duration-500 group-hover:text-ink/65 md:col-span-3 md:row-start-auto">
-                    {s.description}
-                  </span>
-                  <span className="label relative hidden text-paper/50 transition-colors duration-500 group-hover:text-ink/60 md:col-span-1 md:block">
-                    {s.duration} min
-                  </span>
-                  <span className="relative col-start-2 row-start-1 flex items-center justify-end gap-4 md:col-span-2 md:col-start-auto md:row-start-auto md:pr-4">
-                    <span className="text-right">
-                      <span className="display block text-[clamp(1.5rem,2.6vw,2.4rem)] tabular-nums transition-colors duration-500 group-hover:text-ink">
+                      <span className="mt-1 block text-sm text-ink/55">{s.description}</span>
+                    </span>
+                    <span className="label hidden text-ink/50 md:col-span-2 md:block md:text-right">{s.duration} min</span>
+                    <span className="text-right md:col-span-2">
+                      <span className="block text-[clamp(1.2rem,2.2vw,1.9rem)] font-bold tabular-nums [font-stretch:122%]">
                         {formatPrice(s.price)}
                       </span>
-                      <span className="label mt-1 block text-paper/40 md:hidden">{s.duration} min</span>
+                      <span className="label block text-ink/45 md:hidden">{s.duration} min</span>
                     </span>
-                    <span className="hidden size-10 place-items-center border border-line transition-all duration-500 group-hover:rotate-45 group-hover:border-ink group-hover:bg-ink sm:grid">
-                      <ArrowUpRight className="size-4" strokeWidth={1.5} />
+                    <span className="hidden justify-end md:col-span-2 md:flex">
+                      <span className="flex h-9 items-center gap-1.5 rounded-full border border-ink/20 px-4 text-sm transition-colors duration-300 group-hover/row:border-ink group-hover/row:bg-ink group-hover/row:text-paper">
+                        Book <ArrowUpRight className="size-3.5" strokeWidth={1.75} />
+                      </span>
                     </span>
-                  </span>
-                </button>
-              </motion.li>
-            ))}
+                  </button>
+                </motion.li>
+              )
+            })}
           </AnimatePresence>
         </motion.ul>
       </div>
@@ -135,20 +129,20 @@ export function Services() {
       {/* floating preview */}
       <motion.div
         aria-hidden
-        className="pointer-events-none fixed left-0 top-0 z-30 hidden h-[260px] w-[200px] -translate-x-1/2 -translate-y-1/2 lg:block"
+        className="pointer-events-none fixed left-0 top-0 z-30 hidden h-[240px] w-[190px] -translate-x-1/2 -translate-y-1/2 lg:block"
         style={{ x: sx, y: sy }}
       >
         <AnimatePresence>
           {hoveredService && (
             <motion.div
               key={hoveredService.id}
-              className="absolute inset-0 overflow-hidden"
-              initial={{ clipPath: 'inset(50% 50% 50% 50%)', rotate: -6 }}
-              animate={{ clipPath: 'inset(0% 0% 0% 0%)', rotate: 0 }}
-              exit={{ clipPath: 'inset(50% 50% 50% 50%)', rotate: 6 }}
-              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              className="absolute inset-0 overflow-hidden rounded-2xl shadow-[0_30px_60px_-20px_rgba(0,0,0,0.5)]"
+              initial={{ opacity: 0, scale: 0.8, rotate: -8 }}
+              animate={{ opacity: 1, scale: 1, rotate: -3 }}
+              exit={{ opacity: 0, scale: 0.85, rotate: 4 }}
+              transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
             >
-              <Img id={hoveredService.image} alt="" sizes="200px" maxWidth={480} className="h-full w-full" />
+              <Img id={hoveredService.image} alt="" sizes="190px" maxWidth={480} className="h-full w-full" />
             </motion.div>
           )}
         </AnimatePresence>

@@ -49,8 +49,8 @@ export function Preloader({ onDone }: { onDone: () => void }) {
       aria-hidden
     >
       <div className="flex justify-between">
-        <span data-pl-meta className="label">Barber Club</span>
-        <span data-pl-meta className="label">Est. 2016</span>
+        <span data-pl-meta className="label opacity-60">Barber club</span>
+        <span data-pl-meta className="label opacity-60">Est. 2016</span>
       </div>
       <div className="overflow-hidden">
         <div data-pl-mark>
@@ -59,7 +59,7 @@ export function Preloader({ onDone }: { onDone: () => void }) {
       </div>
       <div className="flex items-end justify-between">
         <span data-pl-meta className="label opacity-60">Loading the chair</span>
-        <span ref={count} data-pl-meta className="display text-5xl tabular-nums md:text-7xl">
+        <span ref={count} data-pl-meta className="label text-2xl tabular-nums md:text-3xl">
           000
         </span>
       </div>

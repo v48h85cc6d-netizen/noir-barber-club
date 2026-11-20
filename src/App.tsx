@@ -5,7 +5,7 @@ import { ContactProvider } from './context/contact'
 import { ScrollTrigger } from './lib/gsap'
 import { Preloader } from './components/Preloader'
 import { Nav } from './components/Nav'
-import { Marquee } from './components/Marquee'
+import { BookingDrawer } from './booking/BookingWidget'
 import { Hero } from './sections/Hero'
 import { Club } from './sections/Club'
 import { Booking } from './sections/Booking'
@@ -38,9 +38,6 @@ export default function App() {
           <main>
             <Hero />
             <Club />
-            <div className="border-y border-line bg-ink py-6 text-paper md:py-10">
-              <Marquee items={['Precision cuts', 'Hot towel shaves', 'Beard work', 'Members club']} />
-            </div>
             <Booking />
             <Barbers />
             <Services />
@@ -51,6 +48,7 @@ export default function App() {
             <Visit />
           </main>
           <Footer />
+          <BookingDrawer />
         </BookingProvider>
       </ContactProvider>
     </ReadyContext.Provider>

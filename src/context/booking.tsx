@@ -1,5 +1,4 @@
-import { createContext, useCallback, useContext, useMemo, useReducer, type ReactNode } from 'react'
-import { scrollToId } from '../lib/scroll'
+import { createContext, useCallback, useContext, useMemo, useReducer, useState, type ReactNode } from 'react'
 
 export const STEPS = ['Service', 'Barber', 'Date', 'Time', 'Details', 'Review'] as const
 export type StepIndex = 0 | 1 | 2 | 3 | 4 | 5
@@ -75,21 +74,25 @@ export function firstIncomplete(s: BookingState): StepIndex {
 interface Ctx {
   state: BookingState
   dispatch: React.Dispatch<Action>
-  /** Pre-select a service and jump to the booking section. */
+  /** Pre-select a service and open the booking panel. */
   bookService: (id: string) => void
-  /** Pre-select a barber and jump to the booking section. */
+  /** Pre-select a barber and open the booking panel. */
   bookBarber: (id: string) => void
+  /** Open the booking panel where the visitor left off. */
   open: () => void
+  close: () => void
+  isOpen: boolean
 }
 
 const BookingContext = createContext<Ctx | null>(null)
 
 export function BookingProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initial)
+  const [isOpen, setOpen] = useState(false)
 
   const go = useCallback((next: BookingState) => {
     dispatch({ type: 'step', step: firstIncomplete(next) })
-    scrollToId('book')
+    setOpen(true)
   }, [])
 
   const bookService = useCallback(
@@ -112,9 +115,13 @@ export function BookingProvider({ children }: { children: ReactNode }) {
     [state, go],
   )
 
-  const open = useCallback(() => scrollToId('book'), [])
+  const open = useCallback(() => setOpen(true), [])
+  const close = useCallback(() => setOpen(false), [])
 
-  const value = useMemo(() => ({ state, dispatch, bookService, bookBarber, open }), [state, bookService, bookBarber, open])
+  const value = useMemo(
+    () => ({ state, dispatch, bookService, bookBarber, open, close, isOpen }),
+    [state, bookService, bookBarber, open, close, isOpen],
+  )
   return <BookingContext.Provider value={value}>{children}</BookingContext.Provider>
 }
 

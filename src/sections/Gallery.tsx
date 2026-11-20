@@ -1,118 +1,77 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import { ArrowLeft, ArrowRight, Plus } from 'lucide-react'
-import { gsap, useGSAP } from '../lib/gsap'
+import { ArrowLeft, ArrowRight, ArrowUpRight, Maximize2 } from 'lucide-react'
 import { useReveal } from '../hooks/useReveal'
-import { useReady } from '../context/ready'
+import { useBooking } from '../context/booking'
 import { SectionLabel } from '../components/SectionLabel'
 import { Img } from '../components/Img'
 import { Modal } from '../components/Modal'
-import { gallery } from '../data/content'
+import { gallery, services } from '../data/content'
+import { formatPrice } from '../data/site'
 
 export function Gallery() {
   const root = useRef<HTMLElement>(null)
-  const ready = useReady()
+  const { bookService } = useBooking()
   const [active, setActive] = useState<number | null>(null)
   useReveal(root)
 
-  useGSAP(
-    () => {
-      if (!ready) return
-      const mm = gsap.matchMedia()
-      mm.add('(min-width: 1024px) and (prefers-reduced-motion: no-preference)', () => {
-        const pin = root.current!.querySelector<HTMLElement>('[data-pin]')!
-        const track = root.current!.querySelector<HTMLElement>('[data-track]')!
-        const distance = () => Math.max(0, track.scrollWidth - window.innerWidth)
-        const tween = gsap.to(track, {
-          x: () => -distance(),
-          ease: 'none',
-          scrollTrigger: {
-            trigger: pin,
-            pin: true,
-            scrub: 0.8,
-            start: 'top top',
-            end: () => `+=${distance()}`,
-            invalidateOnRefresh: true,
-          },
-        })
-        // each frame's photo drifts inside its frame for depth
-        track.querySelectorAll<HTMLElement>('[data-drift]').forEach((el) => {
-          gsap.fromTo(
-            el,
-            { xPercent: -8 },
-            {
-              xPercent: 8,
-              ease: 'none',
-              scrollTrigger: {
-                trigger: el.parentElement,
-                containerAnimation: tween,
-                start: 'left right',
-                end: 'right left',
-                scrub: true,
-              },
-            },
-          )
-        })
-      })
-    },
-    { scope: root, dependencies: [ready] },
-  )
-
   return (
-    <section ref={root} id="gallery" className="relative bg-paper text-ink">
-      <div data-pin className="overflow-hidden lg:flex lg:h-[100svh] lg:items-center">
-        <div
-          data-track
-          className="no-scrollbar flex snap-x snap-mandatory items-center gap-3 overflow-x-auto py-24 pl-4 pr-4 md:gap-5 md:pl-8 lg:snap-none lg:overflow-visible lg:py-0 lg:pl-12 lg:pr-[12vw] lg:will-change-transform"
-        >
-          <div className="w-[82vw] shrink-0 snap-start pr-6 sm:w-[60vw] lg:w-[40vw] lg:pr-16">
-            <SectionLabel index="05">Gallery</SectionLabel>
-            <h2 data-reveal="lines" className="display mt-8 text-[clamp(3rem,6.6vw,8rem)]">
-              Fresh <br />
-              off the <br />
-              <span className="serif normal-case">chair</span>
-            </h2>
-            <p data-reveal="fade" className="mt-8 max-w-xs leading-relaxed text-ink/60">
-              Work from the floor this season. Tap any frame to look closer.
-            </p>
-            <div className="label mt-8 hidden items-center gap-3 text-ink/50 lg:flex">
-              Scroll <ArrowRight className="size-4" strokeWidth={1.25} />
-            </div>
-          </div>
-
-          {gallery.map((g, i) => (
-            <button
-              key={g.id + i}
-              type="button"
-              onClick={() => setActive(i)}
-              className={`group relative shrink-0 snap-start overflow-hidden text-left ${
-                g.tall
-                  ? 'h-[62svh] w-[70vw] sm:w-[44vw] lg:h-[72vh] lg:w-[28vw]'
-                  : 'h-[46svh] w-[82vw] sm:w-[60vw] lg:h-[52vh] lg:w-[38vw]'
-              } ${i % 2 ? 'lg:self-end lg:mb-[8vh]' : 'lg:self-start lg:mt-[10vh]'}`}
-              aria-label={`Open photo: ${g.caption}`}
-            >
-              <div data-drift className="absolute -inset-x-[10%] inset-y-0">
-                <Img
-                  id={g.id}
-                  alt={g.caption}
-                  sizes="(min-width: 1024px) 38vw, 82vw"
-                  maxWidth={1440}
-                  className="h-full w-full"
-                  imgClassName="transition-transform duration-[1.2s] ease-[var(--ease-expo)] group-hover:scale-105"
-                />
-              </div>
-              <span className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-gradient-to-t from-black/70 to-transparent p-4 text-paper">
-                <span className="label">
-                  {String(i + 1).padStart(2, '0')} — {g.caption}
-                </span>
-                <span className="grid size-9 place-items-center bg-paper text-ink transition-transform duration-500 group-hover:rotate-90">
-                  <Plus className="size-4" strokeWidth={1.5} />
-                </span>
-              </span>
-            </button>
-          ))}
+    <section ref={root} id="gallery" className="section-y relative bg-ink text-paper">
+      <div className="shell">
+        <SectionLabel index="05">Lookbook</SectionLabel>
+        <div className="mt-8 flex flex-col justify-between gap-6 md:flex-row md:items-end">
+          <h2 data-reveal="lines" className="display text-[clamp(2.6rem,6.4vw,6rem)]">
+            Fresh off <b>the chair.</b>
+          </h2>
+          <p data-reveal="fade" className="max-w-sm text-sm leading-relaxed text-paper/60">
+            Work from the floor this season. See the finish before you sit — then book the cut that made it.
+          </p>
         </div>
+
+        <ul data-reveal="stagger" className="mt-10 grid grid-cols-2 gap-2 md:mt-14 md:gap-3 lg:grid-cols-3">
+          {gallery.map((g, i) => {
+            const svc = services.find((s) => s.id === g.service)
+            return (
+              <li key={g.id} className="group relative overflow-hidden rounded-2xl bg-coal">
+                <button
+                  type="button"
+                  onClick={() => setActive(i)}
+                  className="relative block w-full overflow-hidden"
+                  aria-label={`Open photo: ${g.caption}`}
+                >
+                  <span className="absolute inset-x-0 top-0 h-1/2 bg-[radial-gradient(60%_80%_at_50%_0%,rgba(255,255,255,0.12),transparent_70%)]" />
+                  <Img
+                    id={g.id}
+                    alt={g.caption}
+                    sizes="(min-width: 1024px) 31vw, 48vw"
+                    maxWidth={1080}
+                    className="aspect-[4/5] w-full"
+                    imgClassName="transition-transform duration-[1.2s] ease-[var(--ease-expo)] group-hover:scale-[1.04]"
+                  />
+                  <span className="label absolute left-3 top-3 flex items-center gap-1.5 rounded-full bg-black/55 px-2.5 py-1.5 text-paper/80 backdrop-blur md:left-4 md:top-4">
+                    <Maximize2 className="size-3" strokeWidth={1.5} /> #{String(i + 1).padStart(2, '0')}
+                  </span>
+                  <span className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                </button>
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-3 md:p-5">
+                  <div className="min-w-0">
+                    <div className="text-sm font-bold leading-tight [font-stretch:112%] xs:text-base md:text-xl md:[font-stretch:118%]">{g.caption}</div>
+                    {svc && (
+                      <button
+                        type="button"
+                        onClick={() => bookService(svc.id)}
+                        className="label pointer-events-auto mt-1.5 flex items-center gap-1 text-paper/60 transition-colors hover:text-paper"
+                      >
+                        Book this cut <ArrowUpRight className="size-3" strokeWidth={1.75} />
+                      </button>
+                    )}
+                  </div>
+                  {svc && <span className="shrink-0 text-sm font-semibold tabular-nums md:text-lg">{formatPrice(svc.price)}</span>}
+                </div>
+              </li>
+            )
+          })}
+        </ul>
       </div>
 
       <Lightbox index={active} onChange={setActive} />
@@ -146,7 +105,7 @@ function Lightbox({ index, onChange }: { index: number | null; onChange: (i: num
   return (
     <Modal open={index !== null} onClose={close} label="Gallery viewer" variant="full">
       <div className="flex h-full w-full flex-col items-center justify-center gap-5 px-4 py-16 text-paper">
-        <div className="relative h-[70svh] w-full max-w-5xl overflow-hidden">
+        <div className="relative h-[70svh] w-full max-w-5xl overflow-hidden rounded-2xl">
           <AnimatePresence initial={false} custom={dir} mode="popLayout">
             {item && (
               <motion.div
@@ -175,10 +134,10 @@ function Lightbox({ index, onChange }: { index: number | null; onChange: (i: num
             {String((index ?? 0) + 1).padStart(2, '0')} / {String(gallery.length).padStart(2, '0')} — {item?.caption}
           </span>
           <div className="flex gap-2">
-            <button type="button" onClick={() => step(-1)} aria-label="Previous photo" className="grid size-11 place-items-center border border-paper/30 hover:border-paper">
+            <button type="button" onClick={() => step(-1)} aria-label="Previous photo" className="grid size-11 place-items-center rounded-full border border-paper/30 hover:border-paper">
               <ArrowLeft className="size-4" strokeWidth={1.5} />
             </button>
-            <button type="button" onClick={() => step(1)} aria-label="Next photo" className="grid size-11 place-items-center border border-paper/30 hover:border-paper">
+            <button type="button" onClick={() => step(1)} aria-label="Next photo" className="grid size-11 place-items-center rounded-full border border-paper/30 hover:border-paper">
               <ArrowRight className="size-4" strokeWidth={1.5} />
             </button>
           </div>

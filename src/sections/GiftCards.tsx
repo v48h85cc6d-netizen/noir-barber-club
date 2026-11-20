@@ -44,9 +44,8 @@ export function GiftCards() {
       <div className="shell grid gap-14 lg:grid-cols-12 lg:gap-8">
         <div className="lg:col-span-6">
           <SectionLabel index="06">Gift cards</SectionLabel>
-          <h2 data-reveal="lines" className="display mt-8 text-[clamp(3rem,8vw,8rem)]">
-            Give a <br />
-            <span className="serif normal-case">sharper</span> look
+          <h2 data-reveal="lines" className="display mt-8 text-[clamp(2.4rem,4.8vw,4.75rem)]">
+            Give someone <b>a sharper look.</b>
           </h2>
 
           {/* Card preview */}
@@ -63,29 +62,29 @@ export function GiftCards() {
                 ry.set(0)
               }}
               style={{ rotateX: srx, rotateY: sry, transformStyle: 'preserve-3d' }}
-              className="relative aspect-[1.586] w-full max-w-[560px] overflow-hidden border border-white/10 bg-[radial-gradient(130%_120%_at_0%_0%,#2b2b2b_0%,#0f0f0f_55%,#050505_100%)] p-5 shadow-[0_40px_80px_-30px_rgba(0,0,0,0.9)] sm:p-7"
+              className="relative aspect-[1.586] w-full max-w-[560px] overflow-hidden rounded-2xl bg-[linear-gradient(125deg,#f4f4f2_0%,#bcbcb9_22%,#eeeeec_42%,#9d9d9a_63%,#d9d9d6_82%,#8f8f8c_100%)] p-5 text-ink shadow-[0_40px_80px_-30px_rgba(0,0,0,0.9),inset_0_1px_0_rgba(255,255,255,0.8)] sm:p-7"
             >
               <motion.div
                 aria-hidden
-                className="pointer-events-none absolute inset-0 opacity-40 mix-blend-overlay"
+                className="pointer-events-none absolute inset-0 opacity-70 mix-blend-soft-light"
                 style={{ background: shineBg }}
               />
               <div className="relative flex h-full flex-col justify-between">
                 <div className="flex items-start justify-between">
-                  <Wordmark className="w-[38%]" />
-                  <span className="label text-paper/50">Gift card</span>
+                  <Wordmark className="w-[34%]" />
+                  <span className="label text-ink/55">Gift card</span>
                 </div>
                 <div>
-                  <div className="label text-paper/45">{to ? `For ${to}` : 'For someone sharp'}</div>
-                  <div className="display mt-2 text-[clamp(2.75rem,8vw,4.75rem)] tabular-nums">
+                  <div className="label text-ink/55">{to ? `For ${to}` : 'For someone sharp'}</div>
+                  <div className="display mt-1 text-[clamp(2.75rem,8vw,4.75rem)] tabular-nums">
                     {valid ? formatPrice(value) : formatPrice(0)}
                   </div>
                 </div>
                 <div className="flex items-end justify-between gap-4">
-                  <p className="serif line-clamp-2 max-w-[70%] text-base leading-tight text-paper/70 sm:text-lg">
+                  <p className="line-clamp-2 max-w-[68%] text-sm font-medium leading-snug text-ink/70 sm:text-base">
                     {message || 'A cut, a shave, an hour off. Enjoy.'}
                   </p>
-                  <span className="label shrink-0 text-paper/40">{from ? `— ${from}` : code}</span>
+                  <span className="label shrink-0 text-ink/50">{from ? `— ${from}` : code}</span>
                 </div>
               </div>
             </motion.div>
@@ -120,7 +119,7 @@ export function GiftCards() {
                       setAmount(a)
                       setCustom('')
                     }}
-                    className={`h-12 border text-sm font-semibold tabular-nums transition-colors ${
+                    className={`h-11 rounded-full border text-sm font-semibold tabular-nums transition-colors ${
                       on ? 'border-paper bg-paper text-ink' : 'border-line hover:border-paper/50'
                     }`}
                   >
@@ -135,7 +134,7 @@ export function GiftCards() {
                 value={custom}
                 onChange={(e) => setCustom(e.target.value.replace(/[^\d]/g, '').slice(0, 4))}
                 aria-invalid={customInvalid || undefined}
-                className={`h-12 border bg-transparent text-center text-sm font-semibold outline-none transition-colors placeholder:text-paper/35 focus:border-paper ${
+                className={`h-11 rounded-full border bg-transparent text-center text-sm font-semibold outline-none transition-colors placeholder:text-paper/35 focus:border-paper ${
                   custom ? (customInvalid ? 'border-[#d96c5f]' : 'border-paper') : 'border-line'
                 }`}
               />
@@ -172,7 +171,7 @@ export function GiftCards() {
                   type="button"
                   aria-pressed={delivery === k}
                   onClick={() => setDelivery(k)}
-                  className={`flex h-12 items-center justify-center gap-2 border text-sm transition-colors ${
+                  className={`flex h-11 items-center justify-center gap-2 rounded-full border text-sm transition-colors ${
                     delivery === k ? 'border-paper bg-paper text-ink' : 'border-line hover:border-paper/50'
                   }`}
                 >

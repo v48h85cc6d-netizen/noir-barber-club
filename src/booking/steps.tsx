@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Check, Clock, Scissors, Users } from 'lucide-react'
+import { ArrowRight, Check, Clock } from 'lucide-react'
 import { barbers, serviceCategories, services } from '../data/content'
 import { formatPrice } from '../data/site'
 import { useBooking, type Details } from '../context/booking'
@@ -8,63 +8,58 @@ import { Img } from '../components/Img'
 
 /* ———————————————————————— Shared ———————————————————————— */
 
-export function StepTitle({ kicker, title }: { kicker: string; title: string }) {
-  return (
-    <div className="mb-7 md:mb-9">
-      <div className="label text-paper/45">{kicker}</div>
-      <h3 className="display mt-3 text-[clamp(1.9rem,3.6vw,3.25rem)]">{title}</h3>
-    </div>
-  )
-}
+const row =
+  'group flex w-full items-center gap-4 rounded-xl border p-3 text-left transition-[background-color,border-color] duration-300 md:p-3.5'
+const rowIdle = 'border-line bg-ash/40 hover:border-paper/35 hover:bg-ash'
+const rowOn = 'border-paper/70 bg-ash'
 
-const selectable =
-  'relative text-left transition-[background-color,border-color,color] duration-300 border focus-visible:outline-paper'
-const idle = 'border-line bg-coal hover:border-paper/40'
-const active = 'border-paper bg-paper text-ink'
+function Thumb({ id, alt }: { id: string; alt: string }) {
+  return <Img id={id} alt={alt} sizes="48px" maxWidth={480} className="size-11 shrink-0 rounded-lg md:size-12" />
+}
 
 /* ———————————————————————— 1. Service ———————————————————————— */
 
 export function StepService({ onPicked }: { onPicked: () => void }) {
   const { state, dispatch } = useBooking()
   return (
-    <div>
-      <StepTitle kicker="Step 01" title="Choose a service" />
-      <div className="space-y-8">
-        {serviceCategories.map((cat) => (
-          <div key={cat}>
-            <div className="label mb-3 text-paper/45">{cat}</div>
-            <div className="grid gap-2 sm:grid-cols-2">
-              {services
-                .filter((s) => s.category === cat)
-                .map((s) => {
-                  const on = state.serviceId === s.id
-                  return (
-                    <button
-                      key={s.id}
-                      type="button"
-                      aria-pressed={on}
-                      onClick={() => {
-                        dispatch({ type: 'service', id: s.id })
-                        onPicked()
-                      }}
-                      className={`${selectable} ${on ? active : idle} flex flex-col gap-3 p-4 md:p-5`}
-                    >
-                      <span className="flex items-start justify-between gap-3">
-                        <span className="text-[1.05rem] font-semibold [font-stretch:112%]">{s.name}</span>
-                        <span className="text-[1.05rem] font-semibold tabular-nums">{formatPrice(s.price)}</span>
+    <div className="space-y-6">
+      {serviceCategories.map((cat) => (
+        <div key={cat}>
+          <div className="label mb-2.5 text-paper/40">{cat}</div>
+          <div className="space-y-1.5">
+            {services
+              .filter((s) => s.category === cat)
+              .map((s) => {
+                const on = state.serviceId === s.id
+                const num = services.indexOf(s)
+                return (
+                  <button
+                    key={s.id}
+                    type="button"
+                    aria-pressed={on}
+                    onClick={() => {
+                      dispatch({ type: 'service', id: s.id })
+                      onPicked()
+                    }}
+                    className={`${row} ${on ? rowOn : rowIdle}`}
+                  >
+                    <Thumb id={s.image} alt="" />
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate font-semibold [font-stretch:115%]">
+                        <span className="text-paper/45">#{num}</span> {s.name}
                       </span>
-                      <span className={`text-sm leading-snug ${on ? 'text-ink/65' : 'text-paper/50'}`}>{s.description}</span>
-                      <span className={`label flex items-center gap-2 ${on ? 'text-ink/60' : 'text-paper/45'}`}>
-                        <Clock className="size-3.5" strokeWidth={1.5} /> {s.duration} min
-                        {s.signature && <span className="ml-auto">Signature</span>}
+                      <span className="label mt-1 block text-paper/40">
+                        {s.duration} min{s.signature ? ' · signature' : ''}
                       </span>
-                    </button>
-                  )
-                })}
-            </div>
+                    </span>
+                    <span className="font-semibold tabular-nums">{formatPrice(s.price)}</span>
+                    {on && <Check className="size-4 shrink-0" />}
+                  </button>
+                )
+              })}
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
   )
 }
@@ -80,55 +75,32 @@ export function StepBarber({ onPicked }: { onPicked: () => void }) {
   }
   const anyOn = state.barberId === 'any'
   return (
-    <div>
-      <StepTitle kicker="Step 02" title="Choose your barber" />
-      <button
-        type="button"
-        aria-pressed={anyOn}
-        onClick={() => pick('any')}
-        className={`${selectable} ${anyOn ? active : idle} mb-2 flex w-full items-center gap-4 p-4 md:p-5`}
-      >
-        <span className={`grid size-14 shrink-0 place-items-center border ${anyOn ? 'border-ink/20' : 'border-line'}`}>
-          <Users className="size-5" strokeWidth={1.25} />
+    <div className="space-y-1.5">
+      <button type="button" aria-pressed={anyOn} onClick={() => pick('any')} className={`${row} ${anyOn ? rowOn : rowIdle}`}>
+        <span className="grid size-11 shrink-0 place-items-center rounded-lg border border-line md:size-12">
+          <Clock className="size-5" strokeWidth={1.25} />
         </span>
         <span className="flex-1">
-          <span className="block font-semibold [font-stretch:112%]">Any available barber</span>
-          <span className={`text-sm ${anyOn ? 'text-ink/60' : 'text-paper/50'}`}>The most times to choose from</span>
+          <span className="block font-semibold [font-stretch:115%]">First free chair</span>
+          <span className="label mt-1 block text-paper/40">Whoever is free first</span>
         </span>
-        {anyOn && <Check className="size-5" />}
+        {anyOn ? <Check className="size-4" /> : <ArrowRight className="size-4 text-paper/40" strokeWidth={1.5} />}
       </button>
-      <div className="grid grid-cols-2 gap-2">
-        {barbers.map((b) => {
-          const on = state.barberId === b.id
-          return (
-            <button
-              key={b.id}
-              type="button"
-              aria-pressed={on}
-              onClick={() => pick(b.id)}
-              className={`${selectable} ${on ? active : idle} group flex flex-col p-2 md:p-2.5`}
-            >
-              <Img
-                id={b.image}
-                alt={b.name}
-                sizes="(min-width: 1024px) 16vw, 45vw"
-                maxWidth={768}
-                className="aspect-[4/3] w-full"
-                imgClassName="transition-transform duration-700 group-hover:scale-105"
-              />
-              <span className="flex items-start justify-between gap-2 px-1.5 pb-1.5 pt-3">
-                <span>
-                  <span className="block font-semibold leading-tight [font-stretch:112%]">{b.name}</span>
-                  <span className={`mt-1 block text-xs md:text-sm ${on ? 'text-ink/60' : 'text-paper/50'}`}>
-                    {b.specialty}
-                  </span>
-                </span>
-                {on && <Check className="mt-0.5 size-4 shrink-0" />}
+      {barbers.map((b) => {
+        const on = state.barberId === b.id
+        return (
+          <button key={b.id} type="button" aria-pressed={on} onClick={() => pick(b.id)} className={`${row} ${on ? rowOn : rowIdle}`}>
+            <Thumb id={b.image} alt={b.name} />
+            <span className="min-w-0 flex-1">
+              <span className="block font-semibold [font-stretch:115%]">{b.name}</span>
+              <span className="label mt-1 block truncate text-paper/40">
+                {b.specialty} · {b.years} yrs
               </span>
-            </button>
-          )
-        })}
-      </div>
+            </span>
+            {on ? <Check className="size-4" /> : <ArrowRight className="size-4 text-paper/40" strokeWidth={1.5} />}
+          </button>
+        )
+      })}
     </div>
   )
 }
@@ -141,16 +113,14 @@ export function StepDate({ onPicked }: { onPicked: () => void }) {
   const barber = barbers.find((b) => b.id === state.barberId)
   return (
     <div>
-      <StepTitle kicker="Step 03" title="Pick a date" />
-      <p className="-mt-4 mb-6 text-sm text-paper/50">
-        Next three weeks{barber ? ` · showing days ${barber.name.split(' ')[0]} works` : ''}. Closed on Mondays.
+      <p className="-mt-2 mb-5 text-sm text-paper/50">
+        Next three weeks{barber ? ` · days ${barber.name.split(' ')[0]} works` : ''}. Closed on Mondays.
       </p>
       <div className="grid grid-cols-4 gap-1.5 xs:grid-cols-5 sm:grid-cols-7">
         {days.map((d) => {
           const key = toKey(d)
           const open = isShopOpen(d)
-          const works = barberWorks(state.barberId, d)
-          const disabled = !works
+          const disabled = !barberWorks(state.barberId, d)
           const on = state.date === key
           return (
             <button
@@ -165,20 +135,20 @@ export function StepDate({ onPicked }: { onPicked: () => void }) {
                 dispatch({ type: 'date', date: key })
                 onPicked()
               }}
-              className={`${selectable} flex aspect-[4/5] flex-col items-center justify-center gap-1 ${
-                on ? active : disabled ? 'border-transparent bg-transparent text-paper/20' : idle
+              className={`flex aspect-[4/5] flex-col items-center justify-center gap-1 rounded-xl border transition-colors ${
+                on
+                  ? 'border-paper bg-paper text-ink'
+                  : disabled
+                    ? 'border-transparent text-paper/20'
+                    : 'border-line bg-ash/40 hover:border-paper/40'
               }`}
             >
-              <span className="label text-[0.6rem]">{d.toLocaleDateString('en-GB', { weekday: 'short' })}</span>
-              <span className="display text-2xl md:text-3xl">{d.getDate()}</span>
-              <span className={`text-[0.65rem] uppercase tracking-widest ${on ? 'text-ink/55' : 'text-paper/40'}`}>
-                {disabled
-                  ? open
-                    ? 'Off'
-                    : 'Closed'
-                  : key === todayKey
-                    ? 'Today'
-                    : d.toLocaleDateString('en-GB', { month: 'short' })}
+              <span className="label text-[0.6rem] opacity-70">
+                {key === todayKey ? 'Today' : d.toLocaleDateString('en-GB', { weekday: 'short' })}
+              </span>
+              <span className="text-2xl font-semibold tabular-nums [font-stretch:120%]">{d.getDate()}</span>
+              <span className="label text-[0.55rem] opacity-55">
+                {disabled ? (open ? 'Off' : 'Closed') : d.toLocaleDateString('en-GB', { month: 'short' })}
               </span>
             </button>
           )
@@ -208,11 +178,10 @@ export function StepTime({ onPicked, onChangeDate }: { onPicked: () => void; onC
 
   return (
     <div>
-      <StepTitle kicker="Step 04" title="Pick a time" />
       {date && (
-        <div className="-mt-4 mb-6 flex flex-wrap items-center justify-between gap-2 text-sm text-paper/50">
+        <div className="-mt-2 mb-5 flex flex-wrap items-center justify-between gap-2 text-sm text-paper/50">
           <span>
-            {date.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })} · {free} times free
+            {date.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })} · {free} free
           </span>
           <button type="button" onClick={onChangeDate} className="underline underline-offset-4 hover:text-paper">
             Change date
@@ -220,25 +189,25 @@ export function StepTime({ onPicked, onChangeDate }: { onPicked: () => void; onC
         </div>
       )}
       {free === 0 ? (
-        <div className="border border-line p-8 text-center">
+        <div className="rounded-xl border border-line p-8 text-center">
           <p className="text-paper/70">Fully booked on this day.</p>
           <button
             type="button"
             onClick={onChangeDate}
-            className="label mt-5 border border-paper/30 px-5 py-3 transition-colors hover:bg-paper hover:text-ink"
+            className="mt-5 rounded-full border border-paper/30 px-5 py-2.5 text-sm transition-colors hover:bg-paper hover:text-ink"
           >
             Pick another date
           </button>
         </div>
       ) : (
-        <div className="space-y-7">
+        <div className="space-y-6">
           {groups.map((g) => {
             const list = slots.filter((s) => g.test(Number(s.time.slice(0, 2))))
             if (!list.length) return null
             return (
               <div key={g.label}>
-                <div className="label mb-3 text-paper/45">{g.label}</div>
-                <div className="grid grid-cols-3 gap-1.5 xs:grid-cols-4 sm:grid-cols-5 lg:grid-cols-6">
+                <div className="label mb-2.5 text-paper/40">{g.label}</div>
+                <div className="grid grid-cols-3 gap-1.5 xs:grid-cols-4 sm:grid-cols-5">
                   {list.map((s) => {
                     const on = state.time === s.time
                     return (
@@ -252,12 +221,12 @@ export function StepTime({ onPicked, onChangeDate }: { onPicked: () => void; onC
                           dispatch({ type: 'time', time: s.time })
                           onPicked()
                         }}
-                        className={`${selectable} h-12 text-center text-[0.95rem] font-medium tabular-nums ${
+                        className={`h-11 rounded-lg border text-center text-sm font-medium tabular-nums transition-colors ${
                           on
-                            ? active
+                            ? 'border-paper bg-paper text-ink'
                             : s.available
-                              ? idle
-                              : 'border-transparent bg-transparent text-paper/20 line-through'
+                              ? 'border-line bg-ash/40 hover:border-paper/40'
+                              : 'border-transparent text-paper/20 line-through'
                         }`}
                       >
                         {s.time}
@@ -284,6 +253,9 @@ export function validateDetails(d: Details) {
   return errors
 }
 
+const box =
+  'mt-2 w-full rounded-lg border border-line bg-ash/50 px-3.5 py-3 text-[0.95rem] outline-none transition-colors placeholder:text-paper/30 focus:border-paper/60 aria-[invalid=true]:border-[#d96c5f]'
+
 export function StepDetails({ showErrors }: { showErrors: boolean }) {
   const { state, dispatch } = useBooking()
   const [touched, setTouched] = useState<Partial<Record<keyof Details, boolean>>>({})
@@ -292,7 +264,7 @@ export function StepDetails({ showErrors }: { showErrors: boolean }) {
     const err = (showErrors || touched[key]) && errors[key]
     return (
       <label className="block">
-        <span className="label text-paper/50">{label}</span>
+        <span className="label text-paper/45">{label}</span>
         <input
           {...props}
           value={state.details[key]}
@@ -300,10 +272,10 @@ export function StepDetails({ showErrors }: { showErrors: boolean }) {
           onBlur={() => setTouched((t) => ({ ...t, [key]: true }))}
           aria-invalid={err ? true : undefined}
           aria-describedby={err ? `err-${key}` : undefined}
-          className="field"
+          className={box}
         />
         {err && (
-          <span id={`err-${key}`} className="mt-2 block text-xs text-[#e58a7e]">
+          <span id={`err-${key}`} className="mt-1.5 block text-xs text-[#e58a7e]">
             {err}
           </span>
         )}
@@ -311,28 +283,30 @@ export function StepDetails({ showErrors }: { showErrors: boolean }) {
     )
   }
   return (
-    <div>
-      <StepTitle kicker="Step 05" title="Your details" />
-      <div className="grid gap-7 sm:grid-cols-2">
-        <div className="sm:col-span-2">
-          {field('name', 'Full name', { autoComplete: 'name', placeholder: 'Your name', name: 'name' })}
-        </div>
-        {field('phone', 'Phone', { autoComplete: 'tel', type: 'tel', inputMode: 'tel', placeholder: '+31 6 1234 5678', name: 'phone' })}
-        {field('email', 'Email', { autoComplete: 'email', type: 'email', inputMode: 'email', placeholder: 'you@email.com', name: 'email' })}
-        <label className="block sm:col-span-2">
-          <span className="label text-paper/50">Notes for your barber (optional)</span>
-          <textarea
-            rows={3}
-            value={state.details.notes}
-            onChange={(e) => dispatch({ type: 'details', details: { notes: e.target.value } })}
-            placeholder="Reference photo, sensitive skin, first visit…"
-            className="field resize-none"
-            maxLength={400}
-          />
-        </label>
-      </div>
-      <p className="mt-6 flex items-center gap-2 text-xs text-paper/40">
-        <Scissors className="size-3.5" strokeWidth={1.5} /> We only use these details for your appointment.
+    <div className="grid gap-5 sm:grid-cols-2">
+      <div className="sm:col-span-2">{field('name', 'Name', { autoComplete: 'name', placeholder: 'Your name', name: 'name' })}</div>
+      {field('phone', 'Mobile, for the reminder', {
+        autoComplete: 'tel',
+        type: 'tel',
+        inputMode: 'tel',
+        placeholder: '+31 6 1234 5678',
+        name: 'phone',
+      })}
+      {field('email', 'Email', { autoComplete: 'email', type: 'email', inputMode: 'email', placeholder: 'you@email.com', name: 'email' })}
+      <label className="block sm:col-span-2">
+        <span className="label text-paper/45">Notes for your barber (optional)</span>
+        <textarea
+          rows={3}
+          value={state.details.notes}
+          onChange={(e) => dispatch({ type: 'details', details: { notes: e.target.value } })}
+          placeholder="Reference photo, sensitive skin, first visit…"
+          className={`${box} resize-none`}
+          maxLength={400}
+        />
+      </label>
+      <p className="rounded-lg border border-line bg-ash/40 p-4 text-xs leading-relaxed text-paper/55 sm:col-span-2">
+        <b className="text-paper/80">No deposit, no card.</b> You pay in the shop after your cut. Changes and
+        cancellations are free up to 24 hours before.
       </p>
     </div>
   )

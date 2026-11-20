@@ -10,6 +10,8 @@ import { Lockup } from '../components/Logo'
 import { Button } from '../components/Button'
 import { navLinks, site } from '../data/site'
 import { scrollToId } from '../lib/scroll'
+import { nextFreeChair } from '../lib/schedule'
+import { useBooking } from '../context/booking'
 
 interface Form {
   name: string
@@ -32,6 +34,8 @@ export function Footer() {
   const root = useRef<HTMLElement>(null)
   const ready = useReady()
   const { prefill } = useContact()
+  const { open } = useBooking()
+  const [next] = useState(() => nextFreeChair())
   const [form, setForm] = useState<Form>(empty)
   const [tried, setTried] = useState(false)
   const [sent, setSent] = useState(false)
@@ -65,12 +69,34 @@ export function Footer() {
   const err = (k: keyof Form) => tried && errors[k]
 
   return (
-    <footer ref={root} id="contact" className="relative overflow-hidden bg-ink pt-24 text-paper md:pt-36">
-      <div className="shell grid gap-14 lg:grid-cols-12 lg:gap-8">
+    <footer ref={root} id="contact" className="relative overflow-hidden bg-ink text-paper">
+      {/* Closing call to action */}
+      <div className="shell">
+        <div className="flex flex-col items-start justify-between gap-6 border-y border-line py-10 md:flex-row md:items-center md:py-14">
+          <p data-reveal="lines" className="display text-[clamp(1.9rem,4.4vw,4rem)]">
+            {next ? (
+              <>
+                The next chair is free <b>{next.when} at {next.time}.</b>
+              </>
+            ) : (
+              <>
+                Your chair <b>is waiting.</b>
+              </>
+            )}
+          </p>
+          <div data-reveal="fade" className="shrink-0">
+            <Button variant="light" size="lg" onClick={open}>
+              Book a chair
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      <div className="shell grid gap-14 pt-20 md:pt-28 lg:grid-cols-12 lg:gap-8">
         <div className="lg:col-span-5">
           <SectionLabel index="10">Contact</SectionLabel>
-          <h2 data-reveal="lines" className="display mt-8 text-[clamp(3rem,8vw,8rem)]">
-            Say <span className="serif normal-case">hello</span>
+          <h2 data-reveal="lines" className="display mt-8 text-[clamp(2.6rem,6.4vw,6rem)]">
+            Say <b>hello.</b>
           </h2>
           <div data-reveal="stagger" className="mt-10 space-y-6 text-lg">
             <div>
@@ -103,10 +129,10 @@ export function Footer() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                className="border border-line bg-coal p-8 md:p-10"
+                className="rounded-3xl border border-line bg-coal p-8 md:p-10"
                 role="status"
               >
-                <span className="grid size-12 place-items-center bg-paper text-ink">
+                <span className="grid size-12 place-items-center rounded-full bg-paper text-ink">
                   <Check className="size-5" />
                 </span>
                 <h3 className="display mt-6 text-4xl">Thanks, {form.name.split(' ')[0]}.</h3>
@@ -231,7 +257,7 @@ export function Footer() {
               className="group label flex items-center gap-3 text-paper/70 hover:text-paper"
             >
               Back to top
-              <span className="grid size-10 place-items-center border border-line transition-transform duration-500 group-hover:-translate-y-1">
+              <span className="grid size-10 place-items-center rounded-full border border-line transition-transform duration-500 group-hover:-translate-y-1">
                 <ArrowUp className="size-4" strokeWidth={1.5} />
               </span>
             </button>
@@ -240,7 +266,7 @@ export function Footer() {
       </div>
 
       <div className="shell mt-16 overflow-hidden pb-6 md:mt-24">
-        <div data-footer-mark>
+        <div data-footer-mark className="text-paper/[0.09]">
           <Lockup className="w-full" />
         </div>
         <div className="label mt-8 flex flex-col justify-between gap-3 text-paper/35 sm:flex-row">

@@ -161,15 +161,14 @@ export const barbers: Barber[] = [
   },
 ]
 
+/** Lookbook: each frame links to the service that produces the look. */
 export const gallery = [
-  { id: 'photo-1585747860715-2ba37e788b70', caption: 'The floor', tall: false },
-  { id: 'photo-1503951914875-452162b0f3f1', caption: 'Beard detail, scissor over comb', tall: true },
-  { id: 'photo-1512690459411-b9245aed614b', caption: 'The chair', tall: false },
-  { id: 'photo-1593702275687-f8b402bf1fb5', caption: 'Skin fade in progress', tall: true },
-  { id: 'photo-1621605815971-fbc98d665033', caption: 'Tools of the trade', tall: false },
-  { id: 'photo-1622287162716-f311baa1a2b8', caption: 'Scissor work', tall: true },
-  { id: 'photo-1532710093739-9470acff878f', caption: 'Lather before the razor', tall: false },
-  { id: 'photo-1599351431202-1e0f0137899a', caption: 'Razor line-up', tall: true },
+  { id: 'photo-1622286342621-4bd786c2447c', caption: 'Textured crop', service: 'signature-cut' },
+  { id: 'photo-1593702275687-f8b402bf1fb5', caption: 'Skin fade', service: 'skin-fade' },
+  { id: 'photo-1622287162716-f311baa1a2b8', caption: 'Scissor work', service: 'scissor-cut' },
+  { id: 'photo-1599351431202-1e0f0137899a', caption: 'Razor line-up', service: 'buzz-cut' },
+  { id: 'photo-1503951914875-452162b0f3f1', caption: 'Beard detail', service: 'beard-sculpt' },
+  { id: 'photo-1532710093739-9470acff878f', caption: 'Lather & razor', service: 'hot-towel-shave' },
 ]
 
 export interface Plan {
@@ -177,6 +176,8 @@ export interface Plan {
   name: string
   monthly: number
   tagline: string
+  /** Rough monthly saving vs. paying per visit, shown on the card (demo figure) */
+  saving: number
   features: string[]
   featured?: boolean
 }
@@ -187,13 +188,15 @@ export const plans: Plan[] = [
     name: 'Essential',
     monthly: 79,
     tagline: 'For the two-cuts-a-month man.',
+    saving: 11,
     features: ['2 Signature Cuts per month', 'Priority online booking', 'Complimentary drink', '10% off products'],
   },
   {
     id: 'club',
     name: 'Club',
     monthly: 129,
-    tagline: 'Always sharp. Never think about it.',
+    tagline: 'Unlimited cuts, a standing chair.',
+    saving: 36,
     features: [
       'Unlimited cuts',
       '1 Beard Sculpt per month',
@@ -208,6 +211,7 @@ export const plans: Plan[] = [
     name: 'Black',
     monthly: 199,
     tagline: 'The full house, the best chair.',
+    saving: 106,
     features: [
       'Unlimited cuts & beard work',
       '1 Noir Ritual per month',

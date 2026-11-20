@@ -5,6 +5,7 @@ import { useReady } from '../context/ready'
 import { SectionLabel } from '../components/SectionLabel'
 import { Img } from '../components/Img'
 import { stats } from '../data/content'
+import { site } from '../data/site'
 
 export function Club() {
   const root = useRef<HTMLElement>(null)
@@ -56,15 +57,14 @@ export function Club() {
 
         <p
           data-scrub-text
-          className="mt-10 max-w-[22ch] text-[clamp(2rem,5.2vw,5.4rem)] font-[520] leading-[1.02] tracking-[-0.03em] [font-stretch:108%] md:mt-14"
+          className="display mx-auto mt-12 max-w-[20ch] text-center text-[clamp(2.2rem,5.6vw,5.5rem)] md:mt-16"
         >
-          Not a salon. A club for men who take the <span className="serif">details</span> seriously — the line of a
-          fade, the weight of a hot towel, the quiet between <span className="serif">conversations.</span>
+          Not a salon. <b>A club for men who care about the details</b> — the line of a fade, the weight of a hot towel.
         </p>
 
         <div className="mt-16 grid gap-10 md:mt-28 md:grid-cols-12 md:gap-8">
           <div className="md:col-span-5">
-            <div data-reveal="img" className="relative aspect-[4/5] overflow-hidden">
+            <div data-reveal="img" className="relative aspect-[4/5] overflow-hidden rounded-2xl">
               <div data-parallax="0.08" className="absolute -inset-y-[8%] inset-x-0">
                 <Img
                   id="photo-1585747860715-2ba37e788b70"
@@ -74,13 +74,13 @@ export function Club() {
                 />
               </div>
             </div>
-            <p className="label mt-4 text-ink/50">Kerkstraat 118 — the floor</p>
+            <p className="label mt-3 text-ink/50">{site.address.street} — the floor</p>
           </div>
 
           <div className="flex flex-col justify-between gap-12 md:col-span-6 md:col-start-7">
             <div className="grid gap-6 text-[1.05rem] leading-relaxed text-ink/75 sm:grid-cols-2">
               <p data-reveal="fade">
-                NOIR opened in {2016} with four chairs and one rule: every client gets the time the cut actually needs.
+                NOIR opened in {site.established} with four chairs and one rule: every client gets the time the cut actually needs.
                 Appointments run long by design, and nobody is ever rushed out of the chair.
               </p>
               <p data-reveal="fade" data-delay="0.1">
@@ -97,7 +97,7 @@ export function Club() {
                   data-delay={String(i * 0.06)}
                   className={`border-b border-ink/15 py-6 md:py-8 ${i % 2 === 0 ? 'border-r pr-4' : 'pl-4 md:pl-8'}`}
                 >
-                  <div className="display text-[clamp(2.75rem,6vw,5.5rem)] tabular-nums">
+                  <div className="display text-[clamp(2.75rem,6vw,5.5rem)] font-bold tabular-nums">
                     <span data-count={s.value} data-decimals={s.decimals ?? 0}>
                       {s.value.toFixed(s.decimals ?? 0)}
                     </span>
@@ -109,12 +109,12 @@ export function Club() {
             </div>
 
             <div className="grid grid-cols-5 items-end gap-4">
-              <div data-reveal="img" className="col-span-2 aspect-square overflow-hidden">
+              <div data-reveal="img" className="col-span-2 aspect-square overflow-hidden rounded-2xl">
                 <Img id="photo-1621605815971-fbc98d665033" alt="Barber tools laid out" sizes="20vw" className="h-full w-full" />
               </div>
-              <p data-reveal="fade" className="serif col-span-3 text-[clamp(1.5rem,2.4vw,2.25rem)] leading-[1.1]">
+              <p data-reveal="fade" className="display col-span-3 text-[clamp(1.3rem,2.1vw,1.9rem)] leading-[1.12]">
                 “A good cut is invisible. You just look like the best version of yourself.”
-                <span className="label mt-4 block not-italic text-ink/50 [font-family:var(--font-sans)]">
+                <span className="label mt-4 block text-ink/50">
                   Marco Velden — Founder
                 </span>
               </p>

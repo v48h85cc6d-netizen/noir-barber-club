@@ -108,3 +108,16 @@ export function openStatus(now = new Date()) {
   }
   return { open: false, label: 'Closed' }
 }
+
+/** Earliest free demo slot from now (any barber, standard 45 min cut). */
+export function nextFreeChair(now = new Date()) {
+  for (let i = 0; i < 8; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i)
+    const slot = getSlots('any', d, 45, now).find((s) => s.available)
+    if (slot) {
+      const when = i === 0 ? 'today' : i === 1 ? 'tomorrow' : d.toLocaleDateString('en-GB', { weekday: 'long' })
+      return { when, time: slot.time }
+    }
+  }
+  return null
+}

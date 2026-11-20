@@ -245,7 +245,7 @@ export function Footer() {
         </div>
         <div className="label mt-8 flex flex-col justify-between gap-3 text-paper/35 sm:flex-row">
           <span>© {YEAR} {site.name}</span>
-          <span>Precision, quietly done.</span>
+          <span>{site.demoContent ? 'Demo content — address, team, prices and reviews are placeholders' : 'Precision, quietly done.'}</span>
         </div>
       </div>
     </footer>

@@ -110,7 +110,7 @@ export function Club() {
 
             <div className="grid grid-cols-5 items-end gap-4">
               <div data-reveal="img" className="col-span-2 aspect-square overflow-hidden">
-                <Img id="photo-1503951458645-643d53bfd90f" alt="Barber tools laid out" sizes="20vw" className="h-full w-full" />
+                <Img id="photo-1621605815971-fbc98d665033" alt="Barber tools laid out" sizes="20vw" className="h-full w-full" />
               </div>
               <p data-reveal="fade" className="serif col-span-3 text-[clamp(1.5rem,2.4vw,2.25rem)] leading-[1.1]">
                 “A good cut is invisible. You just look like the best version of yourself.”

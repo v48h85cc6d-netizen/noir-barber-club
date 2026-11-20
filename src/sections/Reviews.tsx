@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, Star } from 'lucide-react'
 import { useReveal } from '../hooks/useReveal'
 import { SectionLabel } from '../components/SectionLabel'
 import { reviews } from '../data/content'
+import { site } from '../data/site'
 
 export function Reviews() {
   const root = useRef<HTMLElement>(null)
@@ -54,13 +55,16 @@ export function Reviews() {
           </div>
           <div data-reveal="fade" className="flex items-end justify-between gap-6 md:col-span-5 md:justify-end md:gap-10">
             <div>
-              <div className="display text-[clamp(4rem,8vw,7rem)] tabular-nums">4.9</div>
+              <div className="display text-[clamp(4rem,8vw,7rem)] tabular-nums">{site.rating.score}</div>
               <div className="mt-3 flex gap-1">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <Star key={i} className="size-4 fill-paper text-paper" />
                 ))}
               </div>
-              <div className="label mt-3 text-paper/50">1,240 reviews · Google</div>
+              <div className="label mt-3 leading-relaxed text-paper/50">
+                {site.rating.count.toLocaleString('en-GB')} reviews · {site.rating.source}
+              </div>
+              {site.demoContent && <div className="mt-2 text-xs text-paper/40">Sample rating and reviews</div>}
             </div>
             <div className="flex gap-2">
               <button

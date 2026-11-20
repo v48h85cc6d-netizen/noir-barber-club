@@ -93,20 +93,22 @@ export function Hero() {
               <Wordmark className="block h-auto w-full" />
             </div>
           </div>
-          <div className="mt-5 grid grid-cols-2 items-center gap-4 md:mt-7 md:grid-cols-3">
-            <div data-hero-fade className="hidden items-center gap-3 md:flex">
+          <div className="mt-5 grid grid-cols-2 items-center gap-4 md:mt-7 lg:grid-cols-3">
+            <div data-hero-fade className="hidden items-center gap-3 whitespace-nowrap lg:flex">
               <div className="flex">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <Star key={i} className="size-3.5 fill-paper text-paper" />
                 ))}
               </div>
-              <span className="label text-paper/70">4.9 · 1,240 reviews</span>
+              <span className="label text-paper/70">
+                {site.rating.score} · {site.rating.count.toLocaleString('en-GB')} reviews{site.demoContent && ' · sample'}
+              </span>
             </div>
             <button
               data-hero-fade
               type="button"
               onClick={() => scrollToId('club')}
-              className="label flex items-center gap-3 text-paper/70 transition-colors hover:text-paper md:justify-self-center"
+              className="label flex items-center gap-3 text-paper/70 transition-colors hover:text-paper lg:justify-self-center"
             >
               <ArrowDown className="size-4 animate-bounce" strokeWidth={1.25} />
               Scroll

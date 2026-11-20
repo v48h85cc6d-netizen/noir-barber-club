@@ -26,9 +26,11 @@ src/
 
 ## Placeholders to replace
 
-- **Business details**: `src/data/site.ts` holds the address, phone, email, hours and socials. All are placeholders.
-- **Photography**: temporary Unsplash photos, shown in greyscale, set by ID in `src/data/content.ts`. Any photo that fails to load falls back to a dark branded tile.
-- **Reviews, stats and the 4.9 rating** are demo copy.
+- **Business details**: `src/data/site.ts` holds the address, phone, email, hours, socials and rating. All are placeholders.
+- **Demo flag**: `site.demoContent` in `src/data/site.ts`. While `true`, the rating and reviews are labelled as samples and the footer says the content is a placeholder. Set it to `false` once every value is real.
+- **Team, prices, plans and reviews** live in `src/data/content.ts`. All are demo copy.
+- **Photography**: 14 temporary Unsplash photos, set by ID in `src/data/content.ts` and `src/sections/*`, served greyscale through Unsplash's CDN with responsive `srcset`. Each was checked to load and to match its subject. The barber cards use generic male portraits, not real barbers. Replace them with the shop's own photography.
+- **Logo**: traced from the official mark into `src/assets/logo-*.svg`. The favicon (`public/favicon.svg`, `public/apple-touch-icon.png`) uses the logo's Ø unaltered.
 
 ## Demo-only behaviour (milestone 1)
 

@@ -21,7 +21,7 @@ export const services: Service[] = [
     description: 'Consultation, precision cut, wash and finish. Our house standard.',
     duration: 45,
     price: 45,
-    image: 'photo-1503951914875-452162b0f3f1',
+    image: 'photo-1622286342621-4bd786c2447c',
     signature: true,
   },
   {
@@ -31,7 +31,7 @@ export const services: Service[] = [
     description: 'Seamless fade from skin, detailed with foil and blade.',
     duration: 45,
     price: 48,
-    image: 'photo-1621605815971-fbc98d665033',
+    image: 'photo-1593702275687-f8b402bf1fb5',
   },
   {
     id: 'scissor-cut',
@@ -40,7 +40,7 @@ export const services: Service[] = [
     description: 'Scissor-only work for longer lengths and natural movement.',
     duration: 60,
     price: 55,
-    image: 'photo-1599351431202-1e0f0137899a',
+    image: 'photo-1622287162716-f311baa1a2b8',
   },
   {
     id: 'buzz-cut',
@@ -49,7 +49,7 @@ export const services: Service[] = [
     description: 'One length all over with a crisp razor line-up.',
     duration: 25,
     price: 28,
-    image: 'photo-1622286342621-4bd786c2447c',
+    image: 'photo-1599351431202-1e0f0137899a',
   },
   {
     id: 'junior-cut',
@@ -76,7 +76,7 @@ export const services: Service[] = [
     description: 'Traditional straight-razor shave with pre-shave oil and three hot towels.',
     duration: 40,
     price: 42,
-    image: 'photo-1593702275687-f8b402bf1fb5',
+    image: 'photo-1532710093739-9470acff878f',
   },
   {
     id: 'cut-beard',
@@ -85,7 +85,7 @@ export const services: Service[] = [
     description: 'Signature cut and full beard sculpt in one sitting.',
     duration: 75,
     price: 70,
-    image: 'photo-1622287162716-f311baa1a2b8',
+    image: 'photo-1503951914875-452162b0f3f1',
   },
   {
     id: 'noir-ritual',
@@ -162,14 +162,14 @@ export const barbers: Barber[] = [
 ]
 
 export const gallery = [
-  { id: 'photo-1585747860715-2ba37e788b70', caption: 'The floor, Kerkstraat', tall: false },
-  { id: 'photo-1503951914875-452162b0f3f1', caption: 'Signature Cut', tall: true },
-  { id: 'photo-1605497788044-5a32c7078486', caption: 'Chair No. 2', tall: false },
-  { id: 'photo-1621605815971-fbc98d665033', caption: 'Skin fade, detail', tall: true },
-  { id: 'photo-1503951458645-643d53bfd90f', caption: 'Tools of the trade', tall: false },
-  { id: 'photo-1599351431202-1e0f0137899a', caption: 'Scissor work', tall: true },
-  { id: 'photo-1532710093739-9470acff878f', caption: 'After hours', tall: false },
-  { id: 'photo-1622286342621-4bd786c2447c', caption: 'Line-up', tall: true },
+  { id: 'photo-1585747860715-2ba37e788b70', caption: 'The floor', tall: false },
+  { id: 'photo-1503951914875-452162b0f3f1', caption: 'Beard detail, scissor over comb', tall: true },
+  { id: 'photo-1512690459411-b9245aed614b', caption: 'The chair', tall: false },
+  { id: 'photo-1593702275687-f8b402bf1fb5', caption: 'Skin fade in progress', tall: true },
+  { id: 'photo-1621605815971-fbc98d665033', caption: 'Tools of the trade', tall: false },
+  { id: 'photo-1622287162716-f311baa1a2b8', caption: 'Scissor work', tall: true },
+  { id: 'photo-1532710093739-9470acff878f', caption: 'Lather before the razor', tall: false },
+  { id: 'photo-1599351431202-1e0f0137899a', caption: 'Razor line-up', tall: true },
 ]
 
 export interface Plan {

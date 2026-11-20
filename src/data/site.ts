@@ -7,6 +7,13 @@ export const site = {
   short: 'NOIR',
   established: 2016,
   currency: '€',
+  /**
+   * While true, the site shows small "sample" labels on ratings and reviews
+   * and a demo-content note in the footer. Set to false once every value in
+   * this file and in content.ts is real.
+   */
+  demoContent: true,
+  rating: { score: 4.9, count: 1240, source: 'Google' },
   phone: '+31 20 123 4567',
   phoneHref: 'tel:+31201234567',
   email: 'hello@noirbarberclub.com',

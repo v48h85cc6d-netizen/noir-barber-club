@@ -1,0 +1,199 @@
+@import "@fontsource-variable/archivo/wdth.css";
+@import "@fontsource/instrument-serif/latin-400-italic.css";
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Archivo Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-serif: "Instrument Serif", ui-serif, Georgia, serif;
+
+  --color-ink: #0b0b0b;
+  --color-coal: #131313;
+  --color-ash: #1c1c1c;
+  --color-line: #2a2a2a;
+  --color-paper: #f1efea;
+  --color-bone: #e4e1da;
+  --color-smoke: #8b8a86;
+
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-quart: cubic-bezier(0.76, 0, 0.24, 1);
+
+  --breakpoint-xs: 26rem;
+  --breakpoint-3xl: 112rem;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-padding-top: 5rem;
+  }
+  body {
+    background: var(--color-ink);
+    color: var(--color-paper);
+    font-family: var(--font-sans);
+    font-stretch: 100%;
+    overflow-x: clip;
+  }
+  ::selection {
+    background: var(--color-paper);
+    color: var(--color-ink);
+  }
+  button,
+  [role="button"] {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: not-allowed;
+  }
+  :focus-visible {
+    outline: 1px solid currentColor;
+    outline-offset: 3px;
+  }
+  input,
+  textarea,
+  select {
+    font: inherit;
+  }
+  img {
+    -webkit-user-drag: none;
+  }
+}
+
+/* ——— Typography ——— */
+@utility display {
+  font-stretch: 125%;
+  font-weight: 860;
+  text-transform: uppercase;
+  line-height: 0.86;
+  letter-spacing: -0.025em;
+}
+@utility label {
+  font-size: 0.6875rem;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.32em;
+  font-stretch: 115%;
+  font-weight: 500;
+}
+@utility wide {
+  font-stretch: 118%;
+}
+@utility serif {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: -0.01em;
+  font-stretch: 100%;
+}
+
+/* ——— Layout ——— */
+@utility shell {
+  width: 100%;
+  max-width: 1680px;
+  margin-inline: auto;
+  padding-inline: 1rem;
+  @media (width >= 48rem) {
+    padding-inline: 2rem;
+  }
+  @media (width >= 80rem) {
+    padding-inline: 3rem;
+  }
+}
+@utility section-y {
+  padding-block: 6rem;
+  @media (width >= 48rem) {
+    padding-block: 8rem;
+  }
+  @media (width >= 80rem) {
+    padding-block: 10rem;
+  }
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Masks used for line-by-line text reveals */
+.line-mask {
+  overflow: clip;
+  overflow-clip-margin: 0.12em;
+  padding-bottom: 0.04em;
+}
+
+/* Film grain, painted once and fixed — cheap on the compositor */
+.grain {
+  position: fixed;
+  inset: -50%;
+  z-index: 90;
+  pointer-events: none;
+  opacity: 0.055;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Before JS takes over, keep reveal targets visible for no-JS / reduced motion */
+.js-anim [data-reveal="fade"],
+.js-anim [data-reveal="stagger"] > * {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Inputs */
+.field {
+  width: 100%;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid color-mix(in oklab, currentColor 28%, transparent);
+  padding: 0.9rem 0 0.75rem;
+  font-size: 1rem;
+  border-radius: 0;
+  outline: none;
+  transition: border-color 0.3s;
+}
+.field:focus {
+  border-bottom-color: currentColor;
+}
+.field::placeholder {
+  color: color-mix(in oklab, currentColor 40%, transparent);
+}
+.field[aria-invalid="true"] {
+  border-bottom-color: #d96c5f;
+}
+select.field {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none' stroke='%238b8a86' stroke-width='1.5'%3E%3Cpath d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 2px center;
+  padding-right: 1.5rem;
+}
+select.field option {
+  color: #0b0b0b;
+}
+
+/* Marquee */
+@keyframes marquee {
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+.marquee-track {
+  animation: marquee 38s linear infinite;
+  will-change: transform;
+}
+.marquee-reverse {
+  animation-direction: reverse;
+}

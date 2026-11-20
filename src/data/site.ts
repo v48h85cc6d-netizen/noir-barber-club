@@ -23,8 +23,7 @@ export const site = {
     country: 'Netherlands',
     mapQuery: 'Kerkstraat 118, Amsterdam',
     /** Nearest public transport stop, used on the map card (placeholder) */
-    transit: 'Tram · Prinsengracht',
-    walk: '3 min walk from the tram',
+    transitStop: 'Prinsengracht',
   },
   socials: [
     { label: 'Instagram', href: 'https://instagram.com/' },
@@ -44,24 +43,15 @@ export const hours: Record<number, { open: string; close: string } | null> = {
   6: { open: '09:00', close: '18:00' },
 }
 
-export const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-
+/** Section anchors in nav order; labels come from the dictionaries (nav.links). */
 export const navLinks = [
-  { label: 'Club', href: '#club' },
-  { label: 'Barbers', href: '#barbers' },
-  { label: 'Services', href: '#services' },
-  { label: 'Gallery', href: '#gallery' },
-  { label: 'Membership', href: '#membership' },
-  { label: 'Gift cards', href: '#gift-cards' },
-  { label: 'Visit', href: '#visit' },
-]
+  { key: 'club', href: '#club' },
+  { key: 'barbers', href: '#barbers' },
+  { key: 'services', href: '#services' },
+  { key: 'gallery', href: '#gallery' },
+  { key: 'membership', href: '#membership' },
+  { key: 'giftCards', href: '#gift-cards' },
+  { key: 'visit', href: '#visit' },
+] as const
 
 export const formatPrice = (n: number) => `${site.currency}${n}`
-
-/** Short answers shown in the Visit section. Placeholder policy — confirm before launch. */
-export const faqs = [
-  { q: 'Do you take walk-ins?', a: 'Yes, when a chair is free. Booking guarantees your time and your barber — walk-ins wait for the next gap.' },
-  { q: 'How do I pay?', a: 'In the shop after your cut, by card, phone or cash. Booking online never needs a card.' },
-  { q: 'What if I am running late?', a: 'Call us. Up to ten minutes we can usually still do the full service; after that we may need to shorten or move it.' },
-  { q: 'Do you cut kids’ hair?', a: 'Yes — the Junior Cut is for gentlemen under twelve, any day we are open.' },
-]

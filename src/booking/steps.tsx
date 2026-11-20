@@ -5,6 +5,7 @@ import { formatPrice } from '../data/site'
 import { useBooking, type Details } from '../context/booking'
 import { barberWorks, fromKey, getSlots, isShopOpen, toKey, upcomingDays } from '../lib/schedule'
 import { Img } from '../components/Img'
+import { useI18n, type Dict } from '../i18n'
 
 /* ———————————————————————— Shared ———————————————————————— */
 
@@ -21,11 +22,12 @@ function Thumb({ id, alt }: { id: string; alt: string }) {
 
 export function StepService({ onPicked }: { onPicked: () => void }) {
   const { state, dispatch } = useBooking()
+  const { t } = useI18n()
   return (
     <div className="space-y-6">
       {serviceCategories.map((cat) => (
         <div key={cat}>
-          <div className="label mb-2.5 text-paper/40">{cat}</div>
+          <div className="label mb-2.5 text-paper/40">{t.steps.categories[cat]}</div>
           <div className="space-y-1.5">
             {services
               .filter((s) => s.category === cat)
@@ -46,10 +48,11 @@ export function StepService({ onPicked }: { onPicked: () => void }) {
                     <Thumb id={s.image} alt="" />
                     <span className="min-w-0 flex-1">
                       <span className="block truncate font-semibold [font-stretch:115%]">
-                        <span className="text-paper/45">#{num}</span> {s.name}
+                        <span className="text-paper/45">#{num}</span> {t.services.items[s.id].name}
                       </span>
                       <span className="label mt-1 block text-paper/40">
-                        {s.duration} min{s.signature ? ' · signature' : ''}
+                        {s.duration} {t.common.min}
+                        {s.signature ? ` · ${t.steps.signature}` : ''}
                       </span>
                     </span>
                     <span className="font-semibold tabular-nums">{formatPrice(s.price)}</span>
@@ -68,6 +71,7 @@ export function StepService({ onPicked }: { onPicked: () => void }) {
 
 export function StepBarber({ onPicked }: { onPicked: () => void }) {
   const { state, dispatch } = useBooking()
+  const { t } = useI18n()
   const pick = (id: string) => {
     dispatch({ type: 'barber', id })
     if (state.date && !barberWorks(id, fromKey(state.date))) dispatch({ type: 'date', date: null })
@@ -81,8 +85,8 @@ export function StepBarber({ onPicked }: { onPicked: () => void }) {
           <Clock className="size-5" strokeWidth={1.25} />
         </span>
         <span className="flex-1">
-          <span className="block font-semibold [font-stretch:115%]">First free chair</span>
-          <span className="label mt-1 block text-paper/40">Whoever is free first</span>
+          <span className="block font-semibold [font-stretch:115%]">{t.steps.firstFreeChair}</span>
+          <span className="label mt-1 block text-paper/40">{t.steps.whoeverFree}</span>
         </span>
         {anyOn ? <Check className="size-4" /> : <ArrowRight className="size-4 text-paper/40" strokeWidth={1.5} />}
       </button>
@@ -94,7 +98,7 @@ export function StepBarber({ onPicked }: { onPicked: () => void }) {
             <span className="min-w-0 flex-1">
               <span className="block font-semibold [font-stretch:115%]">{b.name}</span>
               <span className="label mt-1 block truncate text-paper/40">
-                {b.specialty} · {b.years} yrs
+                {t.barbers.people[b.id].specialty} · {b.years} {t.common.yrs}
               </span>
             </span>
             {on ? <Check className="size-4" /> : <ArrowRight className="size-4 text-paper/40" strokeWidth={1.5} />}
@@ -109,12 +113,13 @@ export function StepBarber({ onPicked }: { onPicked: () => void }) {
 
 export function StepDate({ onPicked }: { onPicked: () => void }) {
   const { state, dispatch } = useBooking()
+  const { t, fmt } = useI18n()
   const [{ days, todayKey }] = useState(() => ({ days: upcomingDays(21), todayKey: toKey(new Date()) }))
   const barber = barbers.find((b) => b.id === state.barberId)
   return (
     <div>
       <p className="-mt-2 mb-5 text-sm text-paper/50">
-        Next three weeks{barber ? ` · days ${barber.name.split(' ')[0]} works` : ''}. Closed on Mondays.
+        {t.steps.dateIntro(barber ? barber.name.split(' ')[0] : null)}
       </p>
       <div className="grid grid-cols-4 gap-1.5 xs:grid-cols-5 sm:grid-cols-7">
         {days.map((d) => {
@@ -128,8 +133,8 @@ export function StepDate({ onPicked }: { onPicked: () => void }) {
               type="button"
               disabled={disabled}
               aria-pressed={on}
-              aria-label={`${d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}${
-                disabled ? (open ? ' — barber off' : ' — closed') : ''
+              aria-label={`${fmt.date(d, { weekday: 'long', day: 'numeric', month: 'long' })}${
+                disabled ? (open ? t.steps.barberOff : t.steps.closedSuffix) : ''
               }`}
               onClick={() => {
                 dispatch({ type: 'date', date: key })
@@ -144,11 +149,11 @@ export function StepDate({ onPicked }: { onPicked: () => void }) {
               }`}
             >
               <span className="label text-[0.6rem] opacity-70">
-                {key === todayKey ? 'Today' : d.toLocaleDateString('en-GB', { weekday: 'short' })}
+                {key === todayKey ? t.common.today : fmt.weekday(d, 'short')}
               </span>
               <span className="text-2xl font-semibold tabular-nums [font-stretch:120%]">{d.getDate()}</span>
               <span className="label text-[0.55rem] opacity-55">
-                {disabled ? (open ? 'Off' : 'Closed') : d.toLocaleDateString('en-GB', { month: 'short' })}
+                {disabled ? (open ? t.steps.off : t.common.closed) : fmt.date(d, { month: 'short' })}
               </span>
             </button>
           )
@@ -162,6 +167,7 @@ export function StepDate({ onPicked }: { onPicked: () => void }) {
 
 export function StepTime({ onPicked, onChangeDate }: { onPicked: () => void; onChangeDate: () => void }) {
   const { state, dispatch } = useBooking()
+  const { t, fmt } = useI18n()
   const service = services.find((s) => s.id === state.serviceId)
   const date = state.date ? fromKey(state.date) : null
   const duration = service?.duration ?? 0
@@ -170,9 +176,9 @@ export function StepTime({ onPicked, onChangeDate }: { onPicked: () => void; onC
     [state.date, state.barberId, duration],
   )
   const groups = [
-    { label: 'Morning', test: (h: number) => h < 12 },
-    { label: 'Afternoon', test: (h: number) => h >= 12 && h < 17 },
-    { label: 'Evening', test: (h: number) => h >= 17 },
+    { label: t.steps.morning, test: (h: number) => h < 12 },
+    { label: t.steps.afternoon, test: (h: number) => h >= 12 && h < 17 },
+    { label: t.steps.evening, test: (h: number) => h >= 17 },
   ]
   const free = slots.filter((s) => s.available).length
 
@@ -181,22 +187,22 @@ export function StepTime({ onPicked, onChangeDate }: { onPicked: () => void; onC
       {date && (
         <div className="-mt-2 mb-5 flex flex-wrap items-center justify-between gap-2 text-sm text-paper/50">
           <span>
-            {date.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })} · {free} free
+            {t.steps.freeCount(fmt.date(date, { weekday: 'long', day: 'numeric', month: 'long' }), free)}
           </span>
           <button type="button" onClick={onChangeDate} className="underline underline-offset-4 hover:text-paper">
-            Change date
+            {t.steps.changeDate}
           </button>
         </div>
       )}
       {free === 0 ? (
         <div className="rounded-xl border border-line p-8 text-center">
-          <p className="text-paper/70">Fully booked on this day.</p>
+          <p className="text-paper/70">{t.steps.fullyBooked}</p>
           <button
             type="button"
             onClick={onChangeDate}
             className="mt-5 rounded-full border border-paper/30 px-5 py-2.5 text-sm transition-colors hover:bg-paper hover:text-ink"
           >
-            Pick another date
+            {t.steps.pickAnother}
           </button>
         </div>
       ) : (
@@ -216,7 +222,7 @@ export function StepTime({ onPicked, onChangeDate }: { onPicked: () => void; onC
                         type="button"
                         disabled={!s.available}
                         aria-pressed={on}
-                        aria-label={`${s.time}${s.available ? '' : ' — taken'}`}
+                        aria-label={`${s.time}${s.available ? '' : t.steps.taken}`}
                         onClick={() => {
                           dispatch({ type: 'time', time: s.time })
                           onPicked()
@@ -245,11 +251,12 @@ export function StepTime({ onPicked, onChangeDate }: { onPicked: () => void; onC
 
 /* ———————————————————————— 5. Details ———————————————————————— */
 
-export function validateDetails(d: Details) {
+/** Returns the error message for each invalid field, in the given language. */
+export function validateDetails(d: Details, t: Dict) {
   const errors: Partial<Record<keyof Details, string>> = {}
-  if (d.name.trim().length < 2) errors.name = 'Please enter your full name'
-  if (!/^\+?[\d\s()-]{7,}$/.test(d.phone.trim())) errors.phone = 'Enter a valid phone number'
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(d.email.trim())) errors.email = 'Enter a valid email address'
+  if (d.name.trim().length < 2) errors.name = t.steps.errors.name
+  if (!/^\+?[\d\s()-]{7,}$/.test(d.phone.trim())) errors.phone = t.steps.errors.phone
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(d.email.trim())) errors.email = t.steps.errors.email
   return errors
 }
 
@@ -258,8 +265,9 @@ const box =
 
 export function StepDetails({ showErrors }: { showErrors: boolean }) {
   const { state, dispatch } = useBooking()
+  const { t } = useI18n()
   const [touched, setTouched] = useState<Partial<Record<keyof Details, boolean>>>({})
-  const errors = validateDetails(state.details)
+  const errors = validateDetails(state.details, t)
   const field = (key: keyof Details, label: string, props: React.InputHTMLAttributes<HTMLInputElement>) => {
     const err = (showErrors || touched[key]) && errors[key]
     return (
@@ -284,29 +292,28 @@ export function StepDetails({ showErrors }: { showErrors: boolean }) {
   }
   return (
     <div className="grid gap-5 sm:grid-cols-2">
-      <div className="sm:col-span-2">{field('name', 'Name', { autoComplete: 'name', placeholder: 'Your name', name: 'name' })}</div>
-      {field('phone', 'Mobile, for the reminder', {
+      <div className="sm:col-span-2">{field('name', t.steps.nameLabel, { autoComplete: 'name', placeholder: t.steps.namePh, name: 'name' })}</div>
+      {field('phone', t.steps.phoneLabel, {
         autoComplete: 'tel',
         type: 'tel',
         inputMode: 'tel',
-        placeholder: '+31 6 1234 5678',
+        placeholder: t.steps.phonePh,
         name: 'phone',
       })}
-      {field('email', 'Email', { autoComplete: 'email', type: 'email', inputMode: 'email', placeholder: 'you@email.com', name: 'email' })}
+      {field('email', t.steps.emailLabel, { autoComplete: 'email', type: 'email', inputMode: 'email', placeholder: t.steps.emailPh, name: 'email' })}
       <label className="block sm:col-span-2">
-        <span className="label text-paper/45">Notes for your barber (optional)</span>
+        <span className="label text-paper/45">{t.steps.notesLabel}</span>
         <textarea
           rows={3}
           value={state.details.notes}
           onChange={(e) => dispatch({ type: 'details', details: { notes: e.target.value } })}
-          placeholder="Reference photo, sensitive skin, first visit…"
+          placeholder={t.steps.notesPh}
           className={`${box} resize-none`}
           maxLength={400}
         />
       </label>
       <p className="rounded-lg border border-line bg-ash/40 p-4 text-xs leading-relaxed text-paper/55 sm:col-span-2">
-        <b className="text-paper/80">No deposit, no card.</b> You pay in the shop after your cut. Changes and
-        cancellations are free up to 24 hours before.
+        <b className="text-paper/80">{t.steps.noDepositBold}</b> {t.steps.noDeposit}
       </p>
     </div>
   )

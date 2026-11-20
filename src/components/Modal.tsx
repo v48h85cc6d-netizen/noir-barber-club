@@ -2,6 +2,7 @@ import { useEffect, useRef, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { AnimatePresence, motion } from 'motion/react'
 import { X } from 'lucide-react'
+import { useI18n } from '../i18n'
 
 interface Props {
   open: boolean
@@ -13,6 +14,7 @@ interface Props {
 
 export function Modal({ open, onClose, label, children, variant = 'panel' }: Props) {
   const ref = useRef<HTMLDivElement>(null)
+  const { t } = useI18n()
 
   useEffect(() => {
     if (!open) return
@@ -73,7 +75,7 @@ export function Modal({ open, onClose, label, children, variant = 'panel' }: Pro
             <button
               type="button"
               onClick={onClose}
-              aria-label="Close"
+              aria-label={t.common.close}
               className={`absolute right-3 top-3 z-10 grid size-11 place-items-center transition-transform duration-500 hover:rotate-90 ${
                 variant === 'full' ? 'text-paper' : 'text-ink'
               }`}

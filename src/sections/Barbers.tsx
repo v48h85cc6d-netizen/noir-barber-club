@@ -6,6 +6,7 @@ import { SectionLabel } from '../components/SectionLabel'
 import { Img } from '../components/Img'
 import { Button } from '../components/Button'
 import { barbers, type Barber } from '../data/content'
+import { useI18n } from '../i18n'
 
 /** Pendant lamp drawn above each mirror; glows when its barber is selected. */
 function Lamp({ on }: { on: boolean }) {
@@ -24,6 +25,8 @@ function Lamp({ on }: { on: boolean }) {
 
 function Mirror({ b, i, active, onActivate }: { b: Barber; i: number; active: boolean; onActivate: () => void }) {
   const { bookBarber } = useBooking()
+  const { t } = useI18n()
+  const p = t.barbers.people[b.id]
   return (
     <article
       onPointerEnter={(e) => e.pointerType === 'mouse' && onActivate()}
@@ -37,10 +40,10 @@ function Mirror({ b, i, active, onActivate }: { b: Barber; i: number; active: bo
           active ? 'border-paper/45' : 'border-paper/10'
         }`}
       >
-        <button type="button" onClick={onActivate} className="relative block h-full w-full overflow-hidden rounded-[16px] text-left" aria-label={`${b.name}, ${b.specialty}`}>
+        <button type="button" onClick={onActivate} className="relative block h-full w-full overflow-hidden rounded-[16px] text-left" aria-label={`${b.name}, ${p.specialty}`}>
           <Img
             id={b.image}
-            alt={`Portrait of ${b.name}`}
+            alt={t.barbers.portrait(b.name)}
             sizes="(min-width: 1024px) 45vw, 80vw"
             maxWidth={1080}
             className="h-full w-full"
@@ -58,14 +61,14 @@ function Mirror({ b, i, active, onActivate }: { b: Barber; i: number; active: bo
           <div className="flex flex-wrap items-end justify-between gap-4 pt-5">
             <div className="max-w-sm">
               <div className="label text-paper/50">
-                {b.role} · {b.years} yrs
+                {p.role} · {b.years} {t.common.yrs}
               </div>
               <p className="mt-2 text-sm leading-relaxed text-paper/70">
-                <b className="font-semibold text-paper">{b.specialty}.</b> {b.bio}
+                <b className="font-semibold text-paper">{p.specialty}.</b> {p.bio}
               </p>
             </div>
-            <Button variant="light" onClick={() => bookBarber(b.id)} tabIndex={active ? 0 : -1} aria-label={`Book with ${b.name}`}>
-              Book with {b.name.split(' ')[0]}
+            <Button variant="light" onClick={() => bookBarber(b.id)} tabIndex={active ? 0 : -1} aria-label={t.barbers.bookWith(b.name)}>
+              {t.barbers.bookWith(b.name.split(' ')[0])}
             </Button>
           </div>
         </div>
@@ -78,19 +81,20 @@ export function Barbers() {
   const root = useRef<HTMLElement>(null)
   const [active, setActive] = useState(0)
   const { bookBarber } = useBooking()
+  const { t, locale } = useI18n()
   useReveal(root)
 
   return (
     <section ref={root} id="barbers" className="section-y relative overflow-hidden bg-ink text-paper">
       <div className="shell">
-        <SectionLabel index="03">The barbers</SectionLabel>
+        <SectionLabel index="03">{t.barbers.label}</SectionLabel>
         <div className="mt-8 flex flex-col justify-between gap-6 md:flex-row md:items-end">
-          <h2 data-reveal="lines" className="display text-[clamp(2.6rem,6.4vw,6rem)]">
-            Four chairs. <b>Pick yours.</b>
+          <h2 key={locale} data-reveal="lines" className="display text-[clamp(2.6rem,6.4vw,6rem)]">
+            {t.barbers.a}
+            <b>{t.barbers.b}</b>
           </h2>
           <p data-reveal="fade" className="max-w-sm text-sm leading-relaxed text-paper/60">
-            Every barber keeps his own station and his own diary. Choose the hands that suit your hair — or take the first
-            free chair.
+            {t.barbers.body}
           </p>
         </div>
 
@@ -109,22 +113,22 @@ export function Barbers() {
             <Lamp on />
             <div className="mt-2 overflow-hidden rounded-[22px] border border-paper/30 p-1.5">
               <div className="relative overflow-hidden rounded-[16px]">
-                <Img id={b.image} alt={`Portrait of ${b.name}`} sizes="78vw" maxWidth={1080} className="aspect-[3/4] w-full" />
+                <Img id={b.image} alt={t.barbers.portrait(b.name)} sizes="78vw" maxWidth={1080} className="aspect-[3/4] w-full" />
                 <span className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                 <span className="absolute inset-x-0 bottom-0 p-4">
                   <span className="label block text-paper/60">
-                    #{i + 1} · {b.years} yrs
+                    #{i + 1} · {b.years} {t.common.yrs}
                   </span>
                   <span className="mt-1 block text-xl font-bold [font-stretch:122%]">{b.name}</span>
                 </span>
               </div>
             </div>
             <p className="mt-4 text-sm leading-relaxed text-paper/65">
-              <b className="font-semibold text-paper">{b.specialty}.</b> {b.bio}
+              <b className="font-semibold text-paper">{t.barbers.people[b.id].specialty}.</b> {t.barbers.people[b.id].bio}
             </p>
             <div className="mt-4 flex items-center justify-between gap-3">
-              <Button variant="light" onClick={() => bookBarber(b.id)} aria-label={`Book with ${b.name}`}>
-                Book with {b.name.split(' ')[0]}
+              <Button variant="light" onClick={() => bookBarber(b.id)} aria-label={t.barbers.bookWith(b.name)}>
+                {t.barbers.bookWith(b.name.split(' ')[0])}
               </Button>
               <a
                 href={`https://instagram.com/${b.instagram.slice(1)}`}

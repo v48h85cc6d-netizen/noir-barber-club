@@ -7,13 +7,14 @@ import { formatPrice, site } from '../data/site'
 import { assignBarber } from '../lib/schedule'
 import { StepBarber, StepDate, StepDetails, StepService, StepTime, validateDetails } from './steps'
 import { SummaryRow, useSelection } from './Summary'
+import { useI18n } from '../i18n'
 
 const ease = [0.16, 1, 0.3, 1] as const
-const TITLES = ['Pick a service', 'Pick your barber', 'Pick a date', 'Pick a time', 'Your details', 'Review & confirm']
 
 /** Slide-in booking panel. Opened from every "Book" control on the page. */
 export function BookingDrawer() {
   const { isOpen, close } = useBooking()
+  const { t } = useI18n()
   const panel = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -58,7 +59,7 @@ export function BookingDrawer() {
             id="booking-panel"
             role="dialog"
             aria-modal="true"
-            aria-label="Book a chair"
+            aria-label={t.panel.dialog}
             className="absolute inset-y-0 right-0 flex w-full flex-col bg-coal text-paper shadow-[-40px_0_80px_-20px_rgba(0,0,0,0.6)] sm:w-[560px] lg:w-[min(46vw,640px)]"
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
@@ -76,6 +77,7 @@ export function BookingDrawer() {
 
 function BookingFlow() {
   const { state, dispatch, close } = useBooking()
+  const { t } = useI18n()
   const sel = useSelection()
   const [dir, setDir] = useState(1)
   const [showErrors, setShowErrors] = useState(false)
@@ -88,7 +90,7 @@ function BookingFlow() {
     latest.current = state
   })
 
-  const detailsValid = Object.keys(validateDetails(state.details)).length === 0
+  const detailsValid = Object.keys(validateDetails(state.details, t)).length === 0
   const canNext = [!!state.serviceId, !!state.barberId, !!state.date, !!state.time, detailsValid, agreed][state.step]
 
   useEffect(() => {
@@ -127,7 +129,7 @@ function BookingFlow() {
     if (canNext) goTo((state.step + 1) as StepIndex)
   }
 
-  const summary = [sel.service?.name, sel.service && formatPrice(sel.service.price), sel.barber?.name.split(' ')[0] ?? (state.barberId === 'any' ? 'First free' : null), state.time]
+  const summary = [sel.serviceName, sel.service && formatPrice(sel.service.price), sel.barber?.name.split(' ')[0] ?? (state.barberId === 'any' ? t.panel.firstFree : null), state.time]
     .filter(Boolean)
     .join(' · ')
 
@@ -137,20 +139,20 @@ function BookingFlow() {
       <div className="px-5 pt-5 md:px-8 md:pt-7">
         <div className="flex items-center justify-between">
           <span className="label text-paper/45">
-            {state.submitted ? 'Demo request' : `Step ${state.step + 1} of ${STEPS.length}`}
+            {state.submitted ? t.panel.demoRequest : t.panel.stepOf(state.step + 1, STEPS.length)}
           </span>
           <button
             type="button"
             data-close
             onClick={close}
-            aria-label="Close booking"
+            aria-label={t.panel.closeBooking}
             className="grid size-10 place-items-center rounded-full border border-line transition-colors hover:border-paper/50"
           >
             <X className="size-4" strokeWidth={1.5} />
           </button>
         </div>
         <h2 className="display mt-4 text-[clamp(1.9rem,4vw,2.6rem)] font-bold">
-          {state.submitted ? 'Preview complete' : TITLES[state.step]}
+          {state.submitted ? t.panel.previewComplete : t.panel.titles[state.step]}
         </h2>
         <div className="mt-4 h-px bg-line">
           <motion.div
@@ -210,13 +212,13 @@ function BookingFlow() {
       {/* Footer */}
       <div className="flex items-center gap-3 border-t border-line px-5 py-3.5 md:px-8">
         <span className="label min-w-0 flex-1 truncate text-paper/45">
-          {state.submitted ? 'Demo · nothing was booked or charged' : summary || 'Nothing picked yet'}
+          {state.submitted ? t.panel.footerDone : summary || t.panel.nothingYet}
         </span>
         {!state.submitted && (
           <>
             {state.step > 0 && (
               <button type="button" onClick={() => goTo((state.step - 1) as StepIndex)} className="px-2 text-sm text-paper/60 hover:text-paper">
-                Back
+                {t.panel.back}
               </button>
             )}
             <button
@@ -225,7 +227,7 @@ function BookingFlow() {
               disabled={!canNext && state.step < 4}
               className="group/btn flex h-11 items-center gap-2 rounded-full bg-paper pl-5 pr-1.5 text-sm font-medium text-ink transition-opacity disabled:opacity-30"
             >
-              {state.step === 5 ? 'Send request' : 'Continue'}
+              {state.step === 5 ? t.common.sendRequest : t.panel.continue}
               <span className="grid size-8 place-items-center rounded-full bg-ink text-paper">
                 <ArrowRight className="size-4 transition-transform duration-500 group-hover/btn:translate-x-0.5" strokeWidth={1.75} />
               </span>
@@ -251,26 +253,28 @@ function Review({
   onAgree: (v: boolean) => void
 }) {
   const { state } = useBooking()
+  const { t } = useI18n()
   const sel = useSelection()
+  const r = t.panel.rows
   return (
     <div>
       <div className="text-[0.95rem]">
-        <SummaryRow label="Service" value={sel.service ? `${sel.service.name} · ${sel.service.duration} min` : null} step={0} onEdit={onEdit} />
-        <SummaryRow label="Barber" value={sel.barberLabel} step={1} onEdit={onEdit} />
-        <SummaryRow label="Date" value={sel.dateLabel} step={2} onEdit={onEdit} />
-        <SummaryRow label="Time" value={sel.timeLabel} step={3} onEdit={onEdit} />
-        <SummaryRow label="Name" value={state.details.name} step={4} onEdit={onEdit} />
-        <SummaryRow label="Contact" value={`${state.details.phone} · ${state.details.email}`} step={4} onEdit={onEdit} />
-        {state.details.notes && <SummaryRow label="Notes" value={state.details.notes} step={4} onEdit={onEdit} />}
+        <SummaryRow label={r.service} value={sel.service ? `${sel.serviceName} · ${sel.service.duration} ${t.common.min}` : null} step={0} onEdit={onEdit} />
+        <SummaryRow label={r.barber} value={sel.barberLabel} step={1} onEdit={onEdit} />
+        <SummaryRow label={r.date} value={sel.dateLabel} step={2} onEdit={onEdit} />
+        <SummaryRow label={r.time} value={sel.timeLabel} step={3} onEdit={onEdit} />
+        <SummaryRow label={r.name} value={state.details.name} step={4} onEdit={onEdit} />
+        <SummaryRow label={r.contact} value={`${state.details.phone} · ${state.details.email}`} step={4} onEdit={onEdit} />
+        {state.details.notes && <SummaryRow label={r.notes} value={state.details.notes} step={4} onEdit={onEdit} />}
       </div>
       <div className="mt-6 flex items-end justify-between">
-        <span className="label text-paper/45">Pay in the shop</span>
+        <span className="label text-paper/45">{t.panel.payInShop}</span>
         <span className="text-4xl font-bold tabular-nums [font-stretch:125%]">{sel.service ? formatPrice(sel.service.price) : '—'}</span>
       </div>
 
       <label className={`mt-7 flex cursor-pointer items-start gap-3 text-sm ${agreeError ? 'text-[#e58a7e]' : 'text-paper/65'}`}>
         <input type="checkbox" checked={agreed} onChange={(e) => onAgree(e.target.checked)} className="mt-0.5 size-4 shrink-0 accent-paper" />
-        <span>I agree to the 24-hour cancellation policy. Late cancellations and no-shows may be charged 50%.</span>
+        <span>{t.panel.agree}</span>
       </label>
 
       <DemoNote className="mt-6" />
@@ -279,12 +283,12 @@ function Review({
 }
 
 export function DemoNote({ className = '' }: { className?: string }) {
+  const { t } = useI18n()
   return (
     <p className={`flex gap-3 rounded-xl border border-dashed border-paper/20 p-4 text-xs leading-relaxed text-paper/55 ${className}`}>
       <Info className="mt-px size-4 shrink-0" strokeWidth={1.5} />
       <span>
-        Preview mode — online booking is not connected yet. Sending shows the flow only: no appointment is reserved and nobody
-        is notified. To book today, call {site.phone}.
+        {t.panel.demoNote(site.phone)}
       </span>
     </p>
   )
@@ -294,31 +298,32 @@ export function DemoNote({ className = '' }: { className?: string }) {
 
 function Confirmation({ onRestart }: { onRestart: () => void }) {
   const { state } = useBooking()
+  const { t } = useI18n()
   const sel = useSelection()
+  const r = t.panel.rows
   const assigned =
     state.barberId === 'any' && sel.date && state.time && sel.service ? assignBarber(sel.date, state.time, sel.service.duration) : null
   const first = state.details.name.trim().split(' ')[0]
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease }} role="status">
       <div className="label inline-flex items-center gap-2 rounded-full border border-paper/25 px-3 py-2 text-paper/70">
-        <span className="size-1.5 rounded-full bg-paper/70" /> Demo request — not booked
+        <span className="size-1.5 rounded-full bg-paper/70" /> {t.panel.notBooked}
       </div>
       <p className="mt-5 text-lg leading-snug">
-        Thanks{first ? `, ${first}` : ''}. This is where your confirmation will appear once online booking goes live.{' '}
-        <span className="text-paper/55">Nothing has been reserved and no message was sent — call the shop to lock in this time.</span>
+        {t.panel.thanks(first)} {t.panel.confirmLead} <span className="text-paper/55">{t.panel.confirmRest}</span>
       </p>
       <div className="mt-6 text-[0.95rem]">
-        <SummaryRow label="Service" value={sel.service ? `${sel.service.name} · ${sel.service.duration} min` : null} step={0} />
-        <SummaryRow label="Barber" value={assigned ? `${assigned.name} (assigned)` : sel.barberLabel} step={1} />
-        <SummaryRow label="When" value={sel.dateLabel && sel.timeLabel ? `${sel.dateLabel}, ${sel.timeLabel}` : null} step={2} />
-        <SummaryRow label="Pay" value={sel.service ? `${formatPrice(sel.service.price)} in the shop` : null} step={3} />
+        <SummaryRow label={r.service} value={sel.service ? `${sel.serviceName} · ${sel.service.duration} ${t.common.min}` : null} step={0} />
+        <SummaryRow label={r.barber} value={assigned ? t.panel.assigned(assigned.name) : sel.barberLabel} step={1} />
+        <SummaryRow label={r.when} value={sel.dateLabel && sel.timeLabel ? `${sel.dateLabel}, ${sel.timeLabel}` : null} step={2} />
+        <SummaryRow label={r.pay} value={sel.service ? t.panel.inShop(formatPrice(sel.service.price)) : null} step={3} />
       </div>
       <div className="mt-7 flex flex-wrap gap-2">
         <a href={site.phoneHref} className="flex h-11 items-center gap-2 rounded-full bg-paper px-5 text-sm font-medium text-ink hover:bg-white">
-          <Phone className="size-4" strokeWidth={1.5} /> Call to book
+          <Phone className="size-4" strokeWidth={1.5} /> {t.panel.callToBook}
         </a>
         <button type="button" onClick={onRestart} className="flex h-11 items-center gap-2 rounded-full border border-paper/30 px-5 text-sm hover:border-paper">
-          <RotateCcw className="size-4" strokeWidth={1.5} /> New booking
+          <RotateCcw className="size-4" strokeWidth={1.5} /> {t.panel.newBooking}
         </button>
       </div>
     </motion.div>

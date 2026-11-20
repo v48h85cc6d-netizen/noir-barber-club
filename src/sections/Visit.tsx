@@ -3,7 +3,8 @@ import { AnimatePresence, motion } from 'motion/react'
 import { ArrowUpRight, Plus } from 'lucide-react'
 import { useReveal } from '../hooks/useReveal'
 import { SectionLabel } from '../components/SectionLabel'
-import { dayNames, faqs, hours, site } from '../data/site'
+import { hours, site } from '../data/site'
+import { relativeDay, useI18n } from '../i18n'
 import { openStatus } from '../lib/schedule'
 
 const order = [1, 2, 3, 4, 5, 6, 0] // Monday first
@@ -13,6 +14,7 @@ export function Visit() {
   const [now, setNow] = useState(() => new Date())
   const [mapOn, setMapOn] = useState(false)
   const [faq, setFaq] = useState<number | null>(0)
+  const { t, locale, fmt } = useI18n()
   useReveal(root)
 
   useEffect(() => {
@@ -23,16 +25,22 @@ export function Visit() {
   const status = openStatus(now)
   const today = now.getDay()
   const q = encodeURIComponent(site.address.mapQuery)
+  // weekday name for a 0–6 day index, in the active language (any date on that weekday works)
+  const weekdayName = (d: number) => {
+    const name = fmt.weekday(new Date(2024, 0, 7 + d))
+    return name.charAt(0).toLocaleUpperCase(fmt.tag) + name.slice(1)
+  }
 
   return (
     <section ref={root} id="visit" className="section-y relative bg-ink text-paper">
       <div className="shell">
-        <SectionLabel index="09">Find the chair</SectionLabel>
+        <SectionLabel index="09">{t.visit.label}</SectionLabel>
 
         <div className="mt-8 overflow-hidden rounded-3xl border border-line bg-coal lg:grid lg:grid-cols-12">
           <div className="p-6 md:p-10 lg:col-span-5">
-            <h2 data-reveal="lines" className="display text-[clamp(2.4rem,5vw,4.5rem)]">
-              {site.address.walk.split(' from ')[0]} <b>from the tram.</b>
+            <h2 key={locale} data-reveal="lines" className="display text-[clamp(2.4rem,5vw,4.5rem)]">
+              {t.visit.a}
+              <b>{t.visit.b}</b>
             </h2>
             <div data-reveal="fade" className="mt-6 space-y-1 text-[0.95rem] text-paper/70">
               <p>
@@ -48,7 +56,11 @@ export function Visit() {
                 {status.open && <span className="absolute inset-0 animate-ping rounded-full bg-paper/60" />}
                 <span className="relative size-2 rounded-full bg-paper" />
               </span>
-              {status.label}
+              {status.open
+                ? t.status.openUntil(status.until)
+                : status.opens
+                  ? t.status.closedOpens(relativeDay(status.opens.offset, status.opens.date, t, fmt), status.opens.time)
+                  : t.status.closed}
             </div>
             <ul data-reveal="stagger" className="label mt-4 border-t border-line">
               {order.map((d) => {
@@ -57,10 +69,10 @@ export function Visit() {
                 return (
                   <li key={d} className={`flex items-center justify-between border-b border-line py-2.5 ${isToday ? 'text-paper' : 'text-paper/50'}`}>
                     <span>
-                      {dayNames[d]}
-                      {isToday && ' · today'}
+                      {weekdayName(d)}
+                      {isToday && t.visit.todaySuffix}
                     </span>
-                    <span className="tabular-nums">{h ? `${h.open} – ${h.close}` : 'Closed'}</span>
+                    <span className="tabular-nums">{h ? `${h.open} – ${h.close}` : t.common.closed}</span>
                   </li>
                 )
               })}
@@ -73,7 +85,7 @@ export function Visit() {
               rel="noreferrer"
               className="group/btn mt-8 inline-flex h-11 items-center gap-2 rounded-full bg-paper pl-5 pr-1.5 text-sm font-medium text-ink transition-colors hover:bg-white"
             >
-              Get directions
+              {t.visit.directions}
               <span className="grid size-8 place-items-center rounded-full bg-ink text-paper">
                 <ArrowUpRight className="size-4 transition-transform duration-500 group-hover/btn:rotate-45" strokeWidth={1.75} />
               </span>
@@ -83,17 +95,17 @@ export function Visit() {
           <div className="relative min-h-[380px] border-t border-line lg:col-span-7 lg:min-h-full lg:border-l lg:border-t-0">
             {mapOn ? (
               <iframe
-                title={`Map of ${site.address.mapQuery}`}
+                title={t.visit.mapTitle(site.address.mapQuery)}
                 src={`https://maps.google.com/maps?q=${q}&z=16&output=embed`}
                 className="absolute inset-0 h-full w-full grayscale invert-[0.9] contrast-[0.9]"
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
               />
             ) : (
-              <button type="button" onClick={() => setMapOn(true)} className="group absolute inset-0 h-full w-full overflow-hidden" aria-label="Load interactive map">
-                <StreetMap />
+              <button type="button" onClick={() => setMapOn(true)} className="group absolute inset-0 h-full w-full overflow-hidden" aria-label={t.visit.loadMap}>
+                <StreetMap transit={`${t.visit.tram} · ${site.address.transitStop}`} />
                 <span className="label absolute bottom-4 right-4 rounded-full border border-line bg-ink/80 px-3 py-2 text-paper/60 backdrop-blur transition-colors group-hover:text-paper">
-                  Tap to load map
+                  {t.visit.tapMap}
                 </span>
               </button>
             )}
@@ -104,17 +116,18 @@ export function Visit() {
         <div className="mt-16 grid gap-8 md:mt-24 lg:grid-cols-12">
           <div className="lg:col-span-4">
             <div data-reveal="fade" className="label text-paper/50">
-              Before you come
+              {t.visit.before}
             </div>
-            <h3 data-reveal="lines" className="display mt-4 text-[clamp(1.9rem,3.4vw,3rem)]">
-              Good <b>questions.</b>
+            <h3 key={locale} data-reveal="lines" className="display mt-4 text-[clamp(1.9rem,3.4vw,3rem)]">
+              {t.visit.qa}
+              <b>{t.visit.qb}</b>
             </h3>
           </div>
           <ul data-reveal="stagger" className="lg:col-span-7 lg:col-start-6">
-            {faqs.map((f, i) => {
+            {t.visit.faqs.map((f, i) => {
               const open = faq === i
               return (
-                <li key={f.q} className="border-b border-line">
+                <li key={i} className="border-b border-line">
                   <button
                     type="button"
                     onClick={() => setFaq(open ? null : i)}
@@ -150,7 +163,7 @@ export function Visit() {
 }
 
 /** Stylised street map: a lightweight placeholder until the visitor asks for Google Maps. */
-function StreetMap() {
+function StreetMap({ transit }: { transit: string }) {
   return (
     <svg className="absolute inset-0 h-full w-full text-paper" preserveAspectRatio="xMidYMid slice" viewBox="0 0 800 560" aria-hidden>
       <rect width="800" height="560" fill="#101012" />
@@ -174,7 +187,7 @@ function StreetMap() {
         <circle r="4" fill="currentColor" />
       </g>
       <text x="222" y="466" fill="currentColor" opacity="0.55" fontFamily="JetBrains Mono, monospace" fontSize="13" letterSpacing="1">
-        {site.address.transit.toUpperCase()}
+        {transit.toUpperCase()}
       </text>
       {/* shop */}
       <g transform="translate(470 300)">

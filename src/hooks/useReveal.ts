@@ -1,6 +1,7 @@
-import type { RefObject } from 'react'
+import { useRef, type RefObject } from 'react'
 import { gsap, ScrollTrigger, SplitText, useGSAP } from '../lib/gsap'
 import { useReady } from '../context/ready'
+import { useI18n } from '../i18n'
 
 /**
  * Wires declarative scroll animations inside `scope`:
@@ -9,15 +10,26 @@ import { useReady } from '../context/ready'
  *  data-reveal="stagger" – fade + rise for each direct child
  *  data-reveal="img"     – clip-path wipe with an inner image settle
  *  data-parallax="0.2"   – scrubbed vertical drift (fraction of own height)
+ *
+ * Elements using data-reveal="lines" must carry key={locale}: SplitText rewrites
+ * their DOM, so React has to remount them when the language changes. The hook
+ * re-runs on a language switch; anything already scrolled into view is shown
+ * in its final state instead of replaying its entrance.
  */
 export function useReveal(scope: RefObject<HTMLElement | null>) {
   const ready = useReady()
+  const { locale } = useI18n()
+  const hasRun = useRef(false)
 
   useGSAP(
     () => {
       if (!ready || !scope.current) return
       const root = scope.current
       const mm = gsap.matchMedia()
+      const rerun = hasRun.current
+      hasRun.current = true
+      /** On a language switch, content already seen should not animate in again. */
+      const seen = (el: Element) => rerun && el.getBoundingClientRect().top < window.innerHeight
 
       mm.add(
         { motion: '(prefers-reduced-motion: no-preference)', reduce: '(prefers-reduced-motion: reduce)' },
@@ -30,6 +42,7 @@ export function useReveal(scope: RefObject<HTMLElement | null>) {
           }
 
           root.querySelectorAll<HTMLElement>('[data-reveal="lines"]').forEach((el) => {
+            if (seen(el)) return
             SplitText.create(el, {
               type: 'lines',
               mask: 'lines',
@@ -46,6 +59,7 @@ export function useReveal(scope: RefObject<HTMLElement | null>) {
           })
 
           root.querySelectorAll<HTMLElement>('[data-reveal="fade"]').forEach((el) => {
+            if (seen(el)) return void gsap.set(el, { opacity: 1, y: 0 })
             gsap.fromTo(
               el,
               { opacity: 0, y: 40 },
@@ -60,6 +74,7 @@ export function useReveal(scope: RefObject<HTMLElement | null>) {
           })
 
           root.querySelectorAll<HTMLElement>('[data-reveal="stagger"]').forEach((el) => {
+            if (seen(el)) return void gsap.set(el.children, { opacity: 1, y: 0 })
             gsap.fromTo(
               el.children,
               { opacity: 0, y: 50 },
@@ -74,6 +89,7 @@ export function useReveal(scope: RefObject<HTMLElement | null>) {
           })
 
           root.querySelectorAll<HTMLElement>('[data-reveal="img"]').forEach((el) => {
+            if (seen(el)) return
             const inner = el.querySelector('img, [data-img-fallback]')
             const tl = gsap.timeline({ scrollTrigger: { trigger: el, start: 'top 90%', once: true } })
             tl.fromTo(
@@ -104,6 +120,6 @@ export function useReveal(scope: RefObject<HTMLElement | null>) {
       window.addEventListener('load', refresh)
       return () => window.removeEventListener('load', refresh)
     },
-    { scope, dependencies: [ready] },
+    { scope, dependencies: [ready, locale] },
   )
 }

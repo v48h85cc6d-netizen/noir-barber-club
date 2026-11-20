@@ -7,6 +7,7 @@ import { SectionLabel } from '../components/SectionLabel'
 import { Img } from '../components/Img'
 import { serviceCategories, services, type ServiceCategory } from '../data/content'
 import { formatPrice } from '../data/site'
+import { useI18n } from '../i18n'
 
 type Filter = 'All' | ServiceCategory
 const filters: Filter[] = ['All', ...serviceCategories]
@@ -14,6 +15,7 @@ const filters: Filter[] = ['All', ...serviceCategories]
 export function Services() {
   const root = useRef<HTMLElement>(null)
   const { bookService } = useBooking()
+  const { t, locale } = useI18n()
   const [filter, setFilter] = useState<Filter>('All')
   const [hovered, setHovered] = useState<string | null>(null)
   useReveal(root)
@@ -38,18 +40,18 @@ export function Services() {
       }}
     >
       <div className="shell">
-        <SectionLabel index="04">The menu</SectionLabel>
+        <SectionLabel index="04">{t.services.label}</SectionLabel>
         <div className="mt-8 grid gap-6 md:grid-cols-12 md:items-end">
-          <h2 data-reveal="lines" className="display text-[clamp(2.6rem,6.4vw,6rem)] md:col-span-8">
-            Fixed prices. <b>No surprises.</b>
+          <h2 key={locale} data-reveal="lines" className="display text-[clamp(2.6rem,6.4vw,6rem)] md:col-span-8">
+            {t.services.a}
+            <b>{t.services.b}</b>
           </h2>
           <p data-reveal="fade" className="max-w-sm text-sm leading-relaxed text-ink/60 md:col-span-4">
-            Every price includes a consultation, the wash and a hot towel on the neck. What you see is what you pay at the
-            chair.
+            {t.services.body}
           </p>
         </div>
 
-        <div data-reveal="fade" role="tablist" aria-label="Filter services" className="no-scrollbar -mx-4 mt-10 flex gap-1.5 overflow-x-auto px-4 md:mx-0 md:mt-14 md:px-0">
+        <div data-reveal="fade" role="tablist" aria-label={t.services.filter} className="no-scrollbar -mx-4 mt-10 flex gap-1.5 overflow-x-auto px-4 md:mx-0 md:mt-14 md:px-0">
           {filters.map((f) => (
             <button
               key={f}
@@ -65,7 +67,7 @@ export function Services() {
                 <motion.span layoutId="svc-tab" className="absolute inset-0 -z-0 rounded-full bg-ink" transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }} />
               )}
               <span className="relative">
-                {f}
+                {f === 'All' ? t.services.all : t.steps.categories[f]}
                 <span className="ml-1.5 opacity-50">
                   {f === 'All' ? services.length : services.filter((s) => s.category === f).length}
                 </span>
@@ -102,20 +104,24 @@ export function Services() {
                     </span>
                     <span className="md:col-span-5">
                       <span className="block text-[clamp(1.15rem,2.2vw,1.9rem)] font-bold leading-tight tracking-[-0.02em] [font-stretch:122%]">
-                        {s.name}
+                        {t.services.items[s.id].name}
                       </span>
-                      <span className="mt-1 block text-sm text-ink/55">{s.description}</span>
+                      <span className="mt-1 block text-sm text-ink/55">{t.services.items[s.id].description}</span>
                     </span>
-                    <span className="label hidden text-ink/50 md:col-span-2 md:block md:text-right">{s.duration} min</span>
+                    <span className="label hidden text-ink/50 md:col-span-2 md:block md:text-right">
+                      {s.duration} {t.common.min}
+                    </span>
                     <span className="text-right md:col-span-2">
                       <span className="block text-[clamp(1.2rem,2.2vw,1.9rem)] font-bold tabular-nums [font-stretch:122%]">
                         {formatPrice(s.price)}
                       </span>
-                      <span className="label block text-ink/45 md:hidden">{s.duration} min</span>
+                      <span className="label block text-ink/45 md:hidden">
+                        {s.duration} {t.common.min}
+                      </span>
                     </span>
                     <span className="hidden justify-end md:col-span-2 md:flex">
                       <span className="flex h-9 items-center gap-1.5 rounded-full border border-ink/20 px-4 text-sm transition-colors duration-300 group-hover/row:border-ink group-hover/row:bg-ink group-hover/row:text-paper">
-                        Book <ArrowUpRight className="size-3.5" strokeWidth={1.75} />
+                        {t.services.book} <ArrowUpRight className="size-3.5" strokeWidth={1.75} />
                       </span>
                     </span>
                   </button>

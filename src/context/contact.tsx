@@ -1,7 +1,8 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react'
 import { scrollToId } from '../lib/scroll'
 
-export const SUBJECTS = ['General question', 'Membership', 'Gift card', 'Events & groups', 'Press'] as const
+/** Subject ids; labels come from the dictionaries (contact.subjects). */
+export const SUBJECTS = ['general', 'membership', 'gift', 'events', 'press'] as const
 export type Subject = (typeof SUBJECTS)[number]
 
 interface Prefill {

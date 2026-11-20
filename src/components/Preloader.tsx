@@ -1,11 +1,14 @@
 import { useRef } from 'react'
 import { gsap, useGSAP, prefersReducedMotion } from '../lib/gsap'
 import { Wordmark } from './Logo'
+import { useI18n } from '../i18n'
+import { site } from '../data/site'
 
 /** Intro curtain: wordmark wipes in, counter runs, curtain lifts. */
 export function Preloader({ onDone }: { onDone: () => void }) {
   const root = useRef<HTMLDivElement>(null)
   const count = useRef<HTMLSpanElement>(null)
+  const { t } = useI18n()
 
   useGSAP(
     () => {
@@ -49,8 +52,10 @@ export function Preloader({ onDone }: { onDone: () => void }) {
       aria-hidden
     >
       <div className="flex justify-between">
-        <span data-pl-meta className="label opacity-60">Barber club</span>
-        <span data-pl-meta className="label opacity-60">Est. 2016</span>
+        <span data-pl-meta className="label opacity-60">{t.preloader.club}</span>
+        <span data-pl-meta className="label opacity-60">
+          {t.preloader.est} {site.established}
+        </span>
       </div>
       <div className="overflow-hidden">
         <div data-pl-mark>
@@ -58,7 +63,7 @@ export function Preloader({ onDone }: { onDone: () => void }) {
         </div>
       </div>
       <div className="flex items-end justify-between">
-        <span data-pl-meta className="label opacity-60">Loading the chair</span>
+        <span data-pl-meta className="label opacity-60">{t.preloader.loading}</span>
         <span ref={count} data-pl-meta className="label text-2xl tabular-nums md:text-3xl">
           000
         </span>

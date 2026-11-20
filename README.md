@@ -21,7 +21,8 @@ src/
   context/     Booking state, contact-form prefill, preloader "ready" flag
   hooks/       useReveal: declarative scroll animations (data-reveal="lines|fade|stagger|img", data-parallax)
   lib/         GSAP setup, demo scheduling/availability, scroll helper
-  data/        site.ts (address, phone, hours, socials) and content.ts (services, barbers, plans, reviews, gallery)
+  data/        site.ts (address, phone, hours, socials) and content.ts (prices, durations, images, schedules)
+  i18n/        en.ts (source + Dict type), de.ts, sq.ts, and the I18nProvider / useI18n hook
 ```
 
 ## Placeholders to replace
@@ -42,3 +43,14 @@ src/
 ## Design notes
 
 The visual language (light-grey and near-black sections, sentence-case extra-wide headings mixing light and bold weights, monospace labels, pill buttons, slide-in booking panel) follows a reference reel supplied by the client. That reel shows another studio's concept site for a different brand. Only the design language was adopted. All copy, the brand, the logo and the photography here are NOIR's own or temporary stock.
+
+## Languages (EN / DE / SQ)
+
+- **Every visible string** lives in `src/i18n/en.ts`, `de.ts` and `sq.ts`. English defines the shape (`Dict`); TypeScript refuses to build if German or Albanian is missing a key or has an extra one.
+- **Components** read text with `const { t, locale, fmt } = useI18n()`. `fmt` formats dates and numbers for the active language.
+  - Albanian has a built-in calendar fallback, because Chromium ships without Albanian locale data.
+- **Data files hold no copy.** Services, barbers, plans, gallery and reviews are matched to their text by id. A new service needs an entry in all three dictionaries.
+- **Default and memory:** English for first-time visitors. The choice is saved in `localStorage` (`noir.locale`) and applied instantly, with no reload. A `?lang=de` / `?lang=sq` link opens in that language.
+- **Switcher:** a segmented SQ · DE · EN control in the desktop nav (1280px and up), a compact dropdown in the header below that, and a large switcher in the mobile menu.
+- **Animated headlines:** headings with `data-reveal="lines"` must carry `key={locale}`. The split-text animation rewrites their DOM, so they have to remount on a language switch.
+- **German** uses the informal "du"; **Albanian** uses the polite "ju".

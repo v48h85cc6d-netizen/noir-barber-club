@@ -5,6 +5,7 @@ import { useReveal } from '../hooks/useReveal'
 import { SectionLabel } from '../components/SectionLabel'
 import { reviews } from '../data/content'
 import { site } from '../data/site'
+import { useI18n } from '../i18n'
 
 const ease = [0.16, 1, 0.3, 1] as const
 
@@ -12,23 +13,24 @@ export function Reviews() {
   const root = useRef<HTMLElement>(null)
   const [index, setIndex] = useState(0)
   const [dir, setDir] = useState(1)
+  const { t, fmt } = useI18n()
   useReveal(root)
 
   const go = (d: number) => {
     setDir(d)
     setIndex((i) => (i + d + reviews.length) % reviews.length)
   }
-  const r = reviews[index]
+  const r = { ...reviews[index], ...t.reviews.items[index] }
 
   return (
     <section ref={root} id="reviews" className="section-y relative overflow-hidden bg-paper text-ink">
       <div className="shell">
-        <SectionLabel index="08">Reviews</SectionLabel>
+        <SectionLabel index="08">{t.reviews.label}</SectionLabel>
 
         <div className="mt-8 grid items-center gap-10 lg:grid-cols-12 lg:gap-6">
           <div data-reveal="fade" className="lg:col-span-5">
             <div className="display text-[clamp(7rem,22vw,17rem)] font-[200] leading-[0.85] tracking-[-0.06em] tabular-nums">
-              {site.rating.score}
+              {fmt.number(site.rating.score)}
             </div>
             <div className="label mt-4 flex flex-wrap items-center gap-2 text-ink/55">
               <span className="flex gap-0.5">
@@ -36,9 +38,9 @@ export function Reviews() {
                   <Star key={i} className="size-3 fill-ink text-ink" />
                 ))}
               </span>
-              {site.rating.count.toLocaleString('en-GB')} {site.rating.source} reviews
+              {t.reviews.count(fmt.number(site.rating.count), site.rating.source)}
             </div>
-            {site.demoContent && <div className="mt-2 text-xs text-ink/45">Sample rating and reviews</div>}
+            {site.demoContent && <div className="mt-2 text-xs text-ink/45">{t.reviews.sample}</div>}
           </div>
 
           {/* Review deck */}
@@ -81,7 +83,7 @@ export function Reviews() {
                 <button
                   type="button"
                   onClick={() => go(-1)}
-                  aria-label="Previous review"
+                  aria-label={t.reviews.prev}
                   className="grid size-11 place-items-center rounded-full border border-ink/20 transition-colors hover:border-ink"
                 >
                   <ArrowLeft className="size-4" strokeWidth={1.5} />
@@ -89,10 +91,10 @@ export function Reviews() {
                 <button
                   type="button"
                   onClick={() => go(1)}
-                  aria-label="Next review"
+                  aria-label={t.reviews.nextAria}
                   className="flex h-11 items-center gap-2 rounded-full bg-ink pl-5 pr-1.5 text-sm text-paper transition-colors hover:bg-black"
                 >
-                  Next
+                  {t.reviews.next}
                   <span className="grid size-8 place-items-center rounded-full bg-paper text-ink">
                     <ArrowRight className="size-4" strokeWidth={1.75} />
                   </span>

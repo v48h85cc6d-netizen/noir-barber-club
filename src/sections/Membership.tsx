@@ -7,12 +7,14 @@ import { SectionLabel } from '../components/SectionLabel'
 import { Button } from '../components/Button'
 import { plans } from '../data/content'
 import { formatPrice } from '../data/site'
+import { useI18n } from '../i18n'
 
 const ANNUAL_DISCOUNT = 0.15
 
 export function Membership() {
   const root = useRef<HTMLElement>(null)
   const { contactAbout } = useContact()
+  const { t, locale } = useI18n()
   const [annual, setAnnual] = useState(false)
   useReveal(root)
 
@@ -21,16 +23,17 @@ export function Membership() {
       <div className="shell">
         <div className="flex flex-col justify-between gap-10 md:flex-row md:items-end">
           <div>
-            <SectionLabel index="07">Membership</SectionLabel>
-            <h2 data-reveal="lines" className="display mt-8 text-[clamp(2.6rem,6.4vw,6rem)]">
-              Always sharp. <b>Never think about it.</b>
+            <SectionLabel index="07">{t.membership.label}</SectionLabel>
+            <h2 key={locale} data-reveal="lines" className="display mt-8 text-[clamp(2.6rem,6.4vw,6rem)]">
+              {t.membership.a}
+              <b>{t.membership.b}</b>
             </h2>
           </div>
           <div data-reveal="fade" className="flex flex-col gap-5 md:items-end">
             <p className="max-w-sm leading-relaxed text-ink/65 md:text-right">
-              One monthly fee, always sharp. Cancel or pause any time after your first three months.
+              {t.membership.body}
             </p>
-            <div className="relative inline-flex rounded-full border border-ink/20 p-1" role="radiogroup" aria-label="Billing period">
+            <div className="relative inline-flex rounded-full border border-ink/20 p-1" role="radiogroup" aria-label={t.membership.billing}>
               {(['Monthly', 'Annual'] as const).map((p) => {
                 const on = (p === 'Annual') === annual
                 return (
@@ -49,7 +52,7 @@ export function Membership() {
                         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                       />
                     )}
-                    {p}
+                    {p === 'Annual' ? t.membership.annual : t.membership.monthly}
                     {p === 'Annual' && <span className="ml-2 opacity-60">−15%</span>}
                   </button>
                 )
@@ -62,6 +65,7 @@ export function Membership() {
           {plans.map((p, idx) => {
             const price = annual ? Math.round(p.monthly * (1 - ANNUAL_DISCOUNT)) : p.monthly
             const dark = p.featured
+            const copy = t.membership.plans[p.id]
             return (
               <article
                 key={p.id}
@@ -77,11 +81,11 @@ export function Membership() {
                   <h3 className="label opacity-60">{p.name}</h3>
                   {dark && (
                     <span className="label absolute -top-3 right-6 rotate-[4deg] rounded-full bg-paper px-3 py-1.5 text-ink shadow">
-                      Most chosen
+                      {t.membership.mostChosen}
                     </span>
                   )}
                 </div>
-                <p className={`mt-3 text-lg font-medium [font-stretch:112%] ${dark ? 'text-paper/80' : 'text-ink/75'}`}>{p.tagline}</p>
+                <p className={`mt-3 text-lg font-medium [font-stretch:112%] ${dark ? 'text-paper/80' : 'text-ink/75'}`}>{copy.tagline}</p>
 
                 <div className="mt-10 flex items-end gap-2">
                   <motion.span
@@ -93,14 +97,14 @@ export function Membership() {
                   >
                     {formatPrice(price)}
                   </motion.span>
-                  <span className={`label mb-2 ${dark ? 'text-paper/50' : 'text-ink/50'}`}>/ month</span>
+                  <span className={`label mb-2 ${dark ? 'text-paper/50' : 'text-ink/50'}`}>{t.membership.perMonth}</span>
                 </div>
                 <p className={`label mt-2 ${dark ? 'text-paper/50' : 'text-ink/50'}`}>
-                  {annual ? `Billed ${formatPrice(price * 12)} yearly` : 'Billed monthly'} · saves ~{formatPrice(p.saving)}/mo
+                  {annual ? t.membership.billedYearly(formatPrice(price * 12)) : t.membership.billedMonthly} · {t.membership.saves(formatPrice(p.saving))}
                 </p>
 
                 <ul className={`mt-8 flex-1 space-y-3.5 border-t pt-8 ${dark ? 'border-paper/15' : 'border-ink/12'}`}>
-                  {p.features.map((f) => (
+                  {copy.features.map((f) => (
                     <li key={f} className="flex items-start gap-3 text-[0.95rem]">
                       <Check className="mt-0.5 size-4 shrink-0" strokeWidth={1.5} />
                       {f}
@@ -113,20 +117,17 @@ export function Membership() {
                   size="lg"
                   className="mt-10 w-full"
                   onClick={() =>
-                    contactAbout(
-                      'Membership',
-                      `I'd like to join the ${p.name} membership (${annual ? 'annual' : 'monthly'} billing, ${formatPrice(price)}/month). Please get in touch to set it up.`,
-                    )
+                    contactAbout('membership', t.membership.request(p.name, annual, formatPrice(price)))
                   }
                 >
-                  Join {p.name}
+                  {t.membership.join(p.name)}
                 </Button>
               </article>
             )
           })}
         </div>
         <p data-reveal="fade" className="mt-6 text-center text-xs text-ink/45">
-          Memberships are set up in person or by email for now — joining sends us a request, no payment is taken online.
+          {t.membership.footnote}
         </p>
       </div>
     </section>

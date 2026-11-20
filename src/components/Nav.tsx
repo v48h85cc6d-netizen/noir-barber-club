@@ -5,12 +5,15 @@ import { Wordmark } from './Logo'
 import { RollText } from './Button'
 import { ArrowUpRight } from 'lucide-react'
 import { useBooking } from '../context/booking'
+import { useI18n } from '../i18n'
+import { LanguageDropdown, LanguageSegmented } from './LanguageSwitcher'
 import { scrollToId } from '../lib/scroll'
 
 const ease = [0.16, 1, 0.3, 1] as const
 
 export function Nav() {
   const { open: openBooking } = useBooking()
+  const { t } = useI18n()
   const [menu, setMenu] = useState(false)
   const [hidden, setHidden] = useState(false)
   const { scrollY } = useScroll()
@@ -47,7 +50,7 @@ export function Nav() {
           go('top')
         }}
         className="fixed left-4 top-5 z-50 block w-[88px] text-white mix-blend-difference md:left-8 md:top-7 md:w-[104px] xl:left-12"
-        aria-label={`${site.name} — home`}
+        aria-label={`${site.name} — ${t.nav.home}`}
         animate={{ y: hidden && !menu ? -90 : 0 }}
         transition={{ duration: 0.7, ease }}
       >
@@ -59,9 +62,9 @@ export function Nav() {
         animate={{ y: hidden && !menu ? '-110%' : '0%' }}
         transition={{ duration: 0.7, ease }}
       >
-        <nav className="shell flex h-16 items-center justify-end md:h-20 lg:justify-between" aria-label="Main">
-          <span className="hidden w-[104px] lg:block" aria-hidden />
-          <ul className="pointer-events-auto hidden items-center gap-1 rounded-full border border-white/10 bg-ink/70 p-1 text-paper backdrop-blur-md lg:flex">
+        <nav className="shell flex h-16 items-center justify-end md:h-20 xl:justify-between" aria-label={t.nav.main}>
+          <span className="hidden w-[104px] xl:block" aria-hidden />
+          <ul className="pointer-events-auto hidden items-center gap-1 rounded-full border border-white/10 bg-ink/70 p-1 text-paper backdrop-blur-md xl:flex">
             {navLinks.map((l) => (
               <li key={l.href}>
                 <a
@@ -72,13 +75,15 @@ export function Nav() {
                   }}
                   className="group/link block rounded-full px-3.5 py-2 text-[0.8rem] text-paper/75 transition-colors hover:bg-white/10 hover:text-paper xl:px-4"
                 >
-                  <RollText>{l.label}</RollText>
+                  <RollText>{t.nav.links[l.key]}</RollText>
                 </a>
               </li>
             ))}
           </ul>
 
           <div className="pointer-events-auto flex items-center gap-2">
+            <LanguageSegmented className="hidden xl:flex" />
+            <LanguageDropdown className="xl:hidden" />
             <button
               type="button"
               onClick={() => {
@@ -87,7 +92,7 @@ export function Nav() {
               }}
               className="group/btn flex h-10 items-center gap-2 rounded-full bg-paper pl-4 pr-1 text-sm font-medium text-ink shadow-[0_8px_24px_-12px_rgba(0,0,0,0.6)] transition-colors hover:bg-white md:h-11 md:pl-5 md:pr-1.5"
             >
-              <RollText>Book</RollText>
+              <RollText>{t.nav.book}</RollText>
               <span className="grid size-8 place-items-center rounded-full bg-ink text-paper">
                 <ArrowUpRight className="size-4 transition-transform duration-500 group-hover/btn:rotate-45" strokeWidth={1.75} />
               </span>
@@ -97,8 +102,8 @@ export function Nav() {
               onClick={() => setMenu((m) => !m)}
               aria-expanded={menu}
               aria-controls="mobile-menu"
-              aria-label={menu ? 'Close menu' : 'Open menu'}
-              className="relative grid size-10 place-items-center rounded-full border border-white/10 bg-ink/70 text-paper backdrop-blur-md lg:hidden"
+              aria-label={menu ? t.nav.closeMenu : t.nav.openMenu}
+              className="relative grid size-10 place-items-center rounded-full border border-white/10 bg-ink/70 text-paper backdrop-blur-md xl:hidden"
             >
               <span
                 className={`absolute h-px w-4 bg-paper transition-transform duration-500 ease-[var(--ease-expo)] ${
@@ -119,7 +124,7 @@ export function Nav() {
         {menu && (
           <motion.div
             id="mobile-menu"
-            className="fixed inset-0 z-40 flex flex-col bg-ink pt-20 text-paper lg:hidden"
+            className="fixed inset-0 z-40 flex flex-col bg-ink pt-20 text-paper xl:hidden"
             initial={{ clipPath: 'inset(0 0 100% 0)' }}
             animate={{ clipPath: 'inset(0 0 0% 0)' }}
             exit={{ clipPath: 'inset(0 0 100% 0)' }}
@@ -140,7 +145,7 @@ export function Nav() {
                     exit={{ y: '110%' }}
                     transition={{ duration: 0.8, ease, delay: 0.25 + i * 0.05 }}
                   >
-                    <span className="display text-[clamp(2rem,9vw,3.75rem)] font-bold">{l.label}</span>
+                    <span className="display text-[clamp(1.75rem,8.4vw,3.75rem)] font-bold">{t.nav.links[l.key]}</span>
                     <span className="label opacity-40">0{i + 1}</span>
                   </motion.a>
                 </li>
@@ -152,6 +157,7 @@ export function Nav() {
               animate={{ opacity: 1, transition: { delay: 0.6 } }}
               exit={{ opacity: 0 }}
             >
+              <LanguageSegmented size="lg" className="mb-6 self-start" />
               <a href={site.phoneHref}>{site.phone}</a>
               <a href={`mailto:${site.email}`}>{site.email}</a>
               <span>

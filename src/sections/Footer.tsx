@@ -12,6 +12,7 @@ import { navLinks, site } from '../data/site'
 import { scrollToId } from '../lib/scroll'
 import { nextFreeChair } from '../lib/schedule'
 import { useBooking } from '../context/booking'
+import { relativeDay, useI18n, type Dict } from '../i18n'
 
 interface Form {
   name: string
@@ -20,13 +21,13 @@ interface Form {
   message: string
 }
 const YEAR = new Date().getFullYear()
-const empty: Form = { name: '', email: '', subject: 'General question', message: '' }
+const empty: Form = { name: '', email: '', subject: 'general', message: '' }
 
-function validate(f: Form) {
+function validate(f: Form, t: Dict) {
   const e: Partial<Record<keyof Form, string>> = {}
-  if (f.name.trim().length < 2) e.name = 'Please enter your name'
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(f.email.trim())) e.email = 'Enter a valid email address'
-  if (f.message.trim().length < 10) e.message = 'A few more words, please (10+ characters)'
+  if (f.name.trim().length < 2) e.name = t.contact.errors.name
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(f.email.trim())) e.email = t.contact.errors.email
+  if (f.message.trim().length < 10) e.message = t.contact.errors.message
   return e
 }
 
@@ -35,6 +36,7 @@ export function Footer() {
   const ready = useReady()
   const { prefill } = useContact()
   const { open } = useBooking()
+  const { t, locale, fmt } = useI18n()
   const [next] = useState(() => nextFreeChair())
   const [form, setForm] = useState<Form>(empty)
   const [tried, setTried] = useState(false)
@@ -64,7 +66,7 @@ export function Footer() {
     { scope: root, dependencies: [ready] },
   )
 
-  const errors = validate(form)
+  const errors = validate(form, t)
   const set = <K extends keyof Form>(k: K, v: Form[K]) => setForm((f) => ({ ...f, [k]: v }))
   const err = (k: keyof Form) => tried && errors[k]
 
@@ -73,20 +75,22 @@ export function Footer() {
       {/* Closing call to action */}
       <div className="shell">
         <div className="flex flex-col items-start justify-between gap-6 border-y border-line py-10 md:flex-row md:items-center md:py-14">
-          <p data-reveal="lines" className="display text-[clamp(1.9rem,4.4vw,4rem)]">
+          <p key={locale} data-reveal="lines" className="display text-[clamp(1.9rem,4.4vw,4rem)]">
             {next ? (
               <>
-                The next chair is free <b>{next.when} at {next.time}.</b>
+                {t.contact.ctaA}
+                <b>{t.contact.ctaB(relativeDay(next.offset, next.date, t, fmt), next.time)}</b>
               </>
             ) : (
               <>
-                Your chair <b>is waiting.</b>
+                {t.contact.waitingA}
+                <b>{t.contact.waitingB}</b>
               </>
             )}
           </p>
           <div data-reveal="fade" className="shrink-0">
             <Button variant="light" size="lg" onClick={open}>
-              Book a chair
+              {t.common.bookChair}
             </Button>
           </div>
         </div>
@@ -94,25 +98,26 @@ export function Footer() {
 
       <div className="shell grid gap-14 pt-20 md:pt-28 lg:grid-cols-12 lg:gap-8">
         <div className="lg:col-span-5">
-          <SectionLabel index="10">Contact</SectionLabel>
-          <h2 data-reveal="lines" className="display mt-8 text-[clamp(2.6rem,6.4vw,6rem)]">
-            Say <b>hello.</b>
+          <SectionLabel index="10">{t.contact.label}</SectionLabel>
+          <h2 key={locale} data-reveal="lines" className="display mt-8 text-[clamp(2.6rem,6.4vw,6rem)]">
+            {t.contact.a}
+            <b>{t.contact.b}</b>
           </h2>
           <div data-reveal="stagger" className="mt-10 space-y-6 text-lg">
             <div>
-              <div className="label mb-2 text-paper/45">Call</div>
+              <div className="label mb-2 text-paper/45">{t.contact.call}</div>
               <a href={site.phoneHref} className="hover:underline">
                 {site.phone}
               </a>
             </div>
             <div>
-              <div className="label mb-2 text-paper/45">Email</div>
+              <div className="label mb-2 text-paper/45">{t.contact.email}</div>
               <a href={`mailto:${site.email}`} className="break-all hover:underline">
                 {site.email}
               </a>
             </div>
             <div>
-              <div className="label mb-2 text-paper/45">Visit</div>
+              <div className="label mb-2 text-paper/45">{t.contact.visit}</div>
               <p>
                 {site.address.street}, {site.address.city}
               </p>
@@ -135,13 +140,13 @@ export function Footer() {
                 <span className="grid size-12 place-items-center rounded-full bg-paper text-ink">
                   <Check className="size-5" />
                 </span>
-                <h3 className="display mt-6 text-4xl">Thanks, {form.name.split(' ')[0]}.</h3>
+                <h3 className="display mt-6 text-4xl">{t.contact.thanks(form.name.split(' ')[0])}</h3>
                 <p className="mt-4 max-w-md leading-relaxed text-paper/60">
-                  The contact form is in preview mode, so this message wasn’t sent. For now, please email{' '}
-                  <a className="underline" href={`mailto:${site.email}?subject=${encodeURIComponent(form.subject)}&body=${encodeURIComponent(form.message)}`}>
+                  {t.contact.sentA}{' '}
+                  <a className="underline" href={`mailto:${site.email}?subject=${encodeURIComponent(t.contact.subjects[form.subject])}&body=${encodeURIComponent(form.message)}`}>
                     {site.email}
                   </a>{' '}
-                  — that link opens your mail app with your message filled in.
+                  {t.contact.sentB}
                 </p>
                 <button
                   type="button"
@@ -152,7 +157,7 @@ export function Footer() {
                   }}
                   className="label mt-8 underline underline-offset-4"
                 >
-                  Write another message
+                  {t.contact.another}
                 </button>
               </motion.div>
             ) : (
@@ -170,25 +175,27 @@ export function Footer() {
                 className="grid gap-8 sm:grid-cols-2"
               >
                 <label className="block">
-                  <span className="label text-paper/50">Name</span>
+                  <span className="label text-paper/50">{t.contact.name}</span>
                   <input className="field" autoComplete="name" value={form.name} onChange={(e) => set('name', e.target.value)} aria-invalid={err('name') ? true : undefined} />
                   {err('name') && <span className="mt-2 block text-xs text-[#e58a7e]">{errors.name}</span>}
                 </label>
                 <label className="block">
-                  <span className="label text-paper/50">Email</span>
+                  <span className="label text-paper/50">{t.contact.email}</span>
                   <input className="field" type="email" autoComplete="email" value={form.email} onChange={(e) => set('email', e.target.value)} aria-invalid={err('email') ? true : undefined} />
                   {err('email') && <span className="mt-2 block text-xs text-[#e58a7e]">{errors.email}</span>}
                 </label>
                 <label className="block sm:col-span-2">
-                  <span className="label text-paper/50">Subject</span>
+                  <span className="label text-paper/50">{t.contact.subject}</span>
                   <select className="field" value={form.subject} onChange={(e) => set('subject', e.target.value as Subject)}>
                     {SUBJECTS.map((s) => (
-                      <option key={s}>{s}</option>
+                      <option key={s} value={s}>
+                        {t.contact.subjects[s]}
+                      </option>
                     ))}
                   </select>
                 </label>
                 <label className="block sm:col-span-2">
-                  <span className="label text-paper/50">Message</span>
+                  <span className="label text-paper/50">{t.contact.message}</span>
                   <textarea
                     className="field resize-none"
                     rows={4}
@@ -200,9 +207,9 @@ export function Footer() {
                   {err('message') && <span className="mt-2 block text-xs text-[#e58a7e]">{errors.message}</span>}
                 </label>
                 <div className="flex flex-wrap items-center justify-between gap-4 sm:col-span-2">
-                  <p className="max-w-xs text-xs text-paper/40">Preview mode: messages aren’t delivered yet.</p>
+                  <p className="max-w-xs text-xs text-paper/40">{t.contact.previewNote}</p>
                   <Button type="submit" variant="light" size="lg">
-                    Send message
+                    {t.contact.send}
                   </Button>
                 </div>
               </motion.form>
@@ -215,21 +222,21 @@ export function Footer() {
       <div className="shell mt-24 md:mt-36">
         <div className="grid grid-cols-2 gap-8 border-t border-line pt-10 md:grid-cols-4">
           <div>
-            <div className="label mb-4 text-paper/40">Explore</div>
+            <div className="label mb-4 text-paper/40">{t.footer.explore}</div>
             <ul className="space-y-2.5 text-sm">
               {navLinks.slice(0, 4).map((l) => (
                 <li key={l.href}>
                   <a href={l.href} onClick={(e) => { e.preventDefault(); scrollToId(l.href) }} className="text-paper/70 hover:text-paper">
-                    {l.label}
+                    {t.nav.links[l.key]}
                   </a>
                 </li>
               ))}
             </ul>
           </div>
           <div>
-            <div className="label mb-4 text-paper/40">Club</div>
+            <div className="label mb-4 text-paper/40">{t.footer.club}</div>
             <ul className="space-y-2.5 text-sm">
-              {[...navLinks.slice(4), { label: 'Book now', href: '#book' }].map((l) => (
+              {[...navLinks.slice(4).map((l) => ({ label: t.nav.links[l.key], href: l.href })), { label: t.footer.bookNow, href: '#book' }].map((l) => (
                 <li key={l.href}>
                   <a href={l.href} onClick={(e) => { e.preventDefault(); scrollToId(l.href) }} className="text-paper/70 hover:text-paper">
                     {l.label}
@@ -239,7 +246,7 @@ export function Footer() {
             </ul>
           </div>
           <div>
-            <div className="label mb-4 text-paper/40">Follow</div>
+            <div className="label mb-4 text-paper/40">{t.footer.follow}</div>
             <ul className="space-y-2.5 text-sm">
               {site.socials.map((s) => (
                 <li key={s.label}>
@@ -256,7 +263,7 @@ export function Footer() {
               onClick={() => scrollToId('top')}
               className="group label flex items-center gap-3 text-paper/70 hover:text-paper"
             >
-              Back to top
+              {t.footer.top}
               <span className="grid size-10 place-items-center rounded-full border border-line transition-transform duration-500 group-hover:-translate-y-1">
                 <ArrowUp className="size-4" strokeWidth={1.5} />
               </span>
@@ -271,7 +278,7 @@ export function Footer() {
         </div>
         <div className="label mt-8 flex flex-col justify-between gap-3 text-paper/35 sm:flex-row">
           <span>© {YEAR} {site.name}</span>
-          <span>{site.demoContent ? 'Demo content — address, team, prices and reviews are placeholders' : 'Precision, quietly done.'}</span>
+          <span>{site.demoContent ? t.footer.demo : t.footer.tagline}</span>
         </div>
       </div>
     </footer>

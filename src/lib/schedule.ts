@@ -91,22 +91,23 @@ export function assignBarber(date: Date, time: string, duration: number) {
 
 export const endTime = (time: string, duration: number) => toTime(toMin(time) + duration)
 
-export function openStatus(now = new Date()) {
+export type OpenStatus =
+  | { open: true; until: string }
+  | { open: false; opens: { offset: number; date: Date; time: string } | null }
+
+/** Whether the shop is open now, and if not, when it next opens. Formatted by the UI per language. */
+export function openStatus(now = new Date()): OpenStatus {
   const day = hours[now.getDay()]
   const min = now.getHours() * 60 + now.getMinutes()
-  if (day && min >= toMin(day.open) && min < toMin(day.close)) {
-    return { open: true, label: `Open now · until ${day.close}` }
-  }
-  // find next opening
+  if (day && min >= toMin(day.open) && min < toMin(day.close)) return { open: true, until: day.close }
   for (let i = 0; i < 8; i++) {
     const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i)
     const h = hours[d.getDay()]
     if (!h) continue
     if (i === 0 && min >= toMin(h.open)) continue
-    const when = i === 0 ? 'today' : i === 1 ? 'tomorrow' : d.toLocaleDateString('en-GB', { weekday: 'long' })
-    return { open: false, label: `Closed · opens ${when} at ${h.open}` }
+    return { open: false, opens: { offset: i, date: d, time: h.open } }
   }
-  return { open: false, label: 'Closed' }
+  return { open: false, opens: null }
 }
 
 /** Earliest free demo slot from now (any barber, standard 45 min cut). */
@@ -114,10 +115,7 @@ export function nextFreeChair(now = new Date()) {
   for (let i = 0; i < 8; i++) {
     const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i)
     const slot = getSlots('any', d, 45, now).find((s) => s.available)
-    if (slot) {
-      const when = i === 0 ? 'today' : i === 1 ? 'tomorrow' : d.toLocaleDateString('en-GB', { weekday: 'long' })
-      return { when, time: slot.time }
-    }
+    if (slot) return { offset: i, date: d, time: slot.time }
   }
   return null
 }

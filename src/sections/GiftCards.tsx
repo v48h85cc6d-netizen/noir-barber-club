@@ -8,12 +8,14 @@ import { Wordmark } from '../components/Logo'
 import { Button } from '../components/Button'
 import { Modal } from '../components/Modal'
 import { formatPrice, site } from '../data/site'
+import { useI18n } from '../i18n'
 
 const amounts = [50, 75, 100, 150, 250]
 
 export function GiftCards() {
   const root = useRef<HTMLElement>(null)
   const { contactAbout } = useContact()
+  const { t, locale } = useI18n()
   useReveal(root)
 
   const [amount, setAmount] = useState(100)
@@ -43,9 +45,10 @@ export function GiftCards() {
     <section ref={root} id="gift-cards" className="section-y relative overflow-hidden bg-ink text-paper">
       <div className="shell grid gap-14 lg:grid-cols-12 lg:gap-8">
         <div className="lg:col-span-6">
-          <SectionLabel index="06">Gift cards</SectionLabel>
-          <h2 data-reveal="lines" className="display mt-8 text-[clamp(2.4rem,4.8vw,4.75rem)]">
-            Give someone <b>a sharper look.</b>
+          <SectionLabel index="06">{t.gift.label}</SectionLabel>
+          <h2 key={locale} data-reveal="lines" className="display mt-8 text-[clamp(2.4rem,4.8vw,4.75rem)]">
+            {t.gift.a}
+            <b>{t.gift.b}</b>
           </h2>
 
           {/* Card preview */}
@@ -72,17 +75,17 @@ export function GiftCards() {
               <div className="relative flex h-full flex-col justify-between">
                 <div className="flex items-start justify-between">
                   <Wordmark className="w-[34%]" />
-                  <span className="label text-ink/55">Gift card</span>
+                  <span className="label text-ink/55">{t.gift.card}</span>
                 </div>
                 <div>
-                  <div className="label text-ink/55">{to ? `For ${to}` : 'For someone sharp'}</div>
+                  <div className="label text-ink/55">{to ? t.gift.forName(to) : t.gift.forDefault}</div>
                   <div className="display mt-1 text-[clamp(2.75rem,8vw,4.75rem)] tabular-nums">
                     {valid ? formatPrice(value) : formatPrice(0)}
                   </div>
                 </div>
                 <div className="flex items-end justify-between gap-4">
                   <p className="line-clamp-2 max-w-[68%] text-sm font-medium leading-snug text-ink/70 sm:text-base">
-                    {message || 'A cut, a shave, an hour off. Enjoy.'}
+                    {message || t.gift.defaultMessage}
                   </p>
                   <span className="label shrink-0 text-ink/50">{from ? `— ${from}` : code}</span>
                 </div>
@@ -101,12 +104,11 @@ export function GiftCards() {
           }}
         >
           <p className="max-w-md leading-relaxed text-paper/60">
-            Valid for any service or product, for 24 months. Delivered by email in minutes, or printed on heavy black stock
-            in the shop.
+            {t.gift.intro}
           </p>
 
           <fieldset className="mt-10">
-            <legend className="label mb-4 text-paper/50">Amount</legend>
+            <legend className="label mb-4 text-paper/50">{t.gift.amount}</legend>
             <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-6">
               {amounts.map((a) => {
                 const on = !custom && amount === a
@@ -128,9 +130,9 @@ export function GiftCards() {
                 )
               })}
               <input
-                aria-label="Custom amount"
+                aria-label={t.gift.customAria}
                 inputMode="numeric"
-                placeholder="Other"
+                placeholder={t.gift.other}
                 value={custom}
                 onChange={(e) => setCustom(e.target.value.replace(/[^\d]/g, '').slice(0, 4))}
                 aria-invalid={customInvalid || undefined}
@@ -139,31 +141,31 @@ export function GiftCards() {
                 }`}
               />
             </div>
-            {customInvalid && <p className="mt-2 text-xs text-[#e58a7e]">Choose an amount between {formatPrice(25)} and {formatPrice(1000)}.</p>}
+            {customInvalid && <p className="mt-2 text-xs text-[#e58a7e]">{t.gift.amountError(formatPrice(25), formatPrice(1000))}</p>}
           </fieldset>
 
           <div className="mt-8 grid gap-7 sm:grid-cols-2">
             <label className="block">
-              <span className="label text-paper/50">To</span>
-              <input className="field" value={to} maxLength={24} onChange={(e) => setTo(e.target.value)} placeholder="Recipient name" />
+              <span className="label text-paper/50">{t.gift.to}</span>
+              <input className="field" value={to} maxLength={24} onChange={(e) => setTo(e.target.value)} placeholder={t.gift.toPh} />
             </label>
             <label className="block">
-              <span className="label text-paper/50">From</span>
-              <input className="field" value={from} maxLength={24} onChange={(e) => setFrom(e.target.value)} placeholder="Your name" />
+              <span className="label text-paper/50">{t.gift.from}</span>
+              <input className="field" value={from} maxLength={24} onChange={(e) => setFrom(e.target.value)} placeholder={t.gift.fromPh} />
             </label>
             <label className="block sm:col-span-2">
-              <span className="label text-paper/50">Message</span>
-              <input className="field" value={message} maxLength={70} onChange={(e) => setMessage(e.target.value)} placeholder="Happy birthday, look sharp." />
+              <span className="label text-paper/50">{t.gift.message}</span>
+              <input className="field" value={message} maxLength={70} onChange={(e) => setMessage(e.target.value)} placeholder={t.gift.messagePh} />
             </label>
           </div>
 
           <fieldset className="mt-8">
-            <legend className="label mb-4 text-paper/50">Delivery</legend>
+            <legend className="label mb-4 text-paper/50">{t.gift.delivery}</legend>
             <div className="grid grid-cols-2 gap-1.5">
               {(
                 [
-                  ['email', 'By email', Mail],
-                  ['print', 'Pick up printed', Printer],
+                  ['email', t.gift.byEmail, Mail],
+                  ['print', t.gift.pickUp, Printer],
                 ] as const
               ).map(([k, label, Icon]) => (
                 <button
@@ -182,22 +184,22 @@ export function GiftCards() {
           </fieldset>
 
           <Button type="submit" variant="light" size="lg" className="mt-10 w-full" disabled={!valid}>
-            Continue — {valid ? formatPrice(value) : '—'}
+            {t.gift.continue(valid ? formatPrice(value) : '—')}
           </Button>
         </form>
       </div>
 
-      <Modal open={review} onClose={() => setReview(false)} label="Gift card summary">
+      <Modal open={review} onClose={() => setReview(false)} label={t.gift.summary}>
         <div className="p-6 pt-14 sm:p-10 sm:pt-14">
           <Gift className="size-6" strokeWidth={1.25} />
-          <h3 className="display mt-5 text-4xl">Your gift card</h3>
+          <h3 className="display mt-5 text-4xl">{t.gift.yourCard}</h3>
           <dl className="mt-6 text-[0.95rem]">
             {[
-              ['Amount', formatPrice(value)],
-              ['To', to || '—'],
-              ['From', from || '—'],
-              ['Message', message || '—'],
-              ['Delivery', delivery === 'email' ? 'By email' : 'Printed, pick up in shop'],
+              [t.gift.amount, formatPrice(value)],
+              [t.gift.to, to || '—'],
+              [t.gift.from, from || '—'],
+              [t.gift.message, message || '—'],
+              [t.gift.delivery, delivery === 'email' ? t.gift.byEmail : t.gift.pickUpLong],
             ].map(([k, v]) => (
               <div key={k} className="flex justify-between gap-6 border-b border-ink/12 py-3">
                 <dt className="label text-ink/45">{k}</dt>
@@ -207,8 +209,7 @@ export function GiftCards() {
           </dl>
           <p className="mt-6 flex gap-3 border border-dashed border-ink/25 p-4 text-xs leading-relaxed text-ink/65">
             <Info className="mt-px size-4 shrink-0" strokeWidth={1.5} />
-            Online payment isn’t switched on yet, so nothing has been charged. Send us this request and we’ll arrange the
-            card with you, or buy it at the counter on {site.address.street}.
+            {t.gift.note(site.address.street)}
           </p>
           <div className="mt-8 grid gap-2 sm:grid-cols-2">
             <Button
@@ -217,17 +218,15 @@ export function GiftCards() {
               onClick={() => {
                 setReview(false)
                 contactAbout(
-                  'Gift card',
-                  `I'd like a ${formatPrice(value)} gift card${to ? ` for ${to}` : ''}${from ? ` from ${from}` : ''}, ${
-                    delivery === 'email' ? 'delivered by email' : 'printed for pick-up'
-                  }.${message ? ` Message: "${message}"` : ''}`,
+                  'gift',
+                  t.gift.request({ price: formatPrice(value), to, from, email: delivery === 'email', message }),
                 )
               }}
             >
-              Send request
+              {t.common.sendRequest}
             </Button>
             <Button variant="outline-dark" icon={false} onClick={() => setReview(false)}>
-              Keep editing
+              {t.gift.keepEditing}
             </Button>
           </div>
         </div>

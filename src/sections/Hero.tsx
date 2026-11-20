@@ -9,11 +9,13 @@ import { Button } from '../components/Button'
 import { site } from '../data/site'
 import { nextFreeChair, openStatus } from '../lib/schedule'
 import { scrollToId } from '../lib/scroll'
+import { relativeDay, useI18n } from '../i18n'
 
 export function Hero() {
   const root = useRef<HTMLElement>(null)
   const ready = useReady()
   const { open } = useBooking()
+  const { t, fmt } = useI18n()
   const [{ status, next }] = useState(() => ({ status: openStatus(), next: nextFreeChair() }))
 
   useGSAP(
@@ -43,7 +45,7 @@ export function Hero() {
         <div data-hero-media-inner className="absolute inset-0">
           <Img
             id="photo-1503951914875-452162b0f3f1"
-            alt="Barber detailing a beard with scissors"
+            alt={t.hero.imgAlt}
             priority
             className="h-full w-full"
             imgClassName="object-[60%_30%] brightness-[0.62]"
@@ -61,13 +63,13 @@ export function Hero() {
       <div className="shell relative z-10 flex h-full flex-col justify-between pb-5 pt-24 md:pb-7 md:pt-28">
         <div className="flex items-start justify-between gap-6">
           <h1 data-hero-line className="display overflow-hidden pb-1 text-[clamp(1.6rem,3.3vw,2.75rem)] leading-[1.02]">
-            <span className="block">Precision cuts.</span>
-            <b className="block">Quietly done.</b>
+            <span className="block">{t.hero.line1}</span>
+            <b className="block">{t.hero.line2}</b>
           </h1>
           <div data-hero-fade className="label hidden items-center gap-2 pt-2 text-paper/70 md:flex">
             <span className={`size-1.5 rounded-full ${status.open ? 'bg-paper' : 'bg-paper/40'}`} />
-            {status.open ? 'Open now' : 'Closed now'}
-            {next && ` · next chair ${next.when === 'today' ? '' : next.when + ' '}${next.time}`}
+            {status.open ? t.status.openNow : t.status.closedNow}
+            {next && ` · ${t.hero.nextChair(next.offset === 0 ? '' : relativeDay(next.offset, next.date, t, fmt), next.time).replace(/\s+/g, ' ')}`}
           </div>
         </div>
 
@@ -75,15 +77,14 @@ export function Hero() {
           <div className="mb-6 flex flex-col gap-5 md:mb-8 md:flex-row md:items-end md:justify-between">
             <div className="max-w-sm">
               <p data-hero-fade className="text-[0.95rem] leading-relaxed text-paper/70">
-                Fades, scissor work and hot-towel shaves on {site.address.street}.{' '}
-                <b className="font-semibold text-paper">Book your barber in under a minute.</b>
+                {t.hero.intro(site.address.street)} <b className="font-semibold text-paper">{t.hero.introBold}</b>
               </p>
               <div data-hero-fade className="mt-5 flex flex-wrap gap-2">
                 <Button onClick={open} variant="light">
-                  Book a chair
+                  {t.common.bookChair}
                 </Button>
                 <Button onClick={() => scrollToId('services')} variant="outline-light" icon={false}>
-                  See prices
+                  {t.hero.prices}
                 </Button>
               </div>
             </div>
@@ -93,8 +94,8 @@ export function Hero() {
                   <Star key={i} className="size-3 fill-paper text-paper" />
                 ))}
               </span>
-              {site.rating.score} · {site.rating.count.toLocaleString('en-GB')} {site.rating.source} reviews
-              {site.demoContent && ' (sample)'}
+              {t.hero.reviews(fmt.number(site.rating.score), fmt.number(site.rating.count), site.rating.source)}
+              {site.demoContent && t.hero.sample}
             </div>
           </div>
           <div data-hero-mark-wrap className="overflow-hidden">

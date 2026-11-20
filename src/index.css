@@ -70,6 +70,10 @@
   font-weight: 300;
   line-height: 0.98;
   letter-spacing: -0.035em;
+  /* long words (German, Albanian) hyphenate instead of overflowing on phones */
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  overflow-wrap: break-word;
   & b,
   & strong {
     font-weight: 700;

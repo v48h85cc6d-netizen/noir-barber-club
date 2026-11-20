@@ -1,6 +1,6 @@
 # NOIR Command Center — audit & architecture proposal
 
-Status: **proposal, awaiting approval**. Nothing in this document has been implemented yet.
+Status: **approved.** Phase 0 starts once the Supabase project exists. Nothing in this document has been implemented yet.
 
 ## 1. Audit of the current project (commit `d265342`)
 
@@ -137,12 +137,12 @@ Gift card rules are enforced inside the database, not in the browser:
 
 The public website stays exactly as it is until a phase explicitly switches one of its modules to live data, and each switch needs your approval.
 
-## 4. Decisions needed before Phase 0
+## 4. Decisions (approved)
 
-1. **Backend:** approve Supabase (EU) and create the project (free). The owner account must be created by you, so you hold the keys. I'll ask for the project URL and keys through a secure form, never in chat.
-2. **Dashboard language(s):** EN / DE / SQ like the website, or one language.
-3. **Real business data:** real barbers, services, prices and hours to seed, or keep the placeholders until launch.
-4. **Payments:** memberships and gift cards keep recording cash / in-shop payments manually, since no online payment provider exists. Online payment would be a later, separate project.
+1. **Backend:** Supabase, EU (Frankfurt) region, free tier. The owner creates the project and holds its keys. Keys are provided through a secure credential form, never in chat or in the repository.
+2. **Dashboard languages:** EN / DE / SQ, with the same switcher as the public website.
+3. **Seed data:** current placeholders, replaced with real data in the owner console before launch.
+4. **Payments:** recorded manually (cash, card in shop, cash on delivery). Gift cards activate on the owner's confirmation. Online payment is a separate, later project.
 
 ## 5. Out of scope for now
 

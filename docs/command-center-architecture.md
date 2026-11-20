@@ -1,6 +1,9 @@
 # NOIR Command Center — private dashboard for the existing website
 
-Status: **approved.** Phase 0 starts once the Supabase project exists. Nothing in this document has been implemented yet.
+Status: **visual dashboard built in demo mode.**
+- `/admin` exists with the owner and barber apps on sample data.
+- The Supabase migration and permission tests are written and pass locally.
+- **Not yet done:** connecting a real Supabase project, real sign-in and real data. Those wait for the project to be created.
 
 The Command Center is **not** a new website, brand or frontend. It is a private, login-protected section at **`/admin` inside this project**, using this codebase and its design system. The public NOIR Barber Club website stays exactly as it is.
 

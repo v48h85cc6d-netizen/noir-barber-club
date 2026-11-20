@@ -16,11 +16,11 @@ const STORAGE_KEY = 'noir.locale'
 const isLocale = (v: unknown): v is Locale => typeof v === 'string' && (LOCALES as readonly string[]).includes(v)
 
 /** First visit → English. Afterwards the visitor's last choice, or an explicit ?lang= link. */
-function initialLocale(): Locale {
+function initialLocale(storageKey: string): Locale {
   try {
     const fromUrl = new URLSearchParams(window.location.search).get('lang')
     if (isLocale(fromUrl)) return fromUrl
-    const stored = window.localStorage.getItem(STORAGE_KEY)
+    const stored = window.localStorage.getItem(storageKey)
     if (isLocale(stored)) return stored
   } catch {
     /* storage unavailable (private mode etc.) */
@@ -47,7 +47,7 @@ const supported = (tag: string) => {
   }
 }
 
-function makeFormat(locale: Locale) {
+export function makeFormat(locale: Locale) {
   const tag = intlTags[locale]
   const native = locale !== 'sq' || supported(tag)
 
@@ -79,25 +79,35 @@ interface Ctx {
 
 const I18nContext = createContext<Ctx | null>(null)
 
-export function I18nProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>(initialLocale)
+interface ProviderProps {
+  children: ReactNode
+  /** Where the choice is remembered. The dashboard uses one key per signed-in user. */
+  storageKey?: string
+  /** Public site: keep <title> and meta description in sync. The dashboard sets its own. */
+  manageDocument?: boolean
+}
+
+export function I18nProvider({ children, storageKey = STORAGE_KEY, manageDocument = true }: ProviderProps) {
+  const [locale, setLocaleState] = useState<Locale>(() => initialLocale(storageKey))
 
   const setLocale = useCallback((l: Locale) => {
     setLocaleState(l)
     try {
-      window.localStorage.setItem(STORAGE_KEY, l)
+      window.localStorage.setItem(storageKey, l)
     } catch {
       /* ignore */
     }
-  }, [])
+  }, [storageKey])
 
   const t = dictionaries[locale]
 
   // keep the document language, title and description in sync
   useEffect(() => {
     document.documentElement.lang = locale
-    document.title = t.meta.title
-    document.querySelector('meta[name="description"]')?.setAttribute('content', t.meta.description)
+    if (manageDocument) {
+      document.title = t.meta.title
+      document.querySelector('meta[name="description"]')?.setAttribute('content', t.meta.description)
+    }
     // a ?lang= link has done its job once applied; keep URLs clean
     try {
       const url = new URL(window.location.href)
@@ -105,11 +115,11 @@ export function I18nProvider({ children }: { children: ReactNode }) {
         url.searchParams.delete('lang')
         window.history.replaceState(null, '', url)
       }
-      window.localStorage.setItem(STORAGE_KEY, locale)
+      window.localStorage.setItem(storageKey, locale)
     } catch {
       /* ignore */
     }
-  }, [locale, t])
+  }, [locale, t, storageKey, manageDocument])
 
   const value = useMemo(() => ({ locale, t, setLocale, fmt: makeFormat(locale) }), [locale, t, setLocale])
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>

@@ -69,3 +69,42 @@ The visual language (light-grey and near-black sections, sentence-case extra-wid
 - **Online payment** isn't offered, since no payment provider is integrated (`GIFT_SETTINGS.onlinePayment = false`).
 - **Cash on delivery** is controlled by `GIFT_SETTINGS.cashOnDelivery` in `src/lib/giftcard.ts`. It's on, with area *Amsterdam* (placeholder). Set `enabled: false` if printed cards can't be delivered in person.
 - **No automatic messages:** no SMS, WhatsApp or email provider is connected, so nothing is sent automatically.
+
+## NOIR Command Center (`/admin`)
+
+A private management dashboard inside this project, at `/admin`. It isn't a separate site.
+
+- **Status: demo mode.**
+  - Fictional sample data, and a permanent "Demo mode" banner.
+  - Changes last until the page is reloaded and are never sent anywhere.
+  - Real sign-in is shown but disabled until Supabase is connected.
+- **Roles:**
+  - *Owner*: full console with Overview, Appointments (day board / week / list), Clients, Barbers (accounts, hours, time off, invites), Services & prices, Revenue, Gift cards (confirm payment → activate, redeem, delivery queue), Memberships, Reports and Settings (booking policy, permissions, audit log).
+  - *Barber*: phone-first app with Today (next client, Arrived → Start → Done), Calendar, Clients (own only, no email), Schedule (read-only) and Profile (bio, specialty, Instagram, phone).
+- **Languages:** EN / DE / SQ. Each person's choice is stored separately (`noir.admin.locale.<user>`).
+- **Isolation from the public site:**
+  - The dashboard is lazy-loaded from `src/main.tsx`, so the public homepage downloads none of it.
+  - `public/_redirects` serves `/admin/*`.
+  - `public/_headers` marks `/admin` `noindex` and `no-store`.
+- **Code:** `src/admin/`
+  - `data/`: types, demo seed, demo store mirroring the database permission rules
+  - `owner/`, `barber/`: the two apps
+  - `ui.tsx`, `charts.tsx`: building blocks
+  - `i18n/`: dashboard copy
+
+### Supabase (prepared, not yet connected)
+
+- **`supabase/migrations/20261120000000_command_center.sql`** contains:
+  - the schema and row-level security on every table
+  - helper functions reading the role from `staff`
+  - guard triggers (barbers: status-only edits along allowed transitions; limited profile fields; last-owner protection)
+  - owner-only gift card functions (activation only after payment; unpaid cards can't be redeemed)
+  - the double-booking constraint and an insert-only audit log
+- **`supabase/tests/run.sh`** runs 55 permission tests (anonymous, owner, two barbers, a deactivated barber) against a throwaway local PostgreSQL. All pass.
+- **`supabase/functions/invite-barber`** is the owner-only invitation function (Deno). It is untested until a Supabase project exists.
+- **Still needed to go live:**
+  1. Create a Supabase project in the EU (Frankfurt) and apply the migration.
+  2. Deploy `invite-barber`.
+  3. Add `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` (public by design).
+  4. Swap the demo store for the Supabase data layer.
+  5. Turn on owner two-factor sign-in.

@@ -1,6 +1,8 @@
-# NOIR Command Center — audit & architecture proposal
+# NOIR Command Center — private dashboard for the existing website
 
 Status: **approved.** Phase 0 starts once the Supabase project exists. Nothing in this document has been implemented yet.
+
+The Command Center is **not** a new website, brand or frontend. It is a private, login-protected section at **`/admin` inside this project**, using this codebase and its design system. The public NOIR Barber Club website stays exactly as it is.
 
 ## 1. Audit of the current project (commit `d265342`)
 
@@ -85,33 +87,52 @@ Gift card rules are enforced inside the database, not in the browser:
 - **Who appears:** the acting user, read from the session; the browser can't set it.
 - **Protection:** the log is insert-only. Nobody, the owner included, can edit or delete entries; the owner can read and filter them.
 
-### 2.5 Frontend: same repository, separate app
+### 2.5 Integration into the existing project (`/admin`)
 
-- **Route:** the Command Center lives at **`/command`** in this repository and shares the NOIR design tokens (colours, type, pill buttons, mono labels).
-- **Separate bundle:** it's a lazy-loaded chunk, so the public website's download size is unchanged. It's marked `noindex`.
-- **New libraries (dashboard only):** `@supabase/supabase-js` for data and auth, `react-router` for dashboard routes, and TanStack Query for loading, caching and live refresh.
-- **One login:** the screen is the same for everyone. After sign-in the role decides which app loads, and the database enforces it again on every request.
-- **Owner Command Center** (desktop-first, works on tablet):
-  - Today (agenda across all chairs, takings, alerts)
-  - Calendar (day/week by barber)
-  - Appointments
-  - Clients
-  - Barbers & access (invite, deactivate, roles)
-  - Schedules (hours, time off)
-  - Services & prices
-  - Gift cards (orders, mark paid → activate, redeem, mark delivered, manual-delivery queue)
-  - Memberships
-  - Reports (revenue, bookings, chair utilisation, no-shows)
-  - Settings (business details, booking policy)
-  - Audit log
-- **Barber app** (mobile-first, one-handed use):
-  - **Today** timeline with the next client up top
-  - big status buttons: *Arrived → In chair → Done*, plus *No-show*
-  - client card (name, phone, notes, last visits with them)
-  - week view
-  - my hours and time off
-  - my profile
-  - installable on the home screen (PWA)
+**The only edits to existing files** (all additive; the public site renders exactly as before):
+
+| File | Change |
+| --- | --- |
+| `src/main.tsx` | If the path starts with `/admin`, lazy-load the dashboard; otherwise render the existing `<App />` unchanged. The public-only setup (animation class, scroll restoration) stays on the public branch. |
+| `public/_redirects` (new) | `/admin  /index.html  200` and `/admin/*  /index.html  200`, so Netlify serves the app for dashboard URLs. The public site has no other routes, so nothing else changes. |
+| `public/_headers` (new) | `X-Robots-Tag: noindex, nofollow` and `Cache-Control: no-store` for `/admin/*`, keeping it out of search engines and caches. |
+| `vite.config.ts` | Add the Supabase and router libraries to their own chunks, so the public bundle doesn't grow. |
+| `package.json` | Add `@supabase/supabase-js`, `react-router` and `@tanstack/react-query`. They load only on `/admin`. |
+
+**Untouched:** every file in `src/sections`, `src/booking`, the public `src/components`, `src/context`, the public dictionaries, styles and animations. The homepage, booking, gift cards, membership, languages and animations are not modified. Public data stays hard-coded until a later phase switches a module to the database, and only with approval.
+
+**New code lives in its own folders:**
+
+```
+src/admin/
+  AdminApp.tsx          router (basename /admin), session, role gate
+  auth/                 login, invite acceptance, password reset, owner MFA
+  owner/                Today, Calendar, Appointments, Clients, Barbers & access,
+                        Schedules, Services & prices, Gift cards, Memberships,
+                        Reports, Settings, Audit log
+  barber/               Today, Week, Client card, My schedule, My profile (mobile-first)
+  components/           dashboard building blocks (tables, side nav, status pills…)
+  i18n/en.ts de.ts sq.ts dashboard copy (separate from the public dictionaries)
+  lib/supabase.ts       client using only the public URL + anon key
+supabase/
+  migrations/           schema, row-level security policies, audit triggers, seed data
+  functions/            invite-barber, deactivate-barber (server-side, owner-only)
+  tests/                permission tests (owner / barber A / barber B / anonymous)
+docs/
+```
+
+**Reused from the existing codebase:**
+- **Design:** the tokens and utilities in `src/index.css` (`display`, `label`, `field`, `shell`, colours, fonts).
+- **Components:** `Button` (pills), `Logo`/`Wordmark`, `Modal` and `LanguageSwitcher`.
+- **Languages:** `I18nProvider`/`useI18n`, so the language choice is shared with the public site.
+- **Data and logic:** `src/data/site.ts` (business details, opening hours) for seeding, `src/lib/schedule.ts` (hours logic), and `src/lib/giftcard.ts` (shared email and phone validation).
+
+**Look:** the public site's identity in a quieter working form. Ink/paper palette, mono labels, pill buttons and the NØIR wordmark, but no preloader, scroll animations or large hero type. Dense, fast screens for the owner; large touch targets for barbers on phones.
+
+**Access:**
+- Visiting `/admin` without a session shows only the login screen.
+- After sign-in the role (read from the database) loads the owner console or the barber app.
+- The dashboard's JavaScript is downloadable like any web page but contains no secrets or data. All data comes from the database through row-level security.
 
 ### 2.6 Hosting and secrets
 

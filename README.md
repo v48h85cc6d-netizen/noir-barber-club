@@ -36,7 +36,7 @@ src/
 ## Demo-only behaviour (milestone 1)
 
 - **Booking** runs the full flow: service → barber → date → time → details → review. Availability is generated deterministically. Confirming shows a clearly labelled *demo* screen. Nothing is reserved or sent.
-- **Gift cards and memberships** fill in the contact form with the request. No payment is taken.
+- **Memberships** fill in the contact form with the request. No payment is taken.
 - **The contact form** validates input, then says it is in preview mode and offers a `mailto:` link.
 - **The map** is a placeholder graphic that loads Google Maps only when clicked.
 
@@ -54,3 +54,18 @@ The visual language (light-grey and near-black sections, sentence-case extra-wid
 - **Switcher:** a segmented SQ · DE · EN control in the desktop nav (1280px and up), a compact dropdown in the header below that, and a large switcher in the mobile menu.
 - **Animated headlines:** headings with `data-reveal="lines"` must carry `key={locale}`. The split-text animation rewrites their DOM, so they have to remount on a language switch.
 - **German** uses the informal "du"; **Albanian** uses the polite "ju".
+
+## Gift card orders
+
+- **What the customer chooses:**
+  - amount
+  - recipient name
+  - delivery by **email** (recipient's email) or **phone** (recipient's mobile with country code, by **WhatsApp** or **SMS**)
+  - sender name and message
+  - their own mobile (email optional)
+  - payment by **Cash on delivery** (delivery address and phone) or **Pay in the shop**
+- **Placing the order:** after a review step, the order opens in the customer's email app, addressed to the shop's email (`site.email`). It includes a reference such as `GC-K7Q2M9` and is marked *pending payment*. The confirmation says the card stays **inactive until payment**.
+- **The website never issues or activates a card.** The shop creates the gift card code, activates the card and sends it by email, SMS or WhatsApp only after the payment has been received.
+- **Online payment** isn't offered, since no payment provider is integrated (`GIFT_SETTINGS.onlinePayment = false`).
+- **Cash on delivery** is controlled by `GIFT_SETTINGS.cashOnDelivery` in `src/lib/giftcard.ts`. It's on, with area *Amsterdam* (placeholder). Set `enabled: false` if printed cards can't be delivered in person.
+- **No automatic messages:** no SMS, WhatsApp or email provider is connected, so nothing is sent automatically.

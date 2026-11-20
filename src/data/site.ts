@@ -16,7 +16,7 @@ export const site = {
   rating: { score: 4.9, count: 1240, source: 'Google' },
   phone: '+31 20 123 4567',
   phoneHref: 'tel:+31201234567',
-  email: 'hello@noirbarberclub.com',
+  email: 'halidijakup@icloud.com',
   address: {
     street: 'Kerkstraat 118',
     city: '1017 GP Amsterdam',

@@ -94,8 +94,8 @@ export function Overview() {
             <ul className="space-y-2">
               {alerts.map((a, i) => (
                 <li key={i}>
-                  <Link to={a.to} className="group flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 text-sm transition-colors hover:border-[#d2b07a]/40">
-                    <span className="grid size-9 shrink-0 place-items-center rounded-full bg-[#d2b07a]/12 text-[#d2b07a]">
+                  <Link to={a.to} className="group flex items-center gap-3 rounded-xl border border-paper/[0.06] bg-white/60 p-3 text-sm transition-colors hover:border-[#d2b07a]/40">
+                    <span className="grid size-9 shrink-0 place-items-center rounded-full bg-[#d2b07a]/12 text-[#8a6a33]">
                       <a.icon className="size-4" strokeWidth={1.5} />
                     </span>
                     <span className="flex-1 text-paper/80">{a.text}</span>
@@ -117,7 +117,7 @@ export function Overview() {
           {data.barbers.map((b) => {
             const list = m.todayList.filter((a) => a.barberId === b.id && isLive(a))
             return (
-              <li key={b.id} className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
+              <li key={b.id} className="flex items-center gap-3 rounded-xl border border-paper/[0.06] bg-white/60 p-3">
                 <BarberAvatar image={b.image} name={b.name} size={40} />
                 <div className="min-w-0 flex-1">
                   <div className="truncate font-medium">{b.name}</div>

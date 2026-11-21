@@ -21,7 +21,7 @@ export function Profile({ me, onSignOut }: { me: BarberRecord; onSignOut: () => 
   return (
     <div className="space-y-5">
       <div className="flex items-center gap-4">
-        <span className="block size-20 overflow-hidden rounded-full ring-1 ring-white/15">
+        <span className="block size-20 overflow-hidden rounded-full ring-1 ring-paper/15">
           <Img id={me.image} alt={me.name} sizes="160px" maxWidth={480} className="h-full w-full" />
         </span>
         <div>

@@ -30,7 +30,7 @@ export function Services() {
       <div className="space-y-6">
         {cats.map((cat) => (
           <Card key={cat} title={pub.steps.categories[cat]} pad={false}>
-            <ul className="divide-y divide-white/[0.05]">
+            <ul className="divide-y divide-paper/[0.05]">
               {data.services
                 .filter((s) => s.category === cat)
                 .map((s) => {
@@ -54,7 +54,7 @@ export function Services() {
                         <div className="line-clamp-1 text-xs text-paper/50">{pub.services.items[s.id].description}</div>
                       </div>
                       <div className="col-start-2 flex items-center gap-3 md:col-start-auto">
-                        <label className="flex items-center gap-1.5 rounded-xl border border-white/10 px-2.5 py-1.5 focus-within:border-[#d2b07a]/60">
+                        <label className="flex items-center gap-1.5 rounded-xl border border-paper/10 px-2.5 py-1.5 focus-within:border-[#d2b07a]/60">
                           <span className="text-paper/45">€</span>
                           <input
                             inputMode="numeric"
@@ -66,7 +66,7 @@ export function Services() {
                             className="w-10 bg-transparent font-semibold tabular-nums outline-none"
                           />
                         </label>
-                        <label className="flex items-center gap-1.5 rounded-xl border border-white/10 px-2.5 py-1.5 focus-within:border-[#d2b07a]/60">
+                        <label className="flex items-center gap-1.5 rounded-xl border border-paper/10 px-2.5 py-1.5 focus-within:border-[#d2b07a]/60">
                           <input
                             inputMode="numeric"
                             aria-label={`${t.services.duration} ${pub.services.items[s.id].name}`}

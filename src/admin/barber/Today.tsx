@@ -41,7 +41,7 @@ export function Today({ me }: { me: BarberRecord }) {
         {t.bApp.hello} <b>{first}</b>
       </h1>
       <p className="mt-1 text-sm text-paper/55">{t.bApp.dayLine(list.length, done)}</p>
-      <div className="mt-4 h-1.5 rounded-full bg-white/[0.06]" aria-hidden>
+      <div className="mt-4 h-1.5 rounded-full bg-paper/[0.06]" aria-hidden>
         <motion.div className="h-1.5 rounded-full bg-[#d2b07a]" initial={false} animate={{ width: `${list.length ? (done / list.length) * 100 : 0}%` }} transition={{ duration: 0.8, ease }} />
       </div>
 
@@ -54,10 +54,10 @@ export function Today({ me }: { me: BarberRecord }) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.45, ease }}
-            className={`mt-6 overflow-hidden rounded-3xl border p-5 ${focus.status === 'in_chair' ? 'border-[#d2b07a]/60 bg-[linear-gradient(160deg,rgba(210,176,122,0.18),rgba(210,176,122,0.03))]' : 'border-white/10 bg-white/[0.03]'}`}
+            className={`mt-6 overflow-hidden rounded-3xl border p-5 ${focus.status === 'in_chair' ? 'border-[#d2b07a]/60 bg-[linear-gradient(160deg,rgba(210,176,122,0.18),rgba(210,176,122,0.03))]' : 'glass'}`}
           >
             <div className="flex items-center justify-between">
-              <span className="label text-[#d2b07a]">
+              <span className="label text-[#8a6a33]">
                 {later ? `${t.bApp.nextDay} · ${fmt.date(new Date(focus.start), { weekday: 'long', day: 'numeric', month: 'short' })}` : focus.status === 'in_chair' ? t.bApp.inChair : t.bApp.next}
               </span>
               <StatusPill status={focus.status} />
@@ -73,23 +73,23 @@ export function Today({ me }: { me: BarberRecord }) {
               </div>
             </div>
             {(client.notes || focus.note) && (
-              <p className="mt-4 rounded-2xl bg-black/25 p-3 text-sm text-paper/85">
+              <p className="mt-4 rounded-2xl border border-[#b8935a]/20 bg-[#d2b07a]/[0.08] p-3 text-sm text-paper/85">
                 <span className="label mr-2 text-paper/45">{t.bApp.notes}</span>
                 {[focus.note, client.notes].filter(Boolean).join(' · ')}
               </p>
             )}
             <div className="mt-5 grid grid-cols-[1fr_auto] gap-2">
               {later && focus.status === 'booked' && (
-                <button type="button" onClick={() => act(setStatus(focus.id, 'confirmed'))} className="flex h-16 items-center justify-center gap-2.5 rounded-2xl bg-[#d2b07a] text-lg font-semibold text-ink transition-transform active:scale-[0.98]">
+                <button type="button" onClick={() => act(setStatus(focus.id, 'confirmed'))} className="flex h-16 items-center justify-center gap-2.5 rounded-2xl bg-[#d2b07a] text-lg font-semibold text-[#1f1e1c] transition-transform active:scale-[0.98]">
                   <Check className="size-5" strokeWidth={2} /> {t.bApp.confirm}
                 </button>
               )}
-              {later && focus.status !== 'booked' && <span className="flex h-16 items-center justify-center rounded-2xl border border-white/10 text-sm text-paper/55">{t.status.confirmed}</span>}
+              {later && focus.status !== 'booked' && <span className="flex h-16 items-center justify-center rounded-2xl border border-paper/10 text-sm text-paper/55">{t.status.confirmed}</span>}
               {!later && next[focus.status] && (
                 <button
                   type="button"
                   onClick={() => act(setStatus(focus.id, next[focus.status]!.to))}
-                  className="flex h-16 items-center justify-center gap-2.5 rounded-2xl bg-[#d2b07a] text-lg font-semibold text-ink transition-transform active:scale-[0.98]"
+                  className="flex h-16 items-center justify-center gap-2.5 rounded-2xl bg-[#d2b07a] text-lg font-semibold text-[#1f1e1c] transition-transform active:scale-[0.98]"
                 >
                   {(() => {
                     const N = next[focus.status]!
@@ -101,18 +101,18 @@ export function Today({ me }: { me: BarberRecord }) {
                   })()}
                 </button>
               )}
-              <a href={`tel:${client.phone.replace(/\s/g, '')}`} aria-label={`${t.bApp.call} ${client.name}`} className="grid size-16 place-items-center rounded-2xl border border-white/12 hover:border-white/30">
+              <a href={`tel:${client.phone.replace(/\s/g, '')}`} aria-label={`${t.bApp.call} ${client.name}`} className="grid size-16 place-items-center rounded-2xl border border-paper/12 hover:border-paper/30">
                 <Phone className="size-5" strokeWidth={1.5} />
               </a>
               {!later && (focus.status === 'booked' || focus.status === 'confirmed' || focus.status === 'arrived') && (
-                <button type="button" onClick={() => act(setStatus(focus.id, 'no_show'))} className="col-span-2 flex h-12 items-center justify-center gap-2 rounded-2xl border border-white/10 text-sm text-paper/65 hover:border-[#d97a93]/50 hover:text-[#efb0c0]">
+                <button type="button" onClick={() => act(setStatus(focus.id, 'no_show'))} className="col-span-2 flex h-12 items-center justify-center gap-2 rounded-2xl border border-paper/10 text-sm text-paper/65 hover:border-[#d97a93]/50 hover:text-[#efb0c0]">
                   <Ban className="size-4" strokeWidth={1.5} /> {t.bApp.noShow}
                 </button>
               )}
             </div>
           </motion.section>
         ) : (
-          <motion.p key="none" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-6 rounded-3xl border border-dashed border-white/10 p-8 text-center text-paper/55">
+          <motion.p key="none" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-6 rounded-3xl border border-dashed border-paper/10 p-8 text-center text-paper/55">
             {workMinutes(me, today) ? t.bApp.noneLeft : t.bApp.off}
           </motion.p>
         )}
@@ -122,14 +122,14 @@ export function Today({ me }: { me: BarberRecord }) {
       {list.length > 0 && (
         <section className="mt-8">
           <h2 className="label mb-3 text-paper/45">{t.bApp.timeline}</h2>
-          <ol className="relative space-y-2 border-l border-white/[0.08] pl-5">
+          <ol className="relative space-y-2 border-l border-paper/[0.08] pl-5">
             {list.map((a) => {
               const c = data.clients.find((x) => x.id === a.clientId)
               const isFocus = focus?.id === a.id
               return (
                 <li key={a.id} className="relative">
-                  <span className={`absolute -left-[26px] top-5 size-2.5 rounded-full ring-4 ring-ink ${a.status === 'completed' ? 'bg-[#55b386]' : isFocus ? 'bg-[#d2b07a]' : 'bg-white/25'}`} />
-                  <button type="button" onClick={() => setOpen(a)} className={`flex w-full items-center gap-3 rounded-2xl border p-3.5 text-left transition-colors ${isFocus ? 'border-[#d2b07a]/40 bg-white/[0.04]' : 'border-white/[0.07] bg-white/[0.02] hover:border-white/20'} ${a.status === 'completed' || a.status === 'no_show' ? 'opacity-60' : ''}`}>
+                  <span className={`absolute -left-[26px] top-5 size-2.5 rounded-full ring-4 ring-[#f6f4ef] ${a.status === 'completed' ? 'bg-[#2f8f62]' : isFocus ? 'bg-[#d2b07a]' : 'bg-paper/25'}`} />
+                  <button type="button" onClick={() => setOpen(a)} className={`flex w-full items-center gap-3 rounded-2xl border p-3.5 text-left transition-colors ${isFocus ? 'border-[#d2b07a]/40 bg-white/80' : 'border-paper/[0.07] bg-white/60 hover:border-paper/20'} ${a.status === 'completed' || a.status === 'no_show' ? 'opacity-60' : ''}`}>
                     <span className="w-12 shrink-0 font-semibold tabular-nums">{hhmm(a.start)}</span>
                     <span className="min-w-0 flex-1">
                       <span className="block truncate font-medium">{c?.name}</span>

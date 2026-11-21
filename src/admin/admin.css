@@ -1,0 +1,75 @@
+/*
+ * NOIR Command Center — white glass theme. Loaded only by /admin (lazy chunk),
+ * so the public website keeps its own dark tokens untouched.
+ * Tokens are set on <html> so portals (sheets, modals, toasts) inherit them.
+ */
+html.cc-root {
+  --color-ink: #f6f4ef; /* page */
+  --color-coal: #ffffff; /* raised surface */
+  --color-ash: #efece6;
+  --color-line: #e5e1d9;
+  --color-paper: #1f1e1c; /* charcoal text */
+  --color-bone: #e9e5dd;
+  --color-smoke: #77746e;
+  --cc-gold: #d2b07a; /* champagne fill */
+  --cc-gold-ink: #8a6a33; /* champagne as text (AA on white) */
+  color-scheme: light;
+  background: #f6f4ef;
+  /* never pan sideways: content is sized to the viewport below, this is only a backstop */
+  overflow-x: clip;
+  overscroll-behavior-x: none;
+  -webkit-text-size-adjust: 100%;
+}
+html.cc-root body {
+  background: transparent;
+  color: var(--color-paper);
+  overflow-x: clip;
+  max-width: 100vw;
+}
+html.cc-root ::selection {
+  background: #1f1e1c;
+  color: #f6f4ef;
+}
+
+/* soft light behind the glass: off-white with faint champagne and cool-grey light */
+.cc-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(48vw 42vw at 8% -6%, rgba(210, 176, 122, 0.22), transparent 70%),
+    radial-gradient(40vw 36vw at 100% 12%, rgba(196, 204, 214, 0.35), transparent 70%),
+    radial-gradient(52vw 40vw at 70% 110%, rgba(210, 176, 122, 0.16), transparent 70%),
+    linear-gradient(180deg, #faf9f6, #f3f0ea);
+}
+
+/* frosted panels */
+.glass {
+  background: rgba(255, 255, 255, 0.62);
+  -webkit-backdrop-filter: blur(22px) saturate(1.35);
+  backdrop-filter: blur(22px) saturate(1.35);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.95) inset,
+    0 0 0 1px rgba(31, 30, 28, 0.045),
+    0 18px 40px -24px rgba(31, 30, 28, 0.22),
+    0 2px 6px -3px rgba(31, 30, 28, 0.08);
+}
+.glass-strong {
+  background: rgba(255, 255, 255, 0.8);
+  -webkit-backdrop-filter: blur(28px) saturate(1.4);
+  backdrop-filter: blur(28px) saturate(1.4);
+  border-color: rgba(31, 30, 28, 0.07);
+}
+.glass-bar {
+  background: rgba(250, 249, 246, 0.72);
+  -webkit-backdrop-filter: blur(20px) saturate(1.3);
+  backdrop-filter: blur(20px) saturate(1.3);
+}
+/* thin, quiet scrollbars for the few intentional inner scrollers */
+html.cc-root .cc-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(31, 30, 28, 0.18) transparent;
+  overscroll-behavior-x: contain;
+}

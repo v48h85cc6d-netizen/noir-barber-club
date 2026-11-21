@@ -46,7 +46,7 @@ export function Clients({ compact = false }: { compact?: boolean }) {
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <label className="relative min-w-0 flex-1 sm:max-w-sm">
           <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-paper/40" />
-          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t.clients.searchPh} aria-label={t.common.search} className="h-11 w-full rounded-full border border-white/10 bg-white/[0.03] pl-10 pr-4 text-sm outline-none placeholder:text-paper/35 focus:border-[#d2b07a]/60" />
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t.clients.searchPh} aria-label={t.common.search} className="h-11 w-full rounded-full border border-paper/10 bg-white/60 pl-10 pr-4 text-sm outline-none placeholder:text-paper/35 focus:border-[#d2b07a]/60" />
         </label>
         <span className="text-sm text-paper/45">{t.clients.count(rows.length)}</span>
       </div>
@@ -57,7 +57,7 @@ export function Clients({ compact = false }: { compact?: boolean }) {
         <Card pad={false}>
           <table className="hidden w-full text-sm lg:table">
             <thead>
-              <tr className="label border-b border-white/[0.06] text-left text-paper/40">
+              <tr className="label border-b border-paper/[0.06] text-left text-paper/40">
                 <th className="px-5 py-3.5 font-normal">{t.clients.name}</th>
                 <th className="px-3 py-3.5 font-normal">{t.clients.phone}</th>
                 <th className="px-3 py-3.5 text-right font-normal">{t.clients.visits}</th>
@@ -67,9 +67,9 @@ export function Clients({ compact = false }: { compact?: boolean }) {
                 {isOwner && <th className="px-5 py-3.5 text-right font-normal">{t.clients.spent}</th>}
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/[0.05]">
+            <tbody className="divide-y divide-paper/[0.05]">
               {rows.map(({ c, visits, spent, last, next }) => (
-                <tr key={c.id} onClick={() => setOpen(c)} className="cursor-pointer hover:bg-white/[0.025]">
+                <tr key={c.id} onClick={() => setOpen(c)} className="cursor-pointer hover:bg-white/80">
                   <td className="px-5 py-3">
                     <span className="flex items-center gap-3">
                       <Avatar name={c.name} size={30} />
@@ -91,7 +91,7 @@ export function Clients({ compact = false }: { compact?: boolean }) {
               ))}
             </tbody>
           </table>
-          <ul className="divide-y divide-white/[0.05] lg:hidden">
+          <ul className="divide-y divide-paper/[0.05] lg:hidden">
             {rows.map(({ c, visits, last }) => (
               <li key={c.id}>
                 <button type="button" onClick={() => setOpen(c)} className="flex w-full items-center gap-3 px-4 py-3.5 text-left">
@@ -148,13 +148,13 @@ export function Clients({ compact = false }: { compact?: boolean }) {
             </dl>
             {open.notes && (
               <div className="rounded-xl border border-[#d2b07a]/25 bg-[#d2b07a]/[0.06] p-3 text-sm">
-                <span className="label mr-2 text-[#d2b07a]">{t.clients.notes}</span>
+                <span className="label mr-2 text-[#8a6a33]">{t.clients.notes}</span>
                 {open.notes}
               </div>
             )}
             <div>
               <div className="label mb-2 text-paper/45">{t.clients.history}</div>
-              <ul className="divide-y divide-white/[0.06]">
+              <ul className="divide-y divide-paper/[0.06]">
                 {history.slice(0, 12).map((a) => (
                   <li key={a.id} className="flex items-center justify-between gap-3 py-2.5 text-sm">
                     <span>

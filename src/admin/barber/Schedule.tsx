@@ -15,7 +15,7 @@ export function Schedule({ me }: { me: BarberRecord }) {
         <b>{t.nav.schedule}</b>
       </h1>
       <Card title={t.bApp.myHours}>
-        <ul className="divide-y divide-white/[0.06]">
+        <ul className="divide-y divide-paper/[0.06]">
           {ORDER.map((d) => {
             const h = me.hours[d]
             return (
@@ -33,7 +33,7 @@ export function Schedule({ me }: { me: BarberRecord }) {
         ) : (
           <ul className="space-y-2">
             {me.timeOff.map((o) => (
-              <li key={o.id} className="flex justify-between gap-3 rounded-xl border border-white/[0.06] px-3 py-3 text-sm">
+              <li key={o.id} className="flex justify-between gap-3 rounded-xl border border-paper/[0.06] px-3 py-3 text-sm">
                 <span>{o.reason}</span>
                 <span className="tabular-nums text-paper/60">
                   {fmt.date(new Date(o.from), { day: 'numeric', month: 'short' })} – {fmt.date(new Date(o.to), { day: 'numeric', month: 'short' })}
@@ -43,8 +43,8 @@ export function Schedule({ me }: { me: BarberRecord }) {
           </ul>
         )}
       </Card>
-      <p className="flex gap-3 rounded-2xl border border-white/[0.07] p-4 text-sm text-paper/60">
-        <Info className="mt-0.5 size-4 shrink-0 text-[#d2b07a]" strokeWidth={1.5} />
+      <p className="flex gap-3 rounded-2xl border border-paper/[0.07] p-4 text-sm text-paper/60">
+        <Info className="mt-0.5 size-4 shrink-0 text-[#8a6a33]" strokeWidth={1.5} />
         {t.bApp.hoursNote}
       </p>
     </div>

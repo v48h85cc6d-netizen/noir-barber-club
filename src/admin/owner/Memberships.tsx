@@ -22,14 +22,14 @@ export function Memberships() {
         {plans.map((p) => {
           const n = live.filter((m) => m.planId === p.id).length
           return (
-            <div key={p.id} className={`relative overflow-hidden rounded-2xl border p-5 md:p-6 ${p.featured ? 'border-[#d2b07a]/50 bg-[linear-gradient(160deg,rgba(210,176,122,0.14),rgba(210,176,122,0.02))]' : 'border-white/[0.07] bg-white/[0.02]'}`}>
+            <div key={p.id} className={`relative overflow-hidden rounded-2xl border p-5 md:p-6 ${p.featured ? 'border-[#d2b07a]/50 bg-[linear-gradient(160deg,rgba(210,176,122,0.14),rgba(210,176,122,0.02))]' : 'border-paper/[0.07] bg-white/60'}`}>
               <div className="label text-paper/50">{p.name}</div>
               <div className="mt-2 flex items-baseline gap-2">
                 <span className="text-4xl font-semibold tabular-nums [font-stretch:118%]">{money(p.monthly)}</span>
                 <span className="text-sm text-paper/45">{t.common.perMonth}</span>
               </div>
               <p className="mt-2 text-sm text-paper/60">{pub.membership.plans[p.id].tagline}</p>
-              <div className="mt-5 flex items-end justify-between border-t border-white/[0.07] pt-4">
+              <div className="mt-5 flex items-end justify-between border-t border-paper/[0.07] pt-4">
                 <span className="text-sm text-paper/55">{t.members.members(n)}</span>
                 <span className="tabular-nums">{money(live.filter((m) => m.planId === p.id).reduce((s, m) => s + monthly(m.planId, m.billing), 0))}</span>
               </div>
@@ -51,7 +51,7 @@ export function Memberships() {
         />
       </div>
       <Card pad={false}>
-        <ul className="divide-y divide-white/[0.05]">
+        <ul className="divide-y divide-paper/[0.05]">
           {list.map((m) => {
             const c = data.clients.find((x) => x.id === m.clientId)!
             const plan = plans.find((p) => p.id === m.planId)!

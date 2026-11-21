@@ -4,6 +4,7 @@ import { I18nProvider } from '../i18n'
 import { DemoStoreProvider, type Session } from './data/store'
 import { ToastProvider } from './ui'
 import { Login } from './Login'
+import './admin.css'
 
 const OwnerApp = lazy(() => import('./owner/OwnerApp'))
 const BarberApp = lazy(() => import('./barber/BarberApp'))
@@ -31,6 +32,8 @@ export default function AdminApp() {
 
   useEffect(() => {
     document.title = 'NOIR Command Center'
+    document.documentElement.classList.add('cc-root')
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', '#f6f4ef')
     let robots = document.querySelector<HTMLMetaElement>('meta[name="robots"]')
     if (!robots) {
       robots = document.createElement('meta')

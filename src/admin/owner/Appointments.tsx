@@ -86,8 +86,8 @@ export function Appointments() {
               const items = inRange(data.appointments, d, addDays(d, 1)).filter(isLive)
               const isToday = sameDay(d, new Date())
               return (
-                <div key={i} className={`rounded-2xl border p-2 ${isToday ? 'border-[#d2b07a]/50 bg-[#d2b07a]/[0.04]' : 'border-white/[0.07] bg-white/[0.02]'}`}>
-                  <button type="button" onClick={() => { setDate(d); setView('day') }} className="mb-2 w-full rounded-xl px-2 py-1.5 text-left hover:bg-white/[0.04]">
+                <div key={i} className={`rounded-2xl border p-2 ${isToday ? 'border-[#d2b07a]/50 bg-[#d2b07a]/[0.04]' : 'border-paper/[0.07] bg-white/60'}`}>
+                  <button type="button" onClick={() => { setDate(d); setView('day') }} className="mb-2 w-full rounded-xl px-2 py-1.5 text-left hover:bg-white/80">
                     <div className="label text-paper/45">{fmt.weekday(d, 'short')}</div>
                     <div className="flex items-baseline justify-between">
                       <span className="text-xl font-semibold tabular-nums">{d.getDate()}</span>
@@ -152,7 +152,7 @@ export function Appointments() {
               {/* table on wide screens, cards on phones */}
               <table className="hidden w-full text-sm md:table">
                 <thead>
-                  <tr className="label border-b border-white/[0.06] text-left text-paper/40">
+                  <tr className="label border-b border-paper/[0.06] text-left text-paper/40">
                     <th className="px-5 py-3.5 font-normal">{t.appts.time}</th>
                     <th className="px-3 py-3.5 font-normal">{t.appts.client}</th>
                     <th className="px-3 py-3.5 font-normal">{t.appts.service}</th>
@@ -162,11 +162,11 @@ export function Appointments() {
                     <th className="px-5 py-3.5 text-right font-normal">{t.appts.price}</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/[0.05]">
+                <tbody className="divide-y divide-paper/[0.05]">
                   {list.map((a) => {
                     const b = barberOf(a.barberId)
                     return (
-                      <tr key={a.id} onClick={() => setOpen(a)} className="cursor-pointer transition-colors hover:bg-white/[0.025]">
+                      <tr key={a.id} onClick={() => setOpen(a)} className="cursor-pointer transition-colors hover:bg-white/80">
                         <td className="whitespace-nowrap px-5 py-3 tabular-nums">
                           <span className="text-paper/50">{fmt.date(new Date(a.start), { weekday: 'short', day: 'numeric', month: 'short' })}</span> {hhmm(a.start)}
                         </td>
@@ -188,7 +188,7 @@ export function Appointments() {
                   })}
                 </tbody>
               </table>
-              <ul className="divide-y divide-white/[0.05] md:hidden">
+              <ul className="divide-y divide-paper/[0.05] md:hidden">
                 {list.map((a) => (
                   <li key={a.id}>
                     <button type="button" onClick={() => setOpen(a)} className="flex w-full items-center gap-3 px-4 py-3.5 text-left">

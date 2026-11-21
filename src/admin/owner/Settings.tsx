@@ -53,11 +53,11 @@ export function Settings() {
             <Field label={t.settings.codArea}>
               <input value={s.codArea} maxLength={40} onChange={(e) => setS({ ...s, codArea: e.target.value })} className={inputCls} />
             </Field>
-            <div className="flex items-center justify-between gap-3 rounded-xl border border-white/[0.06] px-4 py-3 sm:col-span-2">
+            <div className="flex items-center justify-between gap-3 rounded-xl border border-paper/[0.06] px-4 py-3 sm:col-span-2">
               <span className="text-sm">{t.settings.walkIns}</span>
               <Switch checked={s.allowWalkIns} label={t.settings.walkIns} onChange={(v) => setS({ ...s, allowWalkIns: v })} />
             </div>
-            <div className="flex items-center justify-between gap-3 rounded-xl border border-white/[0.06] px-4 py-3 sm:col-span-2">
+            <div className="flex items-center justify-between gap-3 rounded-xl border border-paper/[0.06] px-4 py-3 sm:col-span-2">
               <span className="text-sm">{t.settings.cod}</span>
               <Switch checked={s.cashOnDelivery} label={t.settings.cod} onChange={(v) => setS({ ...s, cashOnDelivery: v })} />
             </div>
@@ -96,7 +96,7 @@ export function Settings() {
           </Card>
           <Card title={t.settings.connection}>
             <div className="flex items-center gap-3 text-sm">
-              <Database className="size-5 text-[#d2b07a]" strokeWidth={1.5} />
+              <Database className="size-5 text-[#8a6a33]" strokeWidth={1.5} />
               <span className="text-paper/70">{t.settings.connectionDemo}</span>
               <Tag tone="warn">{t.demo.badge}</Tag>
             </div>
@@ -109,13 +109,13 @@ export function Settings() {
         <div className="overflow-x-auto">
           <table className="w-full min-w-[420px] text-sm">
             <thead>
-              <tr className="label border-b border-white/[0.06] text-left text-paper/40">
+              <tr className="label border-b border-paper/[0.06] text-left text-paper/40">
                 <th className="py-3 pr-3 font-normal" />
                 <th className="px-3 py-3 font-normal">{t.common.owner}</th>
                 <th className="px-3 py-3 font-normal">{t.common.barber}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/[0.05]">
+            <tbody className="divide-y divide-paper/[0.05]">
               {MATRIX.map(([k, o, b]) => (
                 <tr key={k}>
                   <td className="py-3 pr-3">{t.settings.perm[k]}</td>
@@ -137,7 +137,7 @@ export function Settings() {
           <ul className="space-y-3 text-sm">
             {t.settings.securityItems.map((x) => (
               <li key={x} className="flex gap-3">
-                <ShieldCheck className="mt-0.5 size-4 shrink-0 text-[#d2b07a]" strokeWidth={1.5} />
+                <ShieldCheck className="mt-0.5 size-4 shrink-0 text-[#8a6a33]" strokeWidth={1.5} />
                 <span className="text-paper/75">{x}</span>
               </li>
             ))}
@@ -145,7 +145,7 @@ export function Settings() {
         </Card>
         <Card title={t.settings.audit}>
           <p className="mb-4 text-xs text-paper/50">{t.settings.auditNote}</p>
-          <ul className="max-h-[360px] divide-y divide-white/[0.05] overflow-y-auto">
+          <ul className="max-h-[360px] divide-y divide-paper/[0.05] overflow-y-auto">
             {data.audit.map((e) => (
               <li key={e.id} className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-0.5 py-3 text-sm sm:grid-cols-[150px_1fr_auto]">
                 <span className="text-paper/50 tabular-nums">{fmt.date(new Date(e.at), { day: 'numeric', month: 'short' })} · {new Date(e.at).toTimeString().slice(0, 5)}</span>

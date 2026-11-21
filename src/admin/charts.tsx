@@ -1,25 +1,29 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 
 /**
  * Charts for the Command Center, following the data-viz rules:
  * one axis, thin marks, recessive grid, hover tooltips, legends + labels so
  * identity is never colour-alone, and an accessible table for every chart.
- * Categorical order is fixed (validated for the dark surface, CVD-safe):
+ * Categorical order is fixed (validated on white and dark surfaces, CVD-safe):
  */
 export const CATEGORICAL = ['#c98500', '#199e70', '#3987e5', '#d55181'] as const
-export const ACCENT = '#d2b07a'
+/** champagne mark colour, deepened so thin lines and bars hold 3:1 on white glass */
+export const ACCENT = '#a5803f'
 
 function useWidth<T extends HTMLElement>() {
   const ref = useRef<T>(null)
-  const [w, setW] = useState(600)
-  useEffect(() => {
+  // start at 0 and measure before paint, so a chart never renders wider than its card
+  const [w, setW] = useState(0)
+  useLayoutEffect(() => {
     const el = ref.current
     if (!el) return
-    const ro = new ResizeObserver(([e]) => setW(Math.max(200, e.contentRect.width)))
+    setW(Math.max(160, el.clientWidth))
+    const ro = new ResizeObserver(([e]) => setW(Math.max(160, Math.floor(e.contentRect.width))))
     ro.observe(el)
     return () => ro.disconnect()
   }, [])
-  return [ref, w] as const
+  // 160 is only a placeholder for the first render; the real width is set before paint
+  return [ref, w || 160] as const
 }
 
 function SrTable({ caption, rows }: { caption: string; rows: [string, string][] }) {
@@ -42,7 +46,7 @@ function Tip({ x, y, children, w }: { x: number; y: number; children: ReactNode;
   const left = Math.min(Math.max(x, 70), w - 70)
   return (
     <div
-      className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full whitespace-nowrap rounded-xl border border-white/10 bg-[#1b1b1e]/95 px-3 py-2 text-xs text-paper shadow-[0_12px_30px_-10px_rgba(0,0,0,0.8)] backdrop-blur"
+      className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full whitespace-nowrap glass glass-strong rounded-xl px-3 py-2 text-xs text-paper"
       style={{ left, top: y - 10 }}
     >
       {children}
@@ -72,8 +76,8 @@ export function AreaChart({ data, format, caption, height = 220 }: { data: { lab
   const ticks = [0, 0.5, 1].map((f) => max * f)
   const every = Math.ceil(data.length / Math.max(2, Math.floor(iw / 64)))
   return (
-    <div ref={ref} className="relative" onMouseLeave={() => setHover(null)}>
-      <svg width={w} height={height} role="img" aria-label={caption} className="block overflow-visible">
+    <div ref={ref} className="relative min-w-0 max-w-full" onMouseLeave={() => setHover(null)}>
+      <svg width={w} height={height} role="img" aria-label={caption} className="block max-w-full overflow-visible">
         <defs>
           <linearGradient id="area-fill" x1="0" x2="0" y1="0" y2="1">
             <stop offset="0" stopColor={ACCENT} stopOpacity="0.28" />
@@ -82,7 +86,7 @@ export function AreaChart({ data, format, caption, height = 220 }: { data: { lab
         </defs>
         {ticks.map((v) => (
           <g key={v}>
-            <line x1={pad.l} x2={w - pad.r} y1={y(v)} y2={y(v)} stroke="rgba(255,255,255,0.06)" />
+            <line x1={pad.l} x2={w - pad.r} y1={y(v)} y2={y(v)} stroke="rgba(31,30,28,0.07)" />
             <text x={pad.l - 8} y={y(v) + 4} textAnchor="end" className="fill-paper/40 font-mono text-[10px]">
               {format(v)}
             </text>
@@ -99,8 +103,8 @@ export function AreaChart({ data, format, caption, height = 220 }: { data: { lab
         )}
         {hover !== null && (
           <g>
-            <line x1={x(hover)} x2={x(hover)} y1={pad.t} y2={pad.t + ih} stroke="rgba(255,255,255,0.25)" strokeDasharray="3 3" />
-            <circle cx={x(hover)} cy={y(data[hover].value)} r="5" fill={ACCENT} stroke="#121214" strokeWidth="2" />
+            <line x1={x(hover)} x2={x(hover)} y1={pad.t} y2={pad.t + ih} stroke="rgba(31,30,28,0.25)" strokeDasharray="3 3" />
+            <circle cx={x(hover)} cy={y(data[hover].value)} r="5" fill={ACCENT} stroke="#ffffff" strokeWidth="2" />
           </g>
         )}
         {data.map((_, i) => (
@@ -142,7 +146,7 @@ export function BarList({ items, format, caption }: { items: { label: ReactNode;
                 {i.sub && <span className="ml-2 text-xs text-paper/40">{i.sub}</span>}
               </span>
             </div>
-            <div className="h-2 rounded-full bg-white/[0.05]">
+            <div className="h-2 rounded-full bg-paper/[0.05]">
               <div
                 className="h-2 rounded-full transition-[width,opacity] duration-700 ease-[var(--ease-expo)] group-hover:opacity-80"
                 style={{ width: `${(i.value / max) * 100}%`, background: ACCENT }}
@@ -202,9 +206,9 @@ export function Columns({ data, caption, format = (n) => String(n), height = 160
   const slot = (w - pad.l - pad.r) / data.length
   const bw = Math.min(28, slot * 0.6)
   return (
-    <div ref={ref} className="relative" onMouseLeave={() => setHover(null)}>
-      <svg width={w} height={height} role="img" aria-label={caption} className="block">
-        <line x1={pad.l} x2={w - pad.r} y1={pad.t + ih} y2={pad.t + ih} stroke="rgba(255,255,255,0.08)" />
+    <div ref={ref} className="relative min-w-0 max-w-full" onMouseLeave={() => setHover(null)}>
+      <svg width={w} height={height} role="img" aria-label={caption} className="block max-w-full">
+        <line x1={pad.l} x2={w - pad.r} y1={pad.t + ih} y2={pad.t + ih} stroke="rgba(31,30,28,0.12)" />
         {data.map((d, i) => {
           const h = Math.max(2, (d.value / max) * ih)
           const x = pad.l + slot * i + (slot - bw) / 2
@@ -236,13 +240,13 @@ export function Columns({ data, caption, format = (n) => String(n), height = 160
   )
 }
 
-/** Weekday × hour heatmap, sequential single hue (dark → champagne). */
+/** Weekday × hour heatmap, sequential single hue (white → deep champagne). */
 export function Heatmap({ rows, cols, values, caption, lowLabel, highLabel, format }: { rows: string[]; cols: string[]; values: number[][]; caption: string; lowLabel: string; highLabel: string; format: (n: number) => string }) {
   const [hover, setHover] = useState<[number, number] | null>(null)
-  const color = (v: number) => (v <= 0 ? 'rgba(255,255,255,0.03)' : `color-mix(in oklab, ${ACCENT} ${Math.round(12 + v * 88)}%, #141416)`)
+  const color = (v: number) => (v <= 0 ? 'rgba(31,30,28,0.04)' : `color-mix(in oklab, #8a6a33 ${Math.round(10 + v * 90)}%, #ffffff)`)
   return (
     <div>
-      <div className="overflow-x-auto">
+      <div className="cc-scroll overflow-x-auto pb-1">
         <div className="inline-grid min-w-full gap-[3px]" style={{ gridTemplateColumns: `2.5rem repeat(${cols.length}, minmax(22px, 1fr))` }} onMouseLeave={() => setHover(null)}>
           <span />
           {cols.map((c, i) => (
@@ -266,7 +270,7 @@ export function Heatmap({ rows, cols, values, caption, lowLabel, highLabel, form
           ))}
         </div>
       </div>
-      <div className="mt-4 flex items-center justify-between gap-4 text-xs text-paper/50">
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-xs text-paper/50">
         <span>{hover ? `${rows[hover[0]]} · ${cols[hover[1]]} — ${format(values[hover[0]][hover[1]])}` : ' '}</span>
         <span className="flex items-center gap-2">
           {lowLabel}

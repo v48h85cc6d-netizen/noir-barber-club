@@ -23,10 +23,10 @@ export function Calendar() {
           <b>{fmt.date(day, { month: 'long', year: 'numeric' })}</b>
         </h1>
         <div className="flex gap-2">
-          <button type="button" aria-label={t.appts.prev} onClick={() => setDay(addDays(day, -7))} className="grid size-11 place-items-center rounded-full border border-white/10">
+          <button type="button" aria-label={t.appts.prev} onClick={() => setDay(addDays(day, -7))} className="grid size-11 place-items-center rounded-full border border-paper/10">
             <ChevronLeft className="size-5" />
           </button>
-          <button type="button" aria-label={t.appts.next} onClick={() => setDay(addDays(day, 7))} className="grid size-11 place-items-center rounded-full border border-white/10">
+          <button type="button" aria-label={t.appts.next} onClick={() => setDay(addDays(day, 7))} className="grid size-11 place-items-center rounded-full border border-paper/10">
             <ChevronRight className="size-5" />
           </button>
         </div>
@@ -44,11 +44,11 @@ export function Calendar() {
               role="radio"
               aria-checked={on}
               onClick={() => setDay(d)}
-              className={`flex h-[76px] flex-col items-center justify-center gap-0.5 rounded-2xl border transition-colors ${on ? 'border-[#d2b07a] bg-[#d2b07a] text-ink' : isToday ? 'border-[#d2b07a]/40' : 'border-white/[0.07] bg-white/[0.02]'}`}
+              className={`flex h-[76px] flex-col items-center justify-center gap-0.5 rounded-2xl border transition-colors ${on ? 'border-[#d2b07a] bg-[#d2b07a] text-[#1f1e1c]' : isToday ? 'border-[#d2b07a]/40' : 'border-paper/[0.07] bg-white/60'}`}
             >
               <span className="label text-[0.58rem] opacity-70">{fmt.weekday(d, 'short')}</span>
               <span className="text-xl font-semibold tabular-nums">{d.getDate()}</span>
-              <span className={`text-[0.6rem] tabular-nums ${on ? 'text-ink/70' : 'text-paper/45'}`}>{n || '·'}</span>
+              <span className={`text-[0.6rem] tabular-nums ${on ? 'text-[#1f1e1c]/70' : 'text-paper/45'}`}>{n || '·'}</span>
             </button>
           )
         })}
@@ -63,8 +63,8 @@ export function Calendar() {
               const c = data.clients.find((x) => x.id === a.clientId)
               return (
                 <li key={a.id}>
-                  <button type="button" onClick={() => setOpen(a)} className="flex w-full items-stretch gap-3 rounded-2xl border border-white/[0.07] bg-white/[0.02] p-3.5 text-left hover:border-white/20">
-                    <span className="flex w-14 shrink-0 flex-col justify-center border-r border-white/[0.08] pr-3 tabular-nums">
+                  <button type="button" onClick={() => setOpen(a)} className="flex w-full items-stretch gap-3 rounded-2xl border border-paper/[0.07] bg-white/60 p-3.5 text-left hover:border-paper/20">
+                    <span className="flex w-14 shrink-0 flex-col justify-center border-r border-paper/[0.08] pr-3 tabular-nums">
                       <span className="font-semibold">{hhmm(a.start)}</span>
                       <span className="text-xs text-paper/45">{hhmm(endOf(a))}</span>
                     </span>

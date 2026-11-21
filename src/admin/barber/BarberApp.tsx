@@ -30,16 +30,17 @@ export default function BarberApp({ onSignOut }: { onSignOut: () => void }) {
   }, [loc.pathname])
 
   return (
-    <div className="min-h-svh bg-ink text-paper">
-      <header className="sticky top-0 z-30 border-b border-white/[0.06] bg-ink/90 backdrop-blur-md">
+    <div className="relative min-h-svh text-paper">
+      <div aria-hidden className="cc-backdrop" />
+      <header className="glass-bar sticky top-0 z-30 border-b border-paper/[0.06]">
         <div className="mx-auto flex h-16 max-w-2xl items-center justify-between gap-3 px-4">
-          <div className="flex items-center gap-3">
-            <Wordmark className="w-20" />
-            <span className="label text-[#d2b07a]">{t.common.barber}</span>
+          <div className="flex min-w-0 items-center gap-3">
+            <Wordmark className="w-20 shrink-0" />
+            <span className="label truncate text-[#8a6a33]">{t.common.barber}</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2">
             <LanguageDropdown />
-            <button type="button" onClick={onSignOut} aria-label={t.common.signOut} className="grid size-10 place-items-center rounded-full border border-white/10 text-paper/70 hover:text-paper">
+            <button type="button" onClick={onSignOut} aria-label={t.common.signOut} className="grid size-10 place-items-center rounded-full border border-paper/10 bg-white/70 text-paper/70 hover:text-paper">
               <LogOut className="size-4" strokeWidth={1.5} />
             </button>
           </div>
@@ -47,7 +48,7 @@ export default function BarberApp({ onSignOut }: { onSignOut: () => void }) {
       </header>
       <DemoBanner />
 
-      <main className="mx-auto max-w-2xl px-4 pb-32 pt-6">
+      <main className="relative z-[1] mx-auto min-w-0 max-w-2xl px-4 pb-32 pt-6">
         <Routes>
           <Route path="today" element={<Today me={me} />} />
           <Route path="calendar" element={<Calendar />} />
@@ -59,17 +60,17 @@ export default function BarberApp({ onSignOut }: { onSignOut: () => void }) {
       </main>
 
       {/* bottom tab bar — big touch targets, thumb reach */}
-      <nav aria-label={t.nav.menu} className="fixed inset-x-0 bottom-0 z-40 border-t border-white/[0.08] bg-[#0c0c0e]/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md">
+      <nav aria-label={t.nav.menu} className="glass-bar fixed inset-x-0 bottom-0 z-40 border-t border-white/80 pb-[env(safe-area-inset-bottom)] shadow-[0_-12px_30px_-20px_rgba(31,30,28,0.35)]">
         <ul className="mx-auto grid max-w-2xl grid-cols-5">
           {tabs.map((x) => (
             <li key={x.key}>
               <NavLink
                 to={`/barber/${x.path}`}
-                className={({ isActive }) => `flex h-[68px] flex-col items-center justify-center gap-1 text-[0.68rem] transition-colors ${isActive ? 'text-[#d2b07a]' : 'text-paper/50 hover:text-paper'}`}
+                className={({ isActive }) => `flex h-[68px] flex-col items-center justify-center gap-1 text-[0.68rem] transition-colors ${isActive ? 'text-[#8a6a33]' : 'text-paper/50 hover:text-paper'}`}
               >
                 {({ isActive }) => (
                   <>
-                    <span className={`grid h-8 w-12 place-items-center rounded-full transition-colors ${isActive ? 'bg-[#d2b07a]/14' : ''}`}>
+                    <span className={`grid h-8 w-12 place-items-center rounded-full transition-colors ${isActive ? 'bg-[#d2b07a]/25' : ''}`}>
                       <x.icon className="size-[22px]" strokeWidth={1.5} />
                     </span>
                     {t.nav[x.key]}

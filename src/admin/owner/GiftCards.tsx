@@ -46,8 +46,8 @@ export function GiftCards() {
             {manual.map((x) => {
               const Icon = channelIcon[x.deliveryMethod]
               return (
-                <li key={x.reference} className="flex flex-wrap items-center gap-3 rounded-xl border border-white/[0.07] bg-white/[0.02] p-3">
-                  <Icon className="size-4 text-[#d2b07a]" strokeWidth={1.5} />
+                <li key={x.reference} className="flex flex-wrap items-center gap-3 rounded-xl border border-paper/[0.07] bg-white/60 p-3">
+                  <Icon className="size-4 text-[#8a6a33]" strokeWidth={1.5} />
                   <span className="font-medium">{x.recipient}</span>
                   <span className="text-sm text-paper/55">{x.sendTo}</span>
                   <span className="font-mono text-xs text-paper/70">{x.code}</span>
@@ -79,12 +79,12 @@ export function GiftCards() {
         <Empty>{t.appts.empty}</Empty>
       ) : (
         <Card pad={false}>
-          <ul className="divide-y divide-white/[0.05]">
+          <ul className="divide-y divide-paper/[0.05]">
             {list.map((x) => {
               const Icon = channelIcon[x.deliveryMethod]
               return (
                 <li key={x.reference}>
-                  <button type="button" onClick={() => { setOpenRef(x.reference); setAmount('') }} className="grid w-full grid-cols-[1fr_auto] items-center gap-x-4 gap-y-2 px-5 py-4 text-left transition-colors hover:bg-white/[0.025] md:grid-cols-[110px_1.3fr_1fr_90px_90px_1.4fr] md:px-6">
+                  <button type="button" onClick={() => { setOpenRef(x.reference); setAmount('') }} className="grid w-full grid-cols-[1fr_auto] items-center gap-x-4 gap-y-2 px-5 py-4 text-left transition-colors hover:bg-white/80 md:grid-cols-[110px_1.3fr_1fr_90px_90px_1.4fr] md:px-6">
                     <span className="font-mono text-xs text-paper/60">{x.reference}</span>
                     <span className="min-w-0 md:order-none">
                       <span className="block truncate font-medium">{x.recipient}</span>
@@ -113,13 +113,13 @@ export function GiftCards() {
         {g && (
           <div className="space-y-6">
             {/* the card itself */}
-            <div className="relative aspect-[1.586] overflow-hidden rounded-2xl bg-[linear-gradient(125deg,#f4f4f2_0%,#bcbcb9_22%,#eeeeec_42%,#9d9d9a_63%,#d9d9d6_82%,#8f8f8c_100%)] p-5 text-ink">
+            <div className="relative aspect-[1.586] overflow-hidden rounded-2xl bg-[linear-gradient(125deg,#f4f4f2_0%,#bcbcb9_22%,#eeeeec_42%,#9d9d9a_63%,#d9d9d6_82%,#8f8f8c_100%)] p-5 text-[#1f1e1c]">
               <div className="flex justify-between">
                 <span className="text-lg font-black tracking-tight [font-stretch:125%]">NØIR</span>
-                <span className="label text-ink/60">{g.payment === 'paid' ? t.gift.cardActive : t.gift.cardInactive}</span>
+                <span className="label text-[#1f1e1c]/60">{g.payment === 'paid' ? t.gift.cardActive : t.gift.cardInactive}</span>
               </div>
               <div className="absolute bottom-5 left-5 right-5">
-                <div className="label text-ink/55">{g.recipient}</div>
+                <div className="label text-[#1f1e1c]/55">{g.recipient}</div>
                 <div className="text-4xl font-light tabular-nums">{money(g.amount)}</div>
                 <div className="mt-1 font-mono text-sm">{g.code}</div>
               </div>
@@ -149,7 +149,7 @@ export function GiftCards() {
             {g.redemptions.length > 0 && (
               <div>
                 <div className="label mb-2 text-paper/45">{t.gift.redemptions}</div>
-                <ul className="divide-y divide-white/[0.06] text-sm">
+                <ul className="divide-y divide-paper/[0.06] text-sm">
                   {g.redemptions.map((r, i) => (
                     <li key={i} className="flex justify-between py-2">
                       <span className="text-paper/60">{fmt.date(new Date(r.at), { day: 'numeric', month: 'short', year: 'numeric' })}</span>
@@ -160,7 +160,7 @@ export function GiftCards() {
               </div>
             )}
 
-            <div className="space-y-3 border-t border-white/[0.06] pt-6">
+            <div className="space-y-3 border-t border-paper/[0.06] pt-6">
               {g.payment === 'pending' && (
                 <>
                   <Btn tone="gold" size="lg" className="w-full" onClick={() => act(confirmGiftPayment(g.reference))}>

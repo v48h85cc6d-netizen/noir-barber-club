@@ -11,9 +11,11 @@ const AdminApp = lazy(() => import('./admin/AdminApp'))
 const root = createRoot(document.getElementById('root')!)
 
 if (isAdmin) {
+  // light Command Center theme from the first paint (no dark flash)
+  document.documentElement.classList.add('cc-root')
   root.render(
     <StrictMode>
-      <Suspense fallback={<div style={{ minHeight: '100svh', background: '#0a0a0b' }} />}>
+      <Suspense fallback={<div style={{ minHeight: '100svh', background: '#f6f4ef' }} />}>
         <AdminApp />
       </Suspense>
     </StrictMode>,

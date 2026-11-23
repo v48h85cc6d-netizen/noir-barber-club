@@ -53,7 +53,7 @@ const at = (d: Date, hhmm: string) => {
 const toMin = (t: string) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3, 5))
 
 /** Stored-data version; bump when the shape changes so old browser data is re-seeded. */
-export const DATA_VERSION = 3
+export const DATA_VERSION = 4
 
 /** Built-in demo logins (the passwords are given by the business, stored here only as digests). */
 export const DEMO_OWNER_EMAIL = 'owner@gmail.com'

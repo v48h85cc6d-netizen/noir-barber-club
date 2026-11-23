@@ -91,6 +91,7 @@ export function resetDb() {
   persist(fresh)
   try {
     window.localStorage.removeItem('noir.demo.session')
+    window.localStorage.removeItem('noir.demo.pending')
     window.sessionStorage.removeItem('noir.booking.draft')
   } catch {
     /* ignore */

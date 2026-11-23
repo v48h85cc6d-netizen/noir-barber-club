@@ -118,7 +118,7 @@ export interface BookingRequest {
   note: string
 }
 
-export type BookingError = 'not_signed_in' | 'not_customer' | 'invalid' | 'outside_window' | 'slot_taken'
+export type BookingError = 'not_signed_in' | 'not_customer' | 'unverified' | 'invalid' | 'outside_window' | 'slot_taken'
 export type BookingResult = { ok: true; appointment: Appointment } | { ok: false; error: BookingError }
 
 export function createBooking(session: AuthSession | null, req: BookingRequest, now = new Date()): BookingResult {
@@ -131,6 +131,8 @@ export function createBooking(session: AuthSession | null, req: BookingRequest, 
     const service = activeServices(d).find((s) => s.id === req.serviceId)
     const client = d.clients.find((c) => c.id === session.clientId)
     if (!service || !client) return { ok: false, error: 'invalid' }
+    // only customers with a verified email address can book
+    if (!d.accounts.find((a) => a.id === session.accountId)?.emailVerifiedAt) return { ok: false, error: 'unverified' }
     const date = fromKey(req.date)
     const days = bookingDays(d, now).map(toKey)
     if (!days.includes(req.date)) return { ok: false, error: 'outside_window' }

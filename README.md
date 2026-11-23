@@ -82,7 +82,7 @@ The visual language (light-grey and near-black sections, sentence-case extra-wid
 | Barber | `/admin/login/barber` | `Barber@gmail.com` / `Barber@gmail.com` (Idris Haddad) |
 | Customer | `/account/register`, then `/account/login` | created by the visitor |
 
-- **Customers** register themselves (full name, email, phone, password, confirmation). Validation, duplicate-email check, automatic sign-in and a session that survives refresh. The sign-up has no role field, so it can only ever create customers.
+- **Customers** register themselves (full name, email, phone, password, confirmation), then confirm their email with a 6-digit code (see below). Validation, duplicate-email check, automatic sign-in after verification and a session that survives refresh. The sign-up has no role field, so it can only ever create customers.
 - **Booking** needs a signed-in customer. A visitor who confirms is sent to sign-in / sign-up and returns to the review step with barber, service, date and time kept. Every booking gets a reference (`NB-XXXXXX`) and appears in *My appointments*, the owner's Appointments and the assigned barber's dashboard.
 - **Rules:** a barber can never be double-booked (re-checked at the moment of saving, also across tabs). Customers see and cancel only their own appointments, up to the cancellation window (24 h by default). Barbers see only their own appointments and can confirm, cancel (before it starts) and complete (once it started). Only the owner creates, edits or deactivates barber accounts.
 - **Route protection** is decided from the signed-in role on every route, not just by hiding links: customers can't open `/admin/*`, barbers can't open `/admin/owner/*`, signed-out visitors are sent to the right login.
@@ -90,11 +90,21 @@ The visual language (light-grey and near-black sections, sentence-case extra-wid
 - **Reset demo data:** owner → Settings → *Reset demo data*, or the link on `/admin`. Restores the sample data and the two built-in logins; removes registered customers.
 - **Swap points for the real backend:** `src/demo/auth.ts` (`AuthService`), `src/demo/bookings.ts` and `src/demo/db.ts`. Screens only use these services. `npm run test:demo` runs the rule checks.
 
+### Customer email verification (OTP)
+
+Sign-up only creates a **pending** registration (kept apart from accounts; password only as a digest). The server function emails a 6-digit code from **NOIR BARBER CLUB <projects@veltri-x-agency.com>**; the account is created and signed in only after the correct code is entered. Unverified customers cannot sign in or book.
+
+- **Server side** (`netlify/functions/verification-send.mts`, `verification-verify.mts`, logic in `netlify/lib/`): the code is generated and checked on the server, stored only as an HMAC for 10 minutes (Netlify Blobs — Netlify's built-in key-value storage, not a database), never returned to the browser. A new code replaces the old one; 5 wrong attempts lock the code; 60 s between codes; at most 5 codes per email and 20 per IP per hour.
+- **Configuration** (Netlify → Site configuration → Environment variables, see `.env.example`): `VERIFICATION_SECRET` plus either `RESEND_API_KEY` (recommended) or `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASS`. Without them the site shows "We couldn't send the verification email right now" — it never pretends an email was sent.
+- **DNS for veltri-x-agency.com** (records come from the provider's domain settings): SPF (TXT, e.g. `include:` of the provider; for Resend on the `send` subdomain), DKIM (TXT, e.g. `resend._domainkey`), and DMARC (`_dmarc` TXT, start with `v=DMARC1; p=none; rua=mailto:…`). Resend refuses to send from the domain until its records are verified.
+- **Local test server:** `npm run build && npm run serve:functions` serves the site and the functions at `http://localhost:8888` with the same environment variables. `npm run test:verification` checks the server rules.
+- **Password reset** still shows its code on screen (demo); it should move to the same email function before going live.
+
 ### Testing the three roles
 
 1. **Owner:** open `/admin`, *Owner login*, sign in. All modules are in the sidebar; *Barbers → Create barber account* adds a barber who can sign in at the barber login.
 2. **Barber:** open `/admin`, *Barber login*, sign in. *Today* shows the day and the next two weeks. Tap an appointment for the customer's details and the status buttons.
-3. **Customer:** on the website, use the person icon in the menu (*Sign in*), then *Create an account*. Use *Book appointment*, pick a barber, service, date and time, and confirm. *My appointments* lists it. Sign in as owner and barber to see the same booking.
+3. **Customer:** on the website, use the person icon in the menu (*Sign in*), then *Create an account* and enter the code from the email (needs the email settings above). Use *Book appointment*, pick a barber, service, date and time, and confirm. *My appointments* lists it. Sign in as owner and barber to see the same booking.
 
 ## NOIR Command Center (`/admin`)
 

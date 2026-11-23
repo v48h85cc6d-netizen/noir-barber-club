@@ -69,6 +69,7 @@ web_modules/
 .env
 .env.*
 !.env.example
+!.env.example
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -155,3 +156,6 @@ vite.config.ts.timestamp-*
 .nx/cache
 .nx/workspace-data
 .nx/migrate-runs
+
+# Netlify local state
+.netlify

@@ -8,7 +8,7 @@ import { LanguageDropdown } from '../components/LanguageSwitcher'
 import { ToastProvider } from '../admin/ui'
 import { AuthLayout } from '../admin/auth-ui'
 import { useAccountT } from './i18n'
-import { ForgotPage, LoginPage, RegisterPage } from './AuthPages'
+import { ForgotPage, LoginPage, RegisterPage, VerifyPage } from './AuthPages'
 import { MyAppointments } from './MyAppointments'
 import { ProfilePage } from './Profile'
 import '../admin/admin.css'
@@ -58,6 +58,7 @@ function AccountRoutes() {
     <Routes>
       <Route path="/login" element={session ? signedInHome : <LoginPage />} />
       <Route path="/register" element={session ? signedInHome : <RegisterPage />} />
+      <Route path="/verify" element={session ? signedInHome : <VerifyPage />} />
       <Route path="/forgot" element={session ? <Navigate to="/appointments" replace /> : <ForgotPage />} />
       <Route path="/appointments" element={<CustomerOnly session={session}>{(s) => <Shell><MyAppointments session={s} /></Shell>}</CustomerOnly>} />
       <Route path="/profile" element={<CustomerOnly session={session}>{(s) => <Shell><ProfilePage session={s} /></Shell>}</CustomerOnly>} />

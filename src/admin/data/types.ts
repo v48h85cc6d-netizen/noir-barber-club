@@ -28,6 +28,8 @@ export interface DemoAccount {
   barberId?: BarberId
   /** customer accounts point at their client record */
   clientId?: string
+  /** customers: when the email address was verified with the emailed code (accounts only exist once verified) */
+  emailVerifiedAt?: string
   /** the two built-in demo logins cannot be removed or have their email changed */
   builtIn?: boolean
 }

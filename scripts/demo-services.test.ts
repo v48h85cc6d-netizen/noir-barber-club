@@ -58,21 +58,30 @@ ok(!auth.signIn('Owner@gmail.com', 'Owner112233', 'customer').ok, 'owner credent
 ok(auth.getSession() === null, 'a refused login leaves nobody signed in')
 
 // ——— registration ———
-const bad = auth.register({ name: 'A', email: 'nope', phone: '12', password: 'short', confirm: 'other' })
+const bad = auth.startRegistration({ name: 'A', email: 'nope', phone: '12', password: 'short', confirm: 'other' })
 ok(!bad.ok && bad.fields?.name && bad.fields.email && bad.fields.phone && bad.fields.password && bad.fields.confirm, 'registration validates every field')
-const mism = auth.register({ name: 'Ana Test', email: 'ana@example.com', phone: '+31 6 1111 2222', password: 'password123', confirm: 'password124' })
+const mism = auth.startRegistration({ name: 'Ana Test', email: 'ana@example.com', phone: '+31 6 1111 2222', password: 'password123', confirm: 'password124' })
 ok(!mism.ok && mism.fields?.confirm === 'password_mismatch', 'password confirmation must match')
-const ana = auth.register({ name: 'Ana Test', email: 'Ana@Example.com', phone: '+31 6 1111 2222', password: 'password123', confirm: 'password123' })
-ok(ana.ok && ana.value.role === 'customer', 'valid registration creates a CUSTOMER and signs in')
+const pend = auth.startRegistration({ name: 'Ana Test', email: 'Ana@Example.com', phone: '+31 6 1111 2222', password: 'password123', confirm: 'password123' })
+ok(pend.ok && !readDb().accounts.some((a) => a.email === 'ana@example.com'), 'sign-up only creates a PENDING registration, no account yet')
+ok(auth.getSession() === null, 'no session before the email is verified')
+const unv = auth.signIn('ana@example.com', 'password123', 'customer')
+ok(!unv.ok && unv.error === 'unverified', 'an unverified customer cannot sign in')
+ok(!JSON.stringify(window.localStorage.getItem('noir.demo.pending')).includes('password123'), 'the pending registration keeps only a password digest')
+const ana = auth.completeRegistration('ana@example.com')
+ok(ana.ok && ana.value.role === 'customer', 'after verification the CUSTOMER account is created and signed in')
+ok(!!readDb().accounts.find((a) => a.email === 'ana@example.com')?.emailVerifiedAt, 'the account is marked as email-verified')
+ok(!auth.completeRegistration('nobody@example.com').ok, 'no account without a pending registration')
 ok(readDb().accounts.find((a) => a.email === 'ana@example.com')?.passwordHash === hashPassword('ana@example.com', 'password123'), 'password is stored as a digest, not plain text')
 auth.signOut()
-const dup = auth.register({ name: 'Ana Two', email: 'ana@example.com', phone: '+31 6 1111 3333', password: 'password123', confirm: 'password123' })
+const dup = auth.startRegistration({ name: 'Ana Two', email: 'ana@example.com', phone: '+31 6 1111 3333', password: 'password123', confirm: 'password123' })
 ok(!dup.ok && dup.error === 'email_taken', 'duplicate email is refused')
-const dupOwner = auth.register({ name: 'Fake Owner', email: 'owner@gmail.com', phone: '+31 6 1111 4444', password: 'password123', confirm: 'password123' })
+const dupOwner = auth.startRegistration({ name: 'Fake Owner', email: 'owner@gmail.com', phone: '+31 6 1111 4444', password: 'password123', confirm: 'password123' })
 ok(!dupOwner.ok, 'nobody can register over the owner email')
 ok(readDb().accounts.find((a) => a.email === 'owner@gmail.com')?.role === 'owner', 'built-in owner account is untouched')
 // the register input has no role field at all; extra properties are ignored
-const sneaky = auth.register({ name: 'Sneaky', email: 'sneaky@example.com', phone: '+31 6 1111 5555', password: 'password123', confirm: 'password123', role: 'owner' } as never)
+auth.startRegistration({ name: 'Sneaky', email: 'sneaky@example.com', phone: '+31 6 1111 5555', password: 'password123', confirm: 'password123', role: 'owner' } as never)
+const sneaky = auth.completeRegistration('sneaky@example.com')
 ok(sneaky.ok && sneaky.value.role === 'customer', 'a "role" sent with sign-up is ignored: always customer')
 auth.signOut()
 
@@ -120,6 +129,17 @@ const anaAppt = first.ok ? first.appointment.id : ''
 const steal = cancelBooking(otherS, anaAppt)
 ok(!steal.ok && steal.error === 'forbidden', 'customer B cannot cancel customer A’s appointment')
 auth.signOut()
+
+// an account without a verified email cannot book (e.g. older demo data)
+updateDb((d) => {
+  delete d.accounts.find((a) => a.email === 'sneaky@example.com')!.emailVerifiedAt
+})
+const unverifiedBook = createBooking(otherS, { barberId: 'lucas', serviceId: 'skin-fade', date: day, time, note: '' })
+ok(!unverifiedBook.ok && unverifiedBook.error === 'unverified', 'a customer without a verified email cannot book')
+ok(!auth.signIn('sneaky@example.com', 'password123', 'customer').ok, 'an unverified account cannot sign in')
+updateDb((d) => {
+  d.accounts.find((a) => a.email === 'sneaky@example.com')!.emailVerifiedAt = new Date().toISOString()
+})
 
 // ——— visibility to staff ———
 ok(readDb().appointments.some((a) => a.id === anaAppt && a.barberId === 'idris' && a.status === 'booked'), 'the booking is in the shared data (owner + Idris see it)')

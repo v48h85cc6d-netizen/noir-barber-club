@@ -26,6 +26,7 @@ export function Today({ me }: { me: BarberRecord }) {
   const client = focus ? data.clients.find((c) => c.id === focus.clientId) : undefined
   const visitsWithMe = (clientId: string) => data.appointments.filter((a) => a.clientId === clientId && a.status === 'completed').length
   const first = session.name.split(' ')[0]
+  const upcoming = inRange(data.appointments, addDays(today, 1), addDays(today, 15)).filter((a) => a.status !== 'cancelled')
 
   const next: Partial<Record<AppointmentStatus, { to: AppointmentStatus; label: string; icon: typeof Check }>> = {
     booked: { to: 'arrived', label: t.bApp.arrived, icon: Footprints },
@@ -145,6 +146,37 @@ export function Today({ me }: { me: BarberRecord }) {
           </ol>
         </section>
       )}
+      {/* upcoming: the next two weeks, own appointments only (the store already scopes them) */}
+      <section className="mt-8">
+        <h2 className="label mb-3 text-paper/45">{t.bApp.upcoming}</h2>
+        {upcoming.length === 0 ? (
+          <p className="rounded-2xl border border-dashed border-paper/15 bg-white/40 p-5 text-center text-sm text-paper/55">{t.bApp.noUpcoming}</p>
+        ) : (
+          <ul className="space-y-2">
+            {upcoming.map((a) => {
+              const c = data.clients.find((x) => x.id === a.clientId)
+              return (
+                <li key={a.id}>
+                  <button type="button" onClick={() => setOpen(a)} className="flex w-full items-center gap-3 rounded-2xl border border-paper/[0.07] bg-white/60 p-3.5 text-left transition-colors hover:border-paper/20">
+                    <span className="w-16 shrink-0 text-xs leading-tight text-paper/60">
+                      <span className="block font-semibold text-paper first-letter:uppercase">{fmt.date(new Date(a.start), { weekday: 'short', day: 'numeric' })}</span>
+                      <span className="tabular-nums">{hhmm(a.start)}</span>
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate font-medium">{c?.name}</span>
+                      <span className="block truncate text-xs text-paper/50">
+                        {pub.services.items[a.serviceId].name} · {a.duration} {t.common.min}
+                        {c?.phone ? ` · ${c.phone}` : ''}
+                      </span>
+                    </span>
+                    <StatusPill status={a.status} />
+                  </button>
+                </li>
+              )
+            })}
+          </ul>
+        )}
+      </section>
       <AppointmentSheet appt={open} onClose={() => setOpen(null)} />
     </div>
   )

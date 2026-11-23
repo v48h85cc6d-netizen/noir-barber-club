@@ -36,7 +36,10 @@ export default function BarberApp({ onSignOut }: { onSignOut: () => void }) {
         <div className="mx-auto flex h-16 max-w-2xl items-center justify-between gap-3 px-4">
           <div className="flex min-w-0 items-center gap-3">
             <Wordmark className="w-20 shrink-0" />
-            <span className="label truncate text-[#8a6a33]">{t.common.barber}</span>
+            <span className="label truncate text-[#8a6a33]" title={`${t.bApp.loggedInAs} ${me?.name ?? ''}`}>
+              {me?.name}
+              <span className="hidden sm:inline"> · {t.common.barber}</span>
+            </span>
           </div>
           <div className="flex shrink-0 items-center gap-2">
             <LanguageDropdown />

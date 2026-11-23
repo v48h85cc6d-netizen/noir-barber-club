@@ -12,6 +12,7 @@ import type {
   BarberId,
   BarberRecord,
   Client,
+  DemoAccount,
   DemoData,
   GiftCardRecord,
   MembershipRecord,
@@ -51,6 +52,15 @@ const at = (d: Date, hhmm: string) => {
 }
 const toMin = (t: string) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3, 5))
 
+/** Stored-data version; bump when the shape changes so old browser data is re-seeded. */
+export const DATA_VERSION = 3
+
+/** Built-in demo logins (the passwords are given by the business, stored here only as digests). */
+export const DEMO_OWNER_EMAIL = 'owner@gmail.com'
+export const DEMO_BARBER_EMAIL = 'barber@gmail.com'
+/** the built-in barber login belongs to Idris */
+export const DEMO_BARBER_ID = 'idris'
+
 const barberHours: Record<BarberId, Record<number, { start: string; end: string } | null>> = (() => {
   const base = (off: number[]) => {
     const out: Record<number, { start: string; end: string } | null> = {}
@@ -77,7 +87,7 @@ export function createDemoData(now = new Date()): DemoData {
     image: b.image,
     instagram: b.instagram,
     phone: `+31 6 0000 10${i}${i}`,
-    email: `${b.id}@demo.noirbarberclub.example`,
+    email: b.id === 'marco' ? DEMO_OWNER_EMAIL : b.id === DEMO_BARBER_ID ? DEMO_BARBER_EMAIL : `${b.id}@demo.noirbarberclub.example`,
     bio: '',
     specialty: '',
     active: true,
@@ -128,7 +138,8 @@ export function createDemoData(now = new Date()): DemoData {
       if (b.timeOff.some((t) => new Date(t.from) <= d && d <= new Date(t.to))) continue
       let m = toMin(h.start)
       const end = toMin(h.end)
-      const fill = offset > 3 ? 0.45 - offset * 0.02 : 0.74
+      // today is busy; days ahead fill up gradually, leaving room to book online
+      const fill = offset > 0 ? Math.max(0.12, 0.52 - offset * 0.03) : 0.74
       while (m + 30 <= end) {
         const svc = pickService()
         if (m + svc.duration > end) break
@@ -230,7 +241,7 @@ export function createDemoData(now = new Date()): DemoData {
   })
 
   const staff: StaffAccount[] = [
-    { id: 'u-owner', name: 'Marco Velden', email: 'owner@demo.noirbarberclub.example', role: 'owner', barberId: 'marco', active: true, invitedAt: day(-400, now).toISOString(), lastSeenAt: now.toISOString() },
+    { id: 'u-owner', name: 'Marco Velden', email: DEMO_OWNER_EMAIL, role: 'owner', barberId: 'marco', active: true, invitedAt: day(-400, now).toISOString(), lastSeenAt: now.toISOString() },
     ...barbers
       .filter((b) => b.id !== 'marco')
       .map((b, i) => ({
@@ -253,8 +264,39 @@ export function createDemoData(now = new Date()): DemoData {
     { id: 'l5', at: at(day(-12, now), '10:02').toISOString(), actor: 'Marco Velden', role: 'owner', action: 'staff.invite', target: 'theo@demo.noirbarberclub.example' },
   ]
 
+  // only the two built-in logins can sign in at first; the owner creates more barber logins
+  const accounts: DemoAccount[] = [
+    {
+      id: 'u-owner',
+      role: 'owner',
+      email: DEMO_OWNER_EMAIL,
+      name: 'Marco Velden',
+      phone: barbers[0].phone,
+      passwordHash: '77da7ed146bb434d7a39ba6b5ea7600fcc273145f81cbe8041572b48bd9baacf',
+      createdAt: day(-400, now).toISOString(),
+      active: true,
+      barberId: 'marco',
+      builtIn: true,
+    },
+    {
+      id: `u-${DEMO_BARBER_ID}`,
+      role: 'barber',
+      email: DEMO_BARBER_EMAIL,
+      name: barbers.find((b) => b.id === DEMO_BARBER_ID)!.name,
+      phone: barbers.find((b) => b.id === DEMO_BARBER_ID)!.phone,
+      passwordHash: 'a11a6e6920065e75378af30928de08c43573583f7e8feded5bb02fac38f89df7',
+      createdAt: day(-300, now).toISOString(),
+      active: true,
+      barberId: DEMO_BARBER_ID,
+      builtIn: true,
+    },
+  ]
+
   void plans
   return {
+    version: DATA_VERSION,
+    seededAt: now.toISOString(),
+    accounts,
     staff,
     barbers,
     clients,

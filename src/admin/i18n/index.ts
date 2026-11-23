@@ -10,7 +10,12 @@ export function useAdminT() {
   const i = useI18n()
   const t: AdminDict = dicts[i.locale]
   const money = (n: number, digits = 0) => `€${i.fmt.number(n, { minimumFractionDigits: digits, maximumFractionDigits: digits })}`
-  return { ...i, t, pub: i.t, money }
+  /** Role, specialty and bio of a barber: website copy for the founding team, the owner's entries for barbers added later. */
+  const person = (b: { id: string; specialty: string; bio: string }) => {
+    const p = (i.t.barbers.people as Record<string, { role: string; specialty: string; bio: string } | undefined>)[b.id]
+    return { role: p?.role ?? t.common.barber, specialty: b.specialty || p?.specialty || '', bio: b.bio || p?.bio || '' }
+  }
+  return { ...i, t, pub: i.t, money, person }
 }
 
 export type { AdminDict }

@@ -1,18 +1,21 @@
-import { barbers, services } from '../data/content'
 import { useBooking, type StepIndex } from '../context/booking'
 import { endTime, fromKey } from '../lib/schedule'
 import { useI18n } from '../i18n'
+import { useCatalog } from './catalog'
 
 export function useSelection() {
   const { state } = useBooking()
   const { t, fmt } = useI18n()
+  const { services, barbers, db } = useCatalog()
   const service = services.find((s) => s.id === state.serviceId) ?? null
-  const barber = barbers.find((b) => b.id === state.barberId) ?? null
+  // after booking, show the barber who actually got the appointment
+  const barberId = state.booked?.barberId ?? state.barberId
+  const barber = barbers.find((b) => b.id === barberId) ?? db.barbers.find((b) => b.id === barberId) ?? null
   const date = state.date ? fromKey(state.date) : null
   return {
     service,
     barber,
-    barberLabel: state.barberId === 'any' ? t.panel.anyAvailable : (barber?.name ?? null),
+    barberLabel: barberId === 'any' ? t.panel.anyAvailable : (barber?.name ?? null),
     serviceName: service ? t.services.items[service.id].name : null,
     date,
     dateLabel: date ? fmt.date(date, { weekday: 'short', day: 'numeric', month: 'long' }) : null,
@@ -33,9 +36,9 @@ export function SummaryRow({ label, value, step, onEdit, tone = 'dark' }: RowPro
   const muted = tone === 'dark' ? 'text-paper/40' : 'text-ink/45'
   return (
     <div className={`flex items-baseline justify-between gap-4 border-b py-3 ${tone === 'dark' ? 'border-line' : 'border-ink/12'}`}>
-      <span className={`label ${muted}`}>{label}</span>
-      <span className="flex items-baseline gap-3 text-right">
-        <span className={value ? '' : muted}>{value ?? '—'}</span>
+      <span className={`label shrink-0 ${muted}`}>{label}</span>
+      <span className="flex min-w-0 items-baseline gap-3 text-right">
+        <span className={`min-w-0 break-words ${value ? '' : muted}`}>{value ?? '—'}</span>
         {onEdit && value && (
           <button
             type="button"

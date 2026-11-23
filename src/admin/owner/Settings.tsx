@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Database, ShieldCheck } from 'lucide-react'
+import { Database, RotateCcw, ShieldCheck } from 'lucide-react'
 import { LanguageSegmented } from '../../components/LanguageSwitcher'
 import { site } from '../../data/site'
 import { useStore } from '../data/store'
@@ -23,7 +23,7 @@ const MATRIX: [keyof ReturnType<typeof useAdminT>['t']['settings']['perm'], Leve
 
 export function Settings() {
   const { t, fmt } = useAdminT()
-  const { data, updateSettings } = useStore()
+  const { data, updateSettings, resetDemo } = useStore()
   const act = useAct()
   const [s, setS] = useState<S>(data.settings)
   const num = (k: keyof S, label: string, min: number, max: number) => (
@@ -95,11 +95,23 @@ export function Settings() {
             <p className="mt-3 text-xs text-paper/50">{t.settings.languageNote}</p>
           </Card>
           <Card title={t.settings.connection}>
-            <div className="flex items-center gap-3 text-sm">
+            <div className="flex flex-wrap items-center gap-3 text-sm">
               <Database className="size-5 text-[#8a6a33]" strokeWidth={1.5} />
-              <span className="text-paper/70">{t.settings.connectionDemo}</span>
+              <span className="min-w-0 flex-1 text-paper/70">{t.settings.connectionDemo}</span>
               <Tag tone="warn">{t.demo.badge}</Tag>
             </div>
+          </Card>
+          <Card title={t.settings.demoData}>
+            <p className="text-sm text-paper/60">{t.settings.demoDataNote}</p>
+            <Btn
+              tone="danger"
+              className="mt-4"
+              onClick={() => {
+                if (window.confirm(t.login.resetConfirm)) act(resetDemo(), t.login.resetDone)
+              }}
+            >
+              <RotateCcw className="size-4" /> {t.login.resetDemo}
+            </Btn>
           </Card>
         </div>
       </div>
@@ -153,7 +165,7 @@ export function Settings() {
                   {e.action} <span className="text-paper/45">· {e.target}</span>
                 </span>
                 <span className="row-start-1 text-right text-xs text-paper/60 sm:row-start-auto">
-                  {e.actor} <span className="text-paper/35">({e.role === 'owner' ? t.common.owner : t.common.barber})</span>
+                  {e.actor} <span className="text-paper/35">({e.role === 'owner' ? t.common.owner : e.role === 'customer' ? t.common.customer : t.common.barber})</span>
                 </span>
               </li>
             ))}

@@ -4,20 +4,20 @@ import './index.css'
 import App from './App.tsx'
 import { I18nProvider } from './i18n'
 
-// /admin is the private Command Center: loaded on demand, so the public site's bundle is unchanged
+// /admin is the private Command Center and /account the customer area: both load on demand
 const isAdmin = /^\/admin(\/|$)/.test(window.location.pathname)
+const isAccount = /^\/account(\/|$)/.test(window.location.pathname)
 const AdminApp = lazy(() => import('./admin/AdminApp'))
+const AccountApp = lazy(() => import('./account/AccountApp'))
 
 const root = createRoot(document.getElementById('root')!)
 
-if (isAdmin) {
-  // light Command Center theme from the first paint (no dark flash)
+if (isAdmin || isAccount) {
+  // light glass theme from the first paint (no dark flash)
   document.documentElement.classList.add('cc-root')
   root.render(
     <StrictMode>
-      <Suspense fallback={<div style={{ minHeight: '100svh', background: '#f6f4ef' }} />}>
-        <AdminApp />
-      </Suspense>
+      <Suspense fallback={<div style={{ minHeight: '100svh', background: '#f6f4ef' }} />}>{isAdmin ? <AdminApp /> : <AccountApp />}</Suspense>
     </StrictMode>,
   )
 } else {

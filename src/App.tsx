@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { ReadyContext } from './context/ready'
-import { BookingProvider } from './context/booking'
+import { BookingProvider, takeDraft, useBooking } from './context/booking'
 import { ContactProvider } from './context/contact'
 import { ScrollTrigger } from './lib/gsap'
 import { Preloader } from './components/Preloader'
@@ -49,8 +49,30 @@ export default function App() {
           </main>
           <Footer />
           <BookingDrawer />
+          <BookingDeepLink ready={ready} />
         </BookingProvider>
       </ContactProvider>
     </ReadyContext.Provider>
   )
+}
+
+/**
+ * ?book=1 opens the booking panel (e.g. from the customer account);
+ * ?book=resume re-opens the choices kept while the visitor signed in.
+ */
+function BookingDeepLink({ ready }: { ready: boolean }) {
+  const { open, resume } = useBooking()
+  useEffect(() => {
+    if (!ready) return
+    const params = new URLSearchParams(window.location.search)
+    const book = params.get('book')
+    if (!book) return
+    params.delete('book')
+    const qs = params.toString()
+    window.history.replaceState(null, '', `${window.location.pathname}${qs ? `?${qs}` : ''}${window.location.hash}`)
+    const draft = book === 'resume' ? takeDraft() : null
+    if (draft) resume(draft)
+    else open()
+  }, [ready, open, resume])
+  return null
 }

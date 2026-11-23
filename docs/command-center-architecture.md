@@ -174,3 +174,13 @@ The public website stays exactly as it is until a phase explicitly switches one 
 - Automatic SMS / WhatsApp / email sending: it needs provider accounts; until then the dashboard shows a *manual delivery* queue
 - A client-facing account area
 - Payroll and commission calculations
+
+## Addendum — three-role demo (owner, barber, customer), no database
+
+Built on request as a frontend-only demo before any database is approved.
+
+- **Data:** one JSON document in `localStorage` (`noir.demo.db`), read and written only through `src/demo/db.ts`. The public booking panel, the customer area (`/account`) and the Command Center (`/admin`) share it, so a customer's booking appears for the owner and the assigned barber immediately (also across tabs via the `storage` event).
+- **Auth:** `src/demo/auth.ts` defines `AuthService` (sign in per area, register, sign out, password reset, change password, profile) with a local mock implementation. Sessions live in `localStorage` (`noir.demo.session`) and are re-validated against the account on every read, so a deactivated or deleted account loses access at once. **Not secure** — for testing only.
+- **Bookings:** `src/demo/bookings.ts` computes availability from barber hours, time off, settings and existing appointments; `createBooking` re-checks the slot inside the write (no double booking), `cancelBooking` only lets a customer cancel their own appointment inside the cancellation window.
+- **Roles enforced in code paths, not only in navigation:** route guards in `AdminApp.tsx` / `AccountApp.tsx`, role checks in every store action, barber status changes limited by `barberOptions()` (cancel only before the start, complete only after).
+- **Moving to the real backend:** implement `AuthService` with Supabase Auth, back `db.ts`/`bookings.ts` with the API, add a `customer` role (own profile + own appointments under RLS) next to the existing owner/barber policies, and keep the `appointments` exclusion constraint as the final double-booking guard.

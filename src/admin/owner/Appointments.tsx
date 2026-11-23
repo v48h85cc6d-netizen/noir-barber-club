@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useStore } from '../data/store'
-import type { Appointment, AppointmentStatus } from '../data/types'
+import type { Appointment, AppointmentStatus, BookingSource } from '../data/types'
 import { addDays, endOf, hhmm, inRange, isLive, revenueOf, sameDay, startOfDay, startOfWeek } from '../data/select'
 import { useAdminT } from '../i18n'
 import { BarberAvatar, Btn, Card, Empty, PageHeader, Segmented, Select, StatusPill, useNow } from '../ui'
@@ -18,6 +18,8 @@ export function Appointments() {
   const [barber, setBarber] = useState('all')
   const [status, setStatus] = useState<'all' | AppointmentStatus>('all')
   const [when, setWhen] = useState<'upcoming' | 'past'>('upcoming')
+  const [source, setSource] = useState<'all' | BookingSource>('all')
+  const [q, setQ] = useState('')
 
   const step = view === 'week' ? 7 : 1
   const weekStart = startOfWeek(date)
@@ -30,11 +32,17 @@ export function Appointments() {
   const list = useMemo(() => {
     const now = nowDate.getTime()
     return data.appointments
-      .filter((a) => (barber === 'all' || a.barberId === barber) && (status === 'all' || a.status === status))
+      .filter((a) => (barber === 'all' || a.barberId === barber) && (status === 'all' || a.status === status) && (source === 'all' || a.source === source))
+      .filter((a) => {
+        const needle = q.trim().toLowerCase()
+        if (!needle) return true
+        const c = data.clients.find((x) => x.id === a.clientId)
+        return (a.ref ?? '').toLowerCase().includes(needle) || (c?.name ?? '').toLowerCase().includes(needle)
+      })
       .filter((a) => (when === 'upcoming' ? endOf(a).getTime() >= now : endOf(a).getTime() < now))
       .sort((a, b) => (when === 'upcoming' ? a.start.localeCompare(b.start) : b.start.localeCompare(a.start)))
       .slice(0, 80)
-  }, [data.appointments, barber, status, when, nowDate])
+  }, [data.appointments, data.clients, barber, status, source, q, when, nowDate])
 
   const clientName = (id: string) => data.clients.find((c) => c.id === id)?.name ?? ''
   const barberOf = (id: string) => data.barbers.find((b) => b.id === id)
@@ -143,6 +151,22 @@ export function Appointments() {
                 </option>
               ))}
             </Select>
+            <Select value={source} onChange={(v) => setSource(v as typeof source)} label={t.appts.source}>
+              <option value="all">{t.appts.allSources}</option>
+              {(Object.keys(t.source) as BookingSource[]).map((s) => (
+                <option key={s} value={s}>
+                  {t.source[s]}
+                </option>
+              ))}
+            </Select>
+            <input
+              type="search"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder={t.appts.searchPh}
+              aria-label={t.appts.searchPh}
+              className="h-10 w-full min-w-0 rounded-full border border-paper/10 bg-white/70 px-4 text-sm outline-none placeholder:text-paper/40 focus:border-[#b8935a] sm:w-64"
+            />
             <span className="ml-auto text-sm text-paper/45">{t.appts.count(list.length)}</span>
           </div>
           {list.length === 0 ? (
@@ -170,7 +194,10 @@ export function Appointments() {
                         <td className="whitespace-nowrap px-5 py-3 tabular-nums">
                           <span className="text-paper/50">{fmt.date(new Date(a.start), { weekday: 'short', day: 'numeric', month: 'short' })}</span> {hhmm(a.start)}
                         </td>
-                        <td className="px-3 py-3 font-medium">{clientName(a.clientId)}</td>
+                        <td className="px-3 py-3 font-medium">
+                          {clientName(a.clientId)}
+                          {a.ref && <span className="label ml-2 text-[0.6rem] text-[#8a6a33]">{a.ref}</span>}
+                        </td>
                         <td className="px-3 py-3 text-paper/75">{pub.services.items[a.serviceId].name}</td>
                         <td className="px-3 py-3">
                           <span className="flex items-center gap-2">

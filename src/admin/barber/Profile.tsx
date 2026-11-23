@@ -1,33 +1,30 @@
 import { useState } from 'react'
 import { Lock, LogOut } from 'lucide-react'
-import { Img } from '../../components/Img'
 import { LanguageSegmented } from '../../components/LanguageSwitcher'
 import { useStore } from '../data/store'
 import type { BarberRecord } from '../data/types'
 import { useAdminT } from '../i18n'
-import { Btn, Card, Field, inputCls, useAct } from '../ui'
+import { BarberAvatar, Btn, Card, Field, inputCls, useAct } from '../ui'
 
 /** Own profile: only bio, specialty, Instagram and phone are editable. */
 export function Profile({ me, onSignOut }: { me: BarberRecord; onSignOut: () => void }) {
-  const { t, pub } = useAdminT()
+  const { t, person } = useAdminT()
   const { updateProfile } = useStore()
   const act = useAct()
   const [f, setF] = useState({
-    bio: me.bio || pub.barbers.people[me.id].bio,
-    specialty: me.specialty || pub.barbers.people[me.id].specialty,
+    bio: person(me).bio,
+    specialty: person(me).specialty,
     instagram: me.instagram,
     phone: me.phone,
   })
   return (
     <div className="space-y-5">
       <div className="flex items-center gap-4">
-        <span className="block size-20 overflow-hidden rounded-full ring-1 ring-paper/15">
-          <Img id={me.image} alt={me.name} sizes="160px" maxWidth={480} className="h-full w-full" />
-        </span>
+        <BarberAvatar image={me.image} name={me.name} size={80} />
         <div>
           <h1 className="text-2xl font-semibold [font-stretch:115%]">{me.name}</h1>
           <div className="label mt-1 flex items-center gap-1.5 text-paper/45">
-            <Lock className="size-3" /> {pub.barbers.people[me.id].role} · {t.bApp.readonly}
+            <Lock className="size-3" /> {person(me).role} · {t.bApp.readonly}
           </div>
         </div>
       </div>

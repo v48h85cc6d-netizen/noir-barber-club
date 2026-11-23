@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { Phone } from 'lucide-react'
-import { BARBER_TRANSITIONS, useStore } from './data/store'
-import type { Appointment, AppointmentStatus, BarberId } from './data/types'
+import { barberOptions, useStore } from './data/store'
+import type { Appointment, AppointmentStatus, BarberId, PayMethod } from './data/types'
 import { endOf, hhmm, sameDay, toMin, workMinutes } from './data/select'
 import { useAdminT } from './i18n'
 import { BarberAvatar, Select, Sheet, StatusPill, Tag, useAct, useNow } from './ui'
@@ -21,13 +21,14 @@ export const BLOCK: Record<AppointmentStatus, string> = {
 
 export function AppointmentSheet({ appt, onClose }: { appt: Appointment | null; onClose: () => void }) {
   const { t, pub, money, fmt } = useAdminT()
-  const { data, session, setStatus, reassign } = useStore()
+  const { data, session, setStatus, reassign, recordPayment } = useStore()
   const act = useAct()
   const a = appt ? (data.appointments.find((x) => x.id === appt.id) ?? appt) : null
   const client = a ? data.clients.find((c) => c.id === a.clientId) : undefined
   const barber = a ? data.barbers.find((b) => b.id === a.barberId) : undefined
   const isOwner = session.role === 'owner'
-  const options = a ? (isOwner ? ALL.filter((s) => s !== a.status) : BARBER_TRANSITIONS[a.status]) : []
+  // barbers get only the moves the booking rules allow right now; the owner can correct anything
+  const options = a ? (isOwner ? ALL.filter((s) => s !== a.status) : barberOptions(a)) : []
   const history = a ? data.appointments.filter((x) => x.clientId === a.clientId && x.status === 'completed' && x.id !== a.id && (isOwner || x.barberId === session.barberId)) : []
 
   return (
@@ -38,6 +39,7 @@ export function AppointmentSheet({ appt, onClose }: { appt: Appointment | null; 
             <StatusPill status={a.status} size="md" />
             <Tag>{t.source[a.source]}</Tag>
             {a.paidWith && <Tag tone="good">{t.pay[a.paidWith]}</Tag>}
+            {a.ref && <Tag tone="gold">{a.ref}</Tag>}
           </div>
           <dl className="grid grid-cols-2 gap-x-4 gap-y-4 text-sm">
             <div>
@@ -72,7 +74,7 @@ export function AppointmentSheet({ appt, onClose }: { appt: Appointment | null; 
           </dl>
           {a.note && (
             <div className="rounded-xl border border-paper/[0.07] bg-white/60 p-3 text-sm">
-              <span className="label mr-2 text-paper/45">{t.appts.note}</span>
+              <span className="label mr-2 text-paper/45">{a.source === 'online' ? t.appts.customerNote : t.appts.note}</span>
               {a.note}
             </div>
           )}
@@ -93,6 +95,28 @@ export function AppointmentSheet({ appt, onClose }: { appt: Appointment | null; 
                   </button>
                 ))}
               </div>
+            </div>
+          )}
+
+          {a.status === 'cancelled' && a.cancelledBy && (
+            <p className="text-sm text-paper/55">
+              {t.appts.cancelledBy}: {a.cancelledBy === 'customer' ? t.common.customer : a.cancelledBy === 'owner' ? t.common.owner : t.common.barber}
+            </p>
+          )}
+
+          {isOwner && a.status !== 'cancelled' && a.status !== 'no_show' && (
+            <div>
+              <div className="label mb-2 text-paper/45">{t.appts.recordPayment}</div>
+              <Select value={a.paidWith ?? ''} label={t.appts.recordPayment} onChange={(v) => v && act(recordPayment(a.id, v as PayMethod))}>
+                <option value="" disabled>
+                  {t.appts.notPaid}
+                </option>
+                {(['card', 'cash', 'gift_card', 'membership'] as const).map((m) => (
+                  <option key={m} value={m}>
+                    {t.pay[m]}
+                  </option>
+                ))}
+              </Select>
             </div>
           )}
 

@@ -3,7 +3,8 @@ import { AnimatePresence, motion, useMotionValueEvent, useScroll } from 'motion/
 import { navLinks, site } from '../data/site'
 import { Wordmark } from './Logo'
 import { RollText } from './Button'
-import { ArrowUpRight } from 'lucide-react'
+import { ArrowUpRight, UserRound } from 'lucide-react'
+import { useSession } from '../demo/auth'
 import { useBooking } from '../context/booking'
 import { useI18n } from '../i18n'
 import { LanguageDropdown, LanguageSegmented } from './LanguageSwitcher'
@@ -14,6 +15,11 @@ const ease = [0.16, 1, 0.3, 1] as const
 export function Nav() {
   const { open: openBooking } = useBooking()
   const { t } = useI18n()
+  const session = useSession()
+  // customers go to their account, staff to the Command Center, visitors to sign-in
+  const account = session
+    ? { href: session.role === 'customer' ? '/account' : '/admin', label: session.role === 'customer' ? t.nav.myAccount : t.nav.staffArea }
+    : { href: '/account/login', label: t.nav.signIn }
   const [menu, setMenu] = useState(false)
   const [hidden, setHidden] = useState(false)
   const { scrollY } = useScroll()
@@ -84,6 +90,15 @@ export function Nav() {
           <div className="pointer-events-auto flex items-center gap-2">
             <LanguageSegmented className="hidden xl:flex" />
             <LanguageDropdown className="xl:hidden" />
+            <a
+              href={account.href}
+              aria-label={account.label}
+              title={account.label}
+              className="relative grid size-10 place-items-center rounded-full border border-white/10 bg-ink/70 text-paper backdrop-blur-md transition-colors hover:bg-ink md:size-11"
+            >
+              <UserRound className="size-[18px]" strokeWidth={1.5} />
+              {session && <span aria-hidden className="absolute right-1.5 top-1.5 size-2 rounded-full bg-[#7fcfa6] ring-2 ring-ink" />}
+            </a>
             <button
               type="button"
               onClick={() => {
@@ -158,6 +173,9 @@ export function Nav() {
               exit={{ opacity: 0 }}
             >
               <LanguageSegmented size="lg" className="mb-6 self-start" />
+              <a href={account.href} className="mb-4 flex items-center gap-2 self-start rounded-full border border-white/15 px-4 py-2.5 text-paper">
+                <UserRound className="size-4" strokeWidth={1.5} /> {account.label}
+              </a>
               <a href={site.phoneHref}>{site.phone}</a>
               <a href={`mailto:${site.email}`}>{site.email}</a>
               <span>

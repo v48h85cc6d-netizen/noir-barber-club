@@ -10,15 +10,24 @@ import { Btn, Card, Field, PageHeader, Sheet, Switch, Tag, inputCls, useAct, use
 const ORDER = [1, 2, 3, 4, 5, 6, 0]
 
 export function Barbers() {
-  const { t, fmt, pub } = useAdminT()
-  const { data, setBarberActive, setBarberHours, addTimeOff, inviteBarber } = useStore()
+  const { t, fmt, pub, person } = useAdminT()
+  const { data, setBarberActive, setBarberHours, addTimeOff, createBarber, updateBarber } = useStore()
   const act = useAct()
   const [openId, setOpenId] = useState<BarberId | null>(null)
   const [invite, setInvite] = useState(false)
-  const [inv, setInv] = useState({ name: '', email: '' })
+  const [inv, setInv] = useState({ name: '', email: '', phone: '', password: '' })
+  const [info, setInfo] = useState<{ id: string; name: string; email: string; phone: string; specialty: string; bio: string; years: string } | null>(null)
   const [off, setOff] = useState({ from: '', to: '', reason: '' })
   const wk = startOfWeek(useNow())
   const b = data.barbers.find((x) => x.id === openId)
+  const bAcc = b ? data.accounts.find((a) => a.barberId === b.id) : undefined
+  // editable copy of the open barber's details (reset whenever another barber is opened)
+  const form =
+    b && info?.id === b.id
+      ? info
+      : b
+        ? { id: b.id, name: b.name, email: b.email, phone: b.phone, specialty: person(b).specialty, bio: person(b).bio, years: String(b.years) }
+        : null
   const weekday = (d: number) => fmt.weekday(new Date(2024, 0, 7 + d), 'long')
 
   return (
@@ -39,15 +48,24 @@ export function Barbers() {
           const avail = Array.from({ length: 7 }, (_, i) => workMinutes(x, addDays(wk, i))).reduce((a, c) => a + c, 0)
           const booked = week.reduce((s, a) => s + a.duration, 0)
           return (
-            <button key={x.id} type="button" onClick={() => setOpenId(x.id)} className="group overflow-hidden rounded-2xl border border-paper/[0.07] bg-white/60 text-left transition-[border-color,transform] hover:-translate-y-0.5 hover:border-[#d2b07a]/40">
+            <button key={x.id} type="button" onClick={() => {
+              setOpenId(x.id)
+              setInfo(null)
+            }} className="group overflow-hidden rounded-2xl border border-paper/[0.07] bg-white/60 text-left transition-[border-color,transform] hover:-translate-y-0.5 hover:border-[#d2b07a]/40">
               <div className="relative aspect-[4/3] overflow-hidden">
-                <Img id={x.image} alt={x.name} sizes="(min-width:1280px) 25vw, 50vw" maxWidth={768} className="h-full w-full" imgClassName={`transition-transform duration-700 group-hover:scale-105 ${x.active ? '' : 'opacity-40'}`} />
+                {x.image ? (
+                  <Img id={x.image} alt={x.name} sizes="(min-width:1280px) 25vw, 50vw" maxWidth={768} className="h-full w-full" imgClassName={`transition-transform duration-700 group-hover:scale-105 ${x.active ? '' : 'opacity-40'}`} />
+                ) : (
+                  <div aria-hidden className={`grid h-full w-full place-items-center bg-[radial-gradient(120%_90%_at_30%_20%,#3a3a3a_0%,#1a1a1a_45%,#0e0e0e_100%)] text-5xl font-semibold text-white/80 [font-stretch:125%] ${x.active ? '' : 'opacity-40'}`}>
+                    {x.name.split(' ').map((w) => w[0]).join('').slice(0, 2)}
+                  </div>
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent" />
                 <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between gap-2 text-white">
                   <div className="min-w-0">
                     <div className="truncate text-lg font-semibold [font-stretch:115%]">{x.name}</div>
                     <div className="label truncate text-white/70">
-                      {x.years} {pub.common.yrs} · {pub.barbers.people[x.id].specialty}
+                      {x.years} {pub.common.yrs}{person(x).specialty ? ` · ${person(x).specialty}` : ''}
                     </div>
                   </div>
                   <span className="shrink-0 rounded-full bg-white/90 backdrop-blur">
@@ -83,7 +101,8 @@ export function Barbers() {
               <span className="min-w-40 flex-1 font-medium">{s.name}</span>
               <span className="min-w-56 flex-1 text-paper/55">{s.email}</span>
               <span className="w-24">{s.role === 'owner' ? <Tag tone="gold">{t.common.owner}</Tag> : <Tag>{t.common.barber}</Tag>}</span>
-              <span className="w-40">{!s.barberId && !s.active ? <Tag tone="warn">{t.barbers.invited}</Tag> : s.active ? <Tag tone="good">{t.barbers.active}</Tag> : <Tag tone="bad">{t.barbers.inactive}</Tag>}</span>
+              <span className="w-40">{s.active ? <Tag tone="good">{t.barbers.active}</Tag> : <Tag tone="bad">{t.barbers.inactive}</Tag>}</span>
+              <span className="w-32">{data.accounts.some((a) => a.id === s.id && a.active) ? <Tag tone="info">{t.barbers.canSignIn}</Tag> : <Tag>{t.barbers.noLogin}</Tag>}</span>
               <span className="w-32 text-xs text-paper/40">{s.lastSeenAt ? fmt.date(new Date(s.lastSeenAt), { day: 'numeric', month: 'short' }) : '—'}</span>
             </li>
           ))}
@@ -94,12 +113,51 @@ export function Barbers() {
       <Sheet open={!!b} onClose={() => setOpenId(null)} title={b?.name ?? ''} wide>
         {b && (
           <div className="space-y-8">
+            {form && (
+              <section>
+                <div className="label mb-3 text-paper/45">{t.barbers.details}</div>
+                <form
+                  className="grid gap-4 sm:grid-cols-2"
+                  onSubmit={(e) => {
+                    e.preventDefault()
+                    if (act(updateBarber(b.id, { name: form.name, email: form.email, phone: form.phone, specialty: form.specialty, bio: form.bio, years: Number(form.years) || 0 }))) setInfo(null)
+                  }}
+                >
+                  <Field label={t.barbers.name}>
+                    <input required value={form.name} maxLength={60} onChange={(e) => setInfo({ ...form, name: e.target.value })} className={inputCls} />
+                  </Field>
+                  <Field label={t.barbers.phone}>
+                    <input type="tel" value={form.phone} maxLength={24} onChange={(e) => setInfo({ ...form, phone: e.target.value })} className={inputCls} />
+                  </Field>
+                  <div className="sm:col-span-2">
+                    <Field label={t.barbers.email} hint={bAcc?.builtIn ? t.barbers.builtIn : undefined}>
+                      <input required type="email" value={form.email} disabled={!!bAcc?.builtIn} maxLength={254} onChange={(e) => setInfo({ ...form, email: e.target.value })} className={`${inputCls} disabled:opacity-60`} />
+                    </Field>
+                  </div>
+                  <Field label={t.barbers.specialty}>
+                    <input value={form.specialty} maxLength={60} onChange={(e) => setInfo({ ...form, specialty: e.target.value })} className={inputCls} />
+                  </Field>
+                  <Field label={t.barbers.years}>
+                    <input type="number" min={0} max={69} value={form.years} onChange={(e) => setInfo({ ...form, years: e.target.value })} className={inputCls} />
+                  </Field>
+                  <div className="sm:col-span-2">
+                    <Field label={t.barbers.bio}>
+                      <textarea rows={3} value={form.bio} maxLength={400} onChange={(e) => setInfo({ ...form, bio: e.target.value })} className={`${inputCls} resize-none`} />
+                    </Field>
+                  </div>
+                  <Btn type="submit" className="sm:col-span-2">
+                    {t.barbers.saveDetails}
+                  </Btn>
+                </form>
+              </section>
+            )}
+
             <section>
               <div className="label mb-3 text-paper/45">{t.barbers.account}</div>
               <div className="flex items-center justify-between gap-4 rounded-xl border border-paper/[0.07] bg-white/60 p-4">
-                <div className="text-sm">
-                  <div>{b.email}</div>
-                  <div className="text-paper/45">{b.phone}</div>
+                <div className="min-w-0 text-sm">
+                  <div className="truncate">{b.email}</div>
+                  <div className="text-paper/45">{bAcc ? t.barbers.canSignIn : t.barbers.noLogin}</div>
                 </div>
                 <Btn tone={b.active ? 'danger' : 'gold'} size="sm" onClick={() => act(setBarberActive(b.id, !b.active))}>
                   {b.active ? t.barbers.deactivate : t.barbers.activate}
@@ -185,8 +243,8 @@ export function Barbers() {
           className="space-y-5"
           onSubmit={(e) => {
             e.preventDefault()
-            if (act(inviteBarber(inv.name, inv.email))) {
-              setInv({ name: '', email: '' })
+            if (act(createBarber(inv))) {
+              setInv({ name: '', email: '', phone: '', password: '' })
               setInvite(false)
             }
           }}
@@ -196,7 +254,13 @@ export function Barbers() {
             <input required value={inv.name} maxLength={60} onChange={(e) => setInv({ ...inv, name: e.target.value })} className={inputCls} />
           </Field>
           <Field label={t.barbers.email}>
-            <input required type="email" value={inv.email} maxLength={254} onChange={(e) => setInv({ ...inv, email: e.target.value })} className={inputCls} />
+            <input required type="email" autoComplete="off" value={inv.email} maxLength={254} onChange={(e) => setInv({ ...inv, email: e.target.value })} className={inputCls} />
+          </Field>
+          <Field label={t.barbers.phone}>
+            <input required type="tel" value={inv.phone} maxLength={24} onChange={(e) => setInv({ ...inv, phone: e.target.value })} className={inputCls} />
+          </Field>
+          <Field label={t.barbers.password}>
+            <input required type="text" autoComplete="new-password" minLength={8} value={inv.password} maxLength={128} onChange={(e) => setInv({ ...inv, password: e.target.value })} className={inputCls} />
           </Field>
           <div className="flex items-center justify-between rounded-xl border border-paper/[0.06] px-4 py-3 text-sm">
             <span className="label text-paper/45">{t.barbers.role}</span>

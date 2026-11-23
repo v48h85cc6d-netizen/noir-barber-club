@@ -193,6 +193,8 @@ export function Avatar({ name, size = 36 }: { name: string; size?: number }) {
 
 /** Photo avatar for barbers with a fixed pixel size. */
 export function BarberAvatar({ image, name, size = 36 }: { image: string; name: string; size?: number }) {
+  // barbers the owner adds have no photo yet
+  if (!image) return <Avatar name={name} size={size} />
   return (
     <span style={{ width: size, height: size }} className="relative block shrink-0 overflow-hidden rounded-full ring-1 ring-paper/15">
       <Img id={image} alt={name} sizes={`${size * 2}px`} maxWidth={480} className="h-full w-full" />
@@ -323,9 +325,9 @@ export const useToast = () => useContext(ToastCtx)
 export function useAct() {
   const toast = useToast()
   const { t } = useAdminT()
-  return (r: { ok: true } | { ok: false; reason: 'forbidden' | 'invalid' }, okText?: string) => {
+  return (r: { ok: true } | { ok: false; reason: 'forbidden' | 'invalid' | 'taken' }, okText?: string) => {
     if (r.ok) toast(okText ?? t.common.savedDemo)
-    else toast(r.reason === 'forbidden' ? t.common.forbidden : t.common.invalid, 'error')
+    else toast(r.reason === 'forbidden' ? t.common.forbidden : r.reason === 'taken' ? t.common.taken : t.common.invalid, 'error')
     return r.ok
   }
 }

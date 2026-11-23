@@ -16,11 +16,13 @@ npm run preview  # serve the build
 ```
 src/
   sections/    Hero, Club, Booking, Barbers, Services, Gallery (lookbook), GiftCards, Membership, Reviews, Visit (+ FAQ), Footer (CTA + contact)
-  booking/     Slide-in booking panel opened from every "Book" control: steps, review & demo confirmation
+  booking/     Slide-in booking panel opened from every "Book" control: steps, review, confirmation
+  account/     Customer area at /account: sign-in, registration, password reset, my appointments, profile
+  demo/        DEMO data layer (localStorage): db.ts, auth.ts (mock sign-in), bookings.ts (availability + rules)
   components/  Logo (traced from the brand mark), Img, Button (pill), Modal, Nav, Preloader, SectionLabel
   context/     Booking state, contact-form prefill, preloader "ready" flag
   hooks/       useReveal: declarative scroll animations (data-reveal="lines|fade|stagger|img", data-parallax)
-  lib/         GSAP setup, demo scheduling/availability, scroll helper
+  lib/         GSAP setup, opening hours, scroll helper
   data/        site.ts (address, phone, hours, socials) and content.ts (prices, durations, images, schedules)
   i18n/        en.ts (source + Dict type), de.ts, sq.ts, and the I18nProvider / useI18n hook
 ```
@@ -35,7 +37,7 @@ src/
 
 ## Demo-only behaviour (milestone 1)
 
-- **Booking** runs the full flow: service → barber → date → time → details → review. Availability is generated deterministically. Confirming shows a clearly labelled *demo* screen. Nothing is reserved or sent.
+- **Booking** runs the full flow: barber → service → date → time → details → review. Confirming needs a customer account and saves the appointment in this browser only (see *Accounts & booking demo* below). The shop is not notified.
 - **Memberships** fill in the contact form with the request. No payment is taken.
 - **The contact form** validates input, then says it is in preview mode and offers a `mailto:` link.
 - **The map** is a placeholder graphic that loads Google Maps only when clicked.
@@ -70,22 +72,46 @@ The visual language (light-grey and near-black sections, sentence-case extra-wid
 - **Cash on delivery** is controlled by `GIFT_SETTINGS.cashOnDelivery` in `src/lib/giftcard.ts`. It's on, with area *Amsterdam* (placeholder). Set `enabled: false` if printed cards can't be delivered in person.
 - **No automatic messages:** no SMS, WhatsApp or email provider is connected, so nothing is sent automatically.
 
+## Accounts & booking demo (three roles, no database)
+
+**Demo only.** Accounts, sessions and bookings are stored in this browser's `localStorage` (key `noir.demo.db`). Passwords are kept as a salted SHA-256 digest, but this is **not secure authentication**: anyone with the browser can read or change the data, there is no server, no email and no rate limiting. Do not use real passwords. Nothing is shared between browsers or devices.
+
+| Role | Where | Demo login |
+| --- | --- | --- |
+| Owner | `/admin/login/owner` | `Owner@gmail.com` / `Owner112233` |
+| Barber | `/admin/login/barber` | `Barber@gmail.com` / `Barber@gmail.com` (Idris Haddad) |
+| Customer | `/account/register`, then `/account/login` | created by the visitor |
+
+- **Customers** register themselves (full name, email, phone, password, confirmation). Validation, duplicate-email check, automatic sign-in and a session that survives refresh. The sign-up has no role field, so it can only ever create customers.
+- **Booking** needs a signed-in customer. A visitor who confirms is sent to sign-in / sign-up and returns to the review step with barber, service, date and time kept. Every booking gets a reference (`NB-XXXXXX`) and appears in *My appointments*, the owner's Appointments and the assigned barber's dashboard.
+- **Rules:** a barber can never be double-booked (re-checked at the moment of saving, also across tabs). Customers see and cancel only their own appointments, up to the cancellation window (24 h by default). Barbers see only their own appointments and can confirm, cancel (before it starts) and complete (once it started). Only the owner creates, edits or deactivates barber accounts.
+- **Route protection** is decided from the signed-in role on every route, not just by hiding links: customers can't open `/admin/*`, barbers can't open `/admin/owner/*`, signed-out visitors are sent to the right login.
+- **Forgot password** shows the reset code on screen (no email service yet).
+- **Reset demo data:** owner → Settings → *Reset demo data*, or the link on `/admin`. Restores the sample data and the two built-in logins; removes registered customers.
+- **Swap points for the real backend:** `src/demo/auth.ts` (`AuthService`), `src/demo/bookings.ts` and `src/demo/db.ts`. Screens only use these services. `npm run test:demo` runs the rule checks.
+
+### Testing the three roles
+
+1. **Owner:** open `/admin`, *Owner login*, sign in. All modules are in the sidebar; *Barbers → Create barber account* adds a barber who can sign in at the barber login.
+2. **Barber:** open `/admin`, *Barber login*, sign in. *Today* shows the day and the next two weeks. Tap an appointment for the customer's details and the status buttons.
+3. **Customer:** on the website, use the person icon in the menu (*Sign in*), then *Create an account*. Use *Book appointment*, pick a barber, service, date and time, and confirm. *My appointments* lists it. Sign in as owner and barber to see the same booking.
+
 ## NOIR Command Center (`/admin`)
 
 A private management dashboard inside this project, at `/admin`. It isn't a separate site.
 
 - **Status: demo mode.**
   - Fictional sample data, and a permanent "Demo mode" banner.
-  - Changes last until the page is reloaded and are never sent anywhere.
-  - Real sign-in is shown but disabled until Supabase is connected.
+  - Changes are saved in this browser only (localStorage) and are never sent anywhere.
+  - Sign-in is the local demo sign-in above, not Supabase.
 - **Roles:**
-  - *Owner*: full console with Overview, Appointments (day board / week / list), Clients, Barbers (accounts, hours, time off, invites), Services & prices, Revenue, Gift cards (confirm payment → activate, redeem, delivery queue), Memberships, Reports and Settings (booking policy, permissions, audit log).
+  - *Owner*: full console with Overview, Appointments (day board / week / list with search, reassign, record payment), Clients, Barbers (create accounts, edit details, hours, time off, deactivate), Services & prices, Revenue, Gift cards (confirm payment → activate, redeem, delivery queue), Memberships, Reports and Settings (booking policy, permissions, audit log).
   - *Barber*: phone-first app with Today (next client, Arrived → Start → Done), Calendar, Clients (own only, no email), Schedule (read-only) and Profile (bio, specialty, Instagram, phone).
 - **Languages:** EN / DE / SQ. Each person's choice is stored separately (`noir.admin.locale.<user>`).
 - **Isolation from the public site:**
   - The dashboard is lazy-loaded from `src/main.tsx`, so the public homepage downloads none of it.
-  - `public/_redirects` serves `/admin/*`.
-  - `public/_headers` marks `/admin` `noindex` and `no-store`.
+  - `public/_redirects` serves `/admin/*` and `/account/*`.
+  - `public/_headers` marks `/admin` and `/account` `noindex` and `no-store`.
 - **Code:** `src/admin/`
   - `data/`: types, demo seed, demo store mirroring the database permission rules
   - `owner/`, `barber/`: the two apps
@@ -106,5 +132,5 @@ A private management dashboard inside this project, at `/admin`. It isn't a sepa
   1. Create a Supabase project in the EU (Frankfurt) and apply the migration.
   2. Deploy `invite-barber`.
   3. Add `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` (public by design).
-  4. Swap the demo store for the Supabase data layer.
+  4. Swap the demo services (`src/demo/`) for Supabase Auth and the Supabase data layer; add a `customer` role with row-level security on its own appointments.
   5. Turn on owner two-factor sign-in.

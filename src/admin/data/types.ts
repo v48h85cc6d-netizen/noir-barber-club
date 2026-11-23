@@ -6,7 +6,31 @@
 import type { ServiceId } from '../../data/content'
 
 export type Role = 'owner' | 'barber'
-export type BarberId = 'marco' | 'idris' | 'lucas' | 'theo'
+/** The four founding barbers use their public ids; barbers the owner adds get generated ids. */
+export type BarberId = string
+
+/**
+ * DEMO login account (localStorage only). Passwords are stored as a salted
+ * SHA-256 digest, which is still NOT secure: anyone with the browser can read
+ * and change this data. Real sign-in replaces this table with the auth provider.
+ */
+export interface DemoAccount {
+  id: string
+  role: 'owner' | 'barber' | 'customer'
+  /** stored lower-case */
+  email: string
+  name: string
+  phone: string
+  passwordHash: string
+  createdAt: string
+  active: boolean
+  /** owner/barber accounts point at their barber record */
+  barberId?: BarberId
+  /** customer accounts point at their client record */
+  clientId?: string
+  /** the two built-in demo logins cannot be removed or have their email changed */
+  builtIn?: boolean
+}
 
 export interface StaffAccount {
   id: string
@@ -58,6 +82,11 @@ export interface Appointment {
   source: BookingSource
   note?: string
   paidWith?: PayMethod
+  /** booking reference shown to the customer (online bookings) */
+  ref?: string
+  createdAt?: string
+  updatedAt?: string
+  cancelledBy?: 'customer' | 'barber' | 'owner'
 }
 
 export interface Client {
@@ -67,7 +96,10 @@ export interface Client {
   email: string
   since: string
   notes: string
-  preferredBarber: BarberId
+  /** '' when the client has not booked a barber yet */
+  preferredBarber: BarberId | ''
+  /** set for customers who registered on the website */
+  accountId?: string
   tags: ('member' | 'regular' | 'new')[]
   marketing: boolean
 }
@@ -117,7 +149,7 @@ export interface AuditEntry {
   id: string
   at: string
   actor: string
-  role: Role
+  role: Role | 'customer'
   action: string
   target: string
 }
@@ -134,6 +166,11 @@ export interface Settings {
 }
 
 export interface DemoData {
+  /** schema version, bumped when the stored shape changes */
+  version: number
+  /** when the sample data was generated */
+  seededAt: string
+  accounts: DemoAccount[]
   staff: StaffAccount[]
   barbers: BarberRecord[]
   clients: Client[]

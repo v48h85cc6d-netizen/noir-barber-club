@@ -48,7 +48,8 @@ const ipKey = (ip: string) => `ip:${sha(ip)}`
 const mac = (secret: string, email: string, code: string, issuedAt: number) => createHmac('sha256', secret).update(`${normEmail(email)}:${code}:${issuedAt}`).digest('hex')
 
 export type SendResult =
-  | { ok: true; expiresAt: number; resendAvailableAt: number }
+  /** messageId: the email provider's id for the sent message (not secret; used to trace delivery) */
+  | { ok: true; expiresAt: number; resendAvailableAt: number; messageId: string }
   | { ok: false; error: 'invalid_email' | 'rate_limited' | 'cooldown' | 'email_not_configured' | 'email_send_failed'; retryAt?: number }
 
 export async function sendCode(deps: Deps, input: { email: string; name?: string; locale?: string; ip?: string }): Promise<SendResult> {
@@ -70,8 +71,10 @@ export async function sendCode(deps: Deps, input: { email: string; name?: string
   const code = String(randomInt(0, 1_000_000)).padStart(6, '0')
   const locale: Locale = input.locale === 'de' || input.locale === 'sq' ? input.locale : 'en'
   const mail = renderVerificationEmail({ code, locale, name: input.name?.slice(0, 80), minutes: Math.round(ttl / 60_000) })
+  let messageId = ''
   try {
-    await deps.mailer.send({ to: email, ...mail })
+    messageId = (await deps.mailer.send({ to: email, ...mail })).id
+    console.log('[verification] email accepted by provider, id', messageId)
   } catch (e) {
     const err = e as { code?: string; message?: string }
     console.error('[verification] email not sent:', err.code ?? '', err.message ?? e)
@@ -82,7 +85,7 @@ export async function sendCode(deps: Deps, input: { email: string; name?: string
   // the new code replaces any earlier one, which becomes invalid
   const rec: CodeRecord = { mac: mac(deps.secret, email, code, now), issuedAt: now, expiresAt: now + ttl, attempts: 0, sends: [...recent, now] }
   await deps.store.set(keyFor(email), rec)
-  return { ok: true, expiresAt: rec.expiresAt, resendAvailableAt: now + RESEND_COOLDOWN_MS }
+  return { ok: true, expiresAt: rec.expiresAt, resendAvailableAt: now + RESEND_COOLDOWN_MS, messageId }
 }
 
 export type CheckResult =

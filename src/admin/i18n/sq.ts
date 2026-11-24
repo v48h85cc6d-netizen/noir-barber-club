@@ -48,6 +48,12 @@ const sq: AdminDict = {
     total: 'Gjithsej',
     taken: "Ky email përdoret tashmë nga një llogari tjetër",
     customer: "Klient",
+    notYours: "Ky termin i përket një berberi tjetër — mund të ndryshoni vetëm terminet tuaja.",
+    notInWorkflow: "Ky ndryshim statusi nuk është pjesë e rrjedhës së terminit.",
+    cancelAfterStart: "Një termin mund të anulohet vetëm para se të fillojë.",
+    notStarted: "E mundur pasi termini të ketë filluar (ose klienti të jetë në karrige).",
+    notToday: "Mbërritja dhe fillimi regjistrohen vetëm në ditën e terminit.",
+    notFound: "Ky termin nuk ekziston më.",
   },
   login: {
     eyebrow: "Privat · vetëm për stafin",

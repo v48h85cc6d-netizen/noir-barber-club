@@ -48,6 +48,12 @@ const de: AdminDict = {
     total: 'Gesamt',
     taken: "Diese E-Mail wird bereits von einem anderen Konto verwendet",
     customer: "Kunde",
+    notYours: "Dieser Termin gehört einem anderen Barber – du kannst nur deine eigenen ändern.",
+    notInWorkflow: "Diese Statusänderung ist im Terminablauf nicht vorgesehen.",
+    cancelAfterStart: "Ein Termin kann nur vor Beginn storniert werden.",
+    notStarted: "Möglich, sobald der Termin begonnen hat (oder der Kunde im Stuhl sitzt).",
+    notToday: "Ankunft und Beginn können nur am Tag des Termins erfasst werden.",
+    notFound: "Diesen Termin gibt es nicht mehr.",
   },
   login: {
     eyebrow: "Privat · nur für Mitarbeiter",

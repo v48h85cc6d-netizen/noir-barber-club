@@ -46,6 +46,12 @@ const en = {
     total: 'Total',
     taken: "This email is already used by another account",
     customer: "Customer",
+    notYours: "This appointment belongs to another barber — you can only change your own.",
+    notInWorkflow: "This status change isn’t part of the appointment workflow.",
+    cancelAfterStart: "An appointment can only be cancelled before it starts.",
+    notStarted: "Possible once the appointment has started (or the client is in the chair).",
+    notToday: "Arrival and start can only be recorded on the day of the appointment.",
+    notFound: "This appointment no longer exists.",
   },
   login: {
     eyebrow: "Private · staff only",

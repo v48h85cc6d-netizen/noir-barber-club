@@ -15,5 +15,8 @@ initdb -D "$dir" -U postgres -A trust >/dev/null
 pg_ctl -D "$dir" -o "-k $dir -c listen_addresses=''" -l "$dir/log" start >/dev/null
 psql() { command psql -h "$dir" -U postgres -d postgres -v ON_ERROR_STOP=1 -q "$@"; }
 psql -f "$here/00_supabase_shim.sql"
-psql -f "$here/../migrations/20261120000000_command_center.sql"
-psql -f "$here/10_permissions.sql" 2>&1 | sed -n 's/^psql:[^ ]* NOTICE:  //p; s/^NOTICE:  //p; /ERROR/p'
+for m in "$here"/../migrations/*.sql; do psql -f "$m"; done
+for t in "$here"/[0-9][0-9]_*.sql; do
+  [ "$(basename "$t")" = 00_supabase_shim.sql ] && continue
+  psql -f "$t" 2>&1 | sed -n 's/^psql:[^ ]* NOTICE:  //p; s/^NOTICE:  //p; /ERROR/p'
+done

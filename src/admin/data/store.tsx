@@ -30,9 +30,9 @@ export interface Session {
   barberId?: BarberId
 }
 
-type Result = { ok: true } | { ok: false; reason: 'forbidden' | 'invalid' | 'taken' }
+type Result = { ok: true } | { ok: false; reason: 'forbidden' | 'invalid' | 'taken'; detail?: StatusRefusal | 'not_found' }
 
-/** Status changes a barber may make on their own appointments. */
+/** Status changes a barber may make on their own appointments (the workflow). */
 export const BARBER_TRANSITIONS: Record<AppointmentStatus, AppointmentStatus[]> = {
   booked: ['confirmed', 'arrived', 'cancelled', 'no_show'],
   confirmed: ['arrived', 'in_chair', 'completed', 'cancelled', 'no_show'],
@@ -43,20 +43,35 @@ export const BARBER_TRANSITIONS: Record<AppointmentStatus, AppointmentStatus[]> 
   cancelled: [],
 }
 
+/** Why a barber's status change is refused (each has its own message). */
+export type StatusRefusal = 'not_yours' | 'not_in_workflow' | 'cancel_after_start' | 'not_started' | 'not_today'
+
 /**
- * Booking rules on top of the transitions: an appointment can only be
- * cancelled before it starts, and only completed / marked no-show once it
- * has started. Applies to barbers; the owner may correct anything.
+ * The single source of truth for a BARBER changing an appointment's status
+ * (mirrored by the database guard in supabase/migrations/*_barber_status_rules.sql):
+ *  - only appointments assigned to the barber
+ *  - only moves in BARBER_TRANSITIONS
+ *  - cancelled: only before the booked start time
+ *  - arrived / in the chair: on the day of the appointment
+ *  - no-show, or completed WITHOUT having started: only after the booked start time
+ *  - in the chair → completed: always — the service is under way, even if it started early
+ * Returns null when allowed.
  */
-export function barberOptions(a: Appointment, now = new Date()): AppointmentStatus[] {
+export function barberStatusCheck(a: Appointment, to: AppointmentStatus, barberId: BarberId | undefined, now = new Date()): StatusRefusal | null {
+  if (!barberId || a.barberId !== barberId) return 'not_yours'
+  if (!BARBER_TRANSITIONS[a.status].includes(to)) return 'not_in_workflow'
   const started = new Date(a.start).getTime() <= now.getTime()
   const sameDay = new Date(a.start).toDateString() === now.toDateString()
-  return BARBER_TRANSITIONS[a.status].filter((s) => {
-    if (s === 'cancelled') return !started
-    if (s === 'completed' || s === 'no_show') return started
-    if (s === 'arrived' || s === 'in_chair') return sameDay || started
-    return true
-  })
+  if (to === 'cancelled' && started) return 'cancel_after_start'
+  if (to === 'completed' && a.status !== 'in_chair' && !started) return 'not_started'
+  if (to === 'no_show' && !started) return 'not_started'
+  if ((to === 'arrived' || to === 'in_chair') && !sameDay && !started) return 'not_today'
+  return null
+}
+
+/** The moves a barber may make right now on an appointment of their own. */
+export function barberOptions(a: Appointment, now = new Date()): AppointmentStatus[] {
+  return BARBER_TRANSITIONS[a.status].filter((to) => barberStatusCheck(a, to, a.barberId, now) === null)
 }
 
 /** Fields a barber may edit on their own profile. */
@@ -134,8 +149,13 @@ export function DemoStoreProvider({ session, children }: { session: Session; chi
     data,
     setStatus: (id, status) => {
       const a = raw.appointments.find((x) => x.id === id)
-      if (!a || !own(a.barberId)) return forbidden
-      if (!isOwner && !barberOptions(a).includes(status)) return forbidden
+      if (!a) return { ok: false, reason: 'invalid', detail: 'not_found' }
+      if (a.status === status) return ok
+      if (!isOwner) {
+        // a barber: own appointments only, along the workflow and the booking rules
+        const refusal = barberStatusCheck(a, status, session.barberId)
+        if (refusal) return { ok: false, reason: refusal === 'not_yours' ? 'forbidden' : 'invalid', detail: refusal }
+      }
       mutate('appointment.status', `${a.ref ?? a.id} · ${status}`, (d) => {
         const t = d.appointments.find((x) => x.id === id)!
         t.status = status

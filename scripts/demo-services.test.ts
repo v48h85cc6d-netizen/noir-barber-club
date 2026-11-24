@@ -167,7 +167,7 @@ const off = auth.signIn('sneaky@example.com', 'password123', 'customer')
 ok(!off.ok && off.error === 'inactive', 'a deactivated account cannot sign in')
 
 // ——— barber status rules (booking rules on top of the allowed transitions) ———
-const { barberOptions } = await import('../src/admin/data/store')
+const { barberOptions, barberStatusCheck } = await import('../src/admin/data/store')
 const base = { id: 'x', clientId: 'c', barberId: 'idris', serviceId: 'skin-fade', duration: 45, price: 48, source: 'online' as const }
 const future = { ...base, status: 'booked' as const, start: new Date(Date.now() + 48 * 3600_000).toISOString() }
 const started = { ...base, status: 'confirmed' as const, start: new Date(Date.now() - 10 * 60_000).toISOString() }
@@ -175,6 +175,15 @@ ok(barberOptions(future).includes('confirmed') && barberOptions(future).includes
 ok(!barberOptions(future).includes('completed'), 'barber cannot complete an appointment that has not started')
 ok(barberOptions(started).includes('completed') && !barberOptions(started).includes('cancelled'), 'once started: barber can complete, no longer cancel')
 ok(barberOptions({ ...base, status: 'completed', start: started.start }).length === 0, 'a completed appointment is final for the barber')
+// the reported bug: started early (in the chair before the booked time) → Done must be allowed
+const early = { ...base, status: 'in_chair' as const, start: new Date(Date.now() + 20 * 60_000).toISOString() }
+ok(barberStatusCheck(early, 'completed', 'idris') === null, 'Done on an appointment started EARLY is allowed (the reported bug)')
+ok(barberStatusCheck({ ...early, status: 'confirmed' }, 'completed', 'idris') === 'not_started', 'completing without starting waits for the booked time (specific reason)')
+ok(barberStatusCheck({ ...early, status: 'arrived' }, 'in_chair', 'idris') === null, 'Start on the same day before the booked time is allowed')
+ok(barberStatusCheck(early, 'completed', 'lucas') === 'not_yours', 'another barber cannot complete it (not_yours)')
+ok(barberStatusCheck(early, 'completed', undefined) === 'not_yours', 'no barber identity → refused')
+ok(barberStatusCheck(started, 'cancelled', 'idris') === 'cancel_after_start', 'cancel after start → specific reason')
+ok(barberStatusCheck({ ...future }, 'arrived', 'idris') === 'not_today', 'arrival two days early → specific reason')
 
 // ——— reset ———
 resetDb()

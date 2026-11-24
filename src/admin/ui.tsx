@@ -325,9 +325,18 @@ export const useToast = () => useContext(ToastCtx)
 export function useAct() {
   const toast = useToast()
   const { t } = useAdminT()
-  return (r: { ok: true } | { ok: false; reason: 'forbidden' | 'invalid' | 'taken' }, okText?: string) => {
+  const details = {
+    not_yours: t.common.notYours,
+    not_in_workflow: t.common.notInWorkflow,
+    cancel_after_start: t.common.cancelAfterStart,
+    not_started: t.common.notStarted,
+    not_today: t.common.notToday,
+    not_found: t.common.notFound,
+  } as const
+  return (r: { ok: true } | { ok: false; reason: 'forbidden' | 'invalid' | 'taken'; detail?: keyof typeof details }, okText?: string) => {
     if (r.ok) toast(okText ?? t.common.savedDemo)
-    else toast(r.reason === 'forbidden' ? t.common.forbidden : r.reason === 'taken' ? t.common.taken : t.common.invalid, 'error')
+    // the specific reason when there is one; the generic role message only for real role refusals
+    else toast(r.detail ? details[r.detail] : r.reason === 'forbidden' ? t.common.forbidden : r.reason === 'taken' ? t.common.taken : t.common.invalid, 'error')
     return r.ok
   }
 }

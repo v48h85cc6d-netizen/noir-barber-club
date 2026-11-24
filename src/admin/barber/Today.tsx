@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { Ban, Check, Footprints, Phone, Scissors } from 'lucide-react'
-import { useStore } from '../data/store'
+import { barberOptions, useStore } from '../data/store'
 import type { Appointment, AppointmentStatus, BarberRecord } from '../data/types'
 import { addDays, endOf, hhmm, inRange, startOfDay, workMinutes } from '../data/select'
 import { useAdminT } from '../i18n'
@@ -86,7 +86,7 @@ export function Today({ me }: { me: BarberRecord }) {
                 </button>
               )}
               {later && focus.status !== 'booked' && <span className="flex h-16 items-center justify-center rounded-2xl border border-paper/10 text-sm text-paper/55">{t.status.confirmed}</span>}
-              {!later && next[focus.status] && (
+              {!later && next[focus.status] && barberOptions(focus, nowDate).includes(next[focus.status]!.to) && (
                 <button
                   type="button"
                   onClick={() => act(setStatus(focus.id, next[focus.status]!.to))}
@@ -105,7 +105,7 @@ export function Today({ me }: { me: BarberRecord }) {
               <a href={`tel:${client.phone.replace(/\s/g, '')}`} aria-label={`${t.bApp.call} ${client.name}`} className="grid size-16 place-items-center rounded-2xl border border-paper/12 hover:border-paper/30">
                 <Phone className="size-5" strokeWidth={1.5} />
               </a>
-              {!later && (focus.status === 'booked' || focus.status === 'confirmed' || focus.status === 'arrived') && (
+              {!later && barberOptions(focus, nowDate).includes('no_show') && (
                 <button type="button" onClick={() => act(setStatus(focus.id, 'no_show'))} className="col-span-2 flex h-12 items-center justify-center gap-2 rounded-2xl border border-paper/10 text-sm text-paper/65 hover:border-[#d97a93]/50 hover:text-[#efb0c0]">
                   <Ban className="size-4" strokeWidth={1.5} /> {t.bApp.noShow}
                 </button>

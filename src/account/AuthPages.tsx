@@ -105,6 +105,18 @@ export function LoginPage() {
           {a.auth.createOne}
         </Link>
       </p>
+      {/* staff entrance: separate from customer registration */}
+      <section aria-labelledby="staff-account-h" className="mt-7 border-t border-paper/10 pt-6">
+        <h2 id="staff-account-h" className="label text-[#8a6a33]">
+          {a.auth.staffLabel}
+        </h2>
+        <div className="mt-2.5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-paper/10 bg-white/50 p-4">
+          <p className="min-w-0 text-sm text-paper/70">{a.auth.staffQuestion}</p>
+          <a href="/staff-login" className="inline-flex h-10 shrink-0 items-center gap-2 rounded-full border border-paper/20 bg-white/80 px-4 text-sm font-medium transition-colors hover:border-paper/40 hover:bg-white">
+            {a.auth.staffLink} <ArrowRight className="size-4" />
+          </a>
+        </div>
+      </section>
       <DemoAuthNote>{a.common.demoNote}</DemoAuthNote>
     </AuthLayout>
   )

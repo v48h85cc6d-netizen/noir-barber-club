@@ -57,6 +57,16 @@ ok(!wa.ok && wa.error === 'wrong_area', 'barber credentials do not open the owne
 ok(!auth.signIn('Owner@gmail.com', 'Owner112233', 'customer').ok, 'owner credentials do not open the customer login')
 ok(auth.getSession() === null, 'a refused login leaves nobody signed in')
 
+// ——— staff entrance (/staff-login): role from the stored account ———
+const so = auth.signInStaff('Owner@gmail.com', 'Owner112233')
+ok(so.ok && so.value.role === 'owner', 'staff sign-in: owner account → owner session')
+auth.signOut()
+const sb = auth.signInStaff('Barber@gmail.com', 'Barber@gmail.com')
+ok(sb.ok && sb.value.role === 'barber' && !!sb.value.barberId, 'staff sign-in: barber account → barber session with its own profile')
+auth.signOut()
+const sw = auth.signInStaff('Barber@gmail.com', 'wrong-password')
+ok(!sw.ok && sw.error === 'invalid_credentials' && auth.getSession() === null, 'staff sign-in: wrong password → invalid, no session')
+
 // ——— registration ———
 const bad = auth.startRegistration({ name: 'A', email: 'nope', phone: '12', password: 'short', confirm: 'other' })
 ok(!bad.ok && bad.fields?.name && bad.fields.email && bad.fields.phone && bad.fields.password && bad.fields.confirm, 'registration validates every field')
@@ -84,6 +94,11 @@ auth.startRegistration({ name: 'Sneaky', email: 'sneaky@example.com', phone: '+3
 const sneaky = auth.completeRegistration('sneaky@example.com')
 ok(sneaky.ok && sneaky.value.role === 'customer', 'a "role" sent with sign-up is ignored: always customer')
 auth.signOut()
+
+const sc = auth.signInStaff('ana@example.com', 'password123')
+ok(!sc.ok && sc.error === 'not_staff' && auth.getSession() === null, 'staff sign-in: a CUSTOMER account → "no staff access", no session created')
+auth.startRegistration({ name: 'Pending Person', email: 'pending@example.com', phone: '+31 6 1111 6666', password: 'password123', confirm: 'password123' })
+ok(auth.signInStaff('pending@example.com', 'password123').ok === false && auth.getSession() === null, 'staff sign-in: an unverified customer registration → refused')
 
 // ——— booking ———
 const d0 = readDb()

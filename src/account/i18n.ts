@@ -65,6 +65,9 @@ const en = {
     staffHereTitle: 'This is the customer area',
     staffHereText: 'You are signed in with a staff account.',
     staffHereCta: 'Open the Command Center',
+    staffLabel: "Staff account",
+    staffQuestion: "Are you a member of the NOIR team?",
+    staffLink: "Staff sign in",
   },
   appts: {
     hello: (name: string) => `Hi ${name}`,
@@ -213,6 +216,9 @@ const de: AccountDict = {
     staffHereTitle: 'Dies ist der Kundenbereich',
     staffHereText: 'Du bist mit einem Mitarbeiterkonto angemeldet.',
     staffHereCta: 'Command Center öffnen',
+    staffLabel: "Mitarbeiterkonto",
+    staffQuestion: "Gehörst du zum NOIR-Team?",
+    staffLink: "Mitarbeiter-Anmeldung",
   },
   appts: {
     hello: (name) => `Hallo ${name}`,
@@ -359,6 +365,9 @@ const sq: AccountDict = {
     staffHereTitle: 'Kjo është zona e klientëve',
     staffHereText: 'Jeni i identifikuar me një llogari stafi.',
     staffHereCta: 'Hap Command Center',
+    staffLabel: "Llogari stafi",
+    staffQuestion: "Jeni pjesë e ekipit NOIR?",
+    staffLink: "Hyrja e stafit",
   },
   appts: {
     hello: (name) => `Përshëndetje ${name}`,

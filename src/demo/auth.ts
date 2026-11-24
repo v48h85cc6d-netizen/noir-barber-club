@@ -41,6 +41,8 @@ export type AuthError =
   | 'unverified'
   /** no pending registration (expired, or started in another browser) */
   | 'no_pending'
+  /** correct credentials, but the account's stored role is not owner/barber */
+  | 'not_staff'
 
 export type FieldError = 'name' | 'email' | 'phone' | 'password_short' | 'password_mismatch' | 'required'
 export interface RegisterInput {
@@ -60,6 +62,11 @@ export type AuthResult<T = AuthSession> =
 export interface AuthService {
   getSession(): AuthSession | null
   signIn(email: string, password: string, area: SignInArea): AuthResult
+  /**
+   * One staff entrance for owner AND barber accounts. The role is taken from the
+   * stored account (never from the page); customer accounts get no session.
+   */
+  signInStaff(email: string, password: string): AuthResult
   /** Step 1 of sign-up: validate, check the email is free, keep the registration as PENDING (no account yet). */
   startRegistration(input: RegisterInput): AuthResult<{ email: string; name: string }>
   /**
@@ -200,6 +207,20 @@ export const localDemoAuth: AuthService = {
     if (acc.passwordHash !== hashPassword(email, password)) return fail('invalid_credentials')
     if (acc.role === 'customer' && !acc.emailVerifiedAt) return fail('unverified')
     if (acc.role !== area) return { ok: false, error: 'wrong_area', accountRole: acc.role }
+    if (!acc.active) return fail('inactive')
+    setSession(acc)
+    return { ok: true, value: currentSession()! }
+  },
+
+  signInStaff(email, password) {
+    const acc = readDb().accounts.find((a) => a.email === normEmail(email))
+    // same message for unknown email and wrong password
+    if (!acc || acc.passwordHash !== hashPassword(email, password)) {
+      // a pending (unverified) customer registration is not a staff account either
+      const p = !acc ? readPending()[normEmail(email)] : undefined
+      return fail(p && p.passwordHash === hashPassword(email, password) ? 'not_staff' : 'invalid_credentials')
+    }
+    if (acc.role !== 'owner' && acc.role !== 'barber') return { ok: false, error: 'not_staff', accountRole: acc.role }
     if (!acc.active) return fail('inactive')
     setSession(acc)
     return { ok: true, value: currentSession()! }

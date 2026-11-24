@@ -78,6 +78,7 @@ The visual language (light-grey and near-black sections, sentence-case extra-wid
 
 | Role | Where | Demo login |
 | --- | --- | --- |
+| Owner or barber (one staff entrance) | `/staff-login` — linked from the customer login (*Staff account → Staff sign in*) | their own staff login |
 | Owner | `/admin/login/owner` | `Owner@gmail.com` / `Owner112233` |
 | Barber | `/admin/login/barber` | `Barber@gmail.com` / `Barber@gmail.com` (Idris Haddad) |
 | Customer | `/account/register`, then `/account/login` | created by the visitor |

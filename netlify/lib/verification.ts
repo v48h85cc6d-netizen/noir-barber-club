@@ -8,7 +8,8 @@
  */
 import { createHash, createHmac, randomInt, timingSafeEqual } from 'node:crypto'
 import { renderVerificationEmail, type Locale } from './email-template'
-import type { Mailer } from './mailer'
+import { MailError, type Mailer } from './mailer'
+import { log, recipientTag, scrub } from './log'
 
 export interface CodeRecord {
   mac: string
@@ -32,6 +33,8 @@ export interface Deps {
   now?: () => number
   /** seconds; 600 (10 minutes) unless overridden for tests */
   ttl?: number
+  /** request reference for the logs */
+  ref?: string
 }
 
 export const MAX_ATTEMPTS = 5
@@ -55,16 +58,29 @@ export type SendResult =
 export async function sendCode(deps: Deps, input: { email: string; name?: string; locale?: string; ip?: string }): Promise<SendResult> {
   const now = (deps.now ?? Date.now)()
   const ttl = (deps.ttl ?? 600) * 1000
-  if (!isEmail(input.email)) return { ok: false, error: 'invalid_email' }
+  const who = { ref: deps.ref, ...recipientTag(input.email) }
+  if (!isEmail(input.email)) {
+    log('warn', 'verification.send.invalid_email', who)
+    return { ok: false, error: 'invalid_email' }
+  }
   const email = normEmail(input.email)
 
   const prev = await deps.store.get<CodeRecord>(keyFor(email))
   const recent = (prev?.sends ?? []).filter((t) => now - t < 3_600_000)
-  if (prev && now - prev.issuedAt < RESEND_COOLDOWN_MS) return { ok: false, error: 'cooldown', retryAt: prev.issuedAt + RESEND_COOLDOWN_MS }
-  if (recent.length >= MAX_SENDS_PER_HOUR) return { ok: false, error: 'rate_limited', retryAt: recent[0] + 3_600_000 }
+  if (prev && now - prev.issuedAt < RESEND_COOLDOWN_MS) {
+    log('info', 'verification.send.cooldown', who)
+    return { ok: false, error: 'cooldown', retryAt: prev.issuedAt + RESEND_COOLDOWN_MS }
+  }
+  if (recent.length >= MAX_SENDS_PER_HOUR) {
+    log('warn', 'verification.send.rate_limited', { ...who, limit: 'per_email', sendsLastHour: recent.length })
+    return { ok: false, error: 'rate_limited', retryAt: recent[0] + 3_600_000 }
+  }
   if (input.ip) {
     const ipSends = ((await deps.store.get<number[]>(ipKey(input.ip))) ?? []).filter((t) => now - t < 3_600_000)
-    if (ipSends.length >= MAX_SENDS_PER_IP_PER_HOUR) return { ok: false, error: 'rate_limited', retryAt: ipSends[0] + 3_600_000 }
+    if (ipSends.length >= MAX_SENDS_PER_IP_PER_HOUR) {
+      log('warn', 'verification.send.rate_limited', { ...who, limit: 'per_ip', sendsLastHour: ipSends.length })
+      return { ok: false, error: 'rate_limited', retryAt: ipSends[0] + 3_600_000 }
+    }
     await deps.store.set(ipKey(input.ip), [...ipSends, now])
   }
 
@@ -74,12 +90,21 @@ export async function sendCode(deps: Deps, input: { email: string; name?: string
   let messageId = ''
   try {
     messageId = (await deps.mailer.send({ to: email, ...mail })).id
-    console.log('[verification] email accepted by provider, id', messageId)
+    log('info', 'verification.send.accepted', { ...who, messageId, locale })
   } catch (e) {
-    const err = e as { code?: string; message?: string }
-    console.error('[verification] email not sent:', err.code ?? '', err.message ?? e)
-    // nothing is stored: the previous code (if any) stays as it was
-    return { ok: false, error: err.code === 'not_configured' ? 'email_not_configured' : 'email_send_failed' }
+    // nothing is stored: the previous code (if any) stays as it was, no account exists
+    const err = e instanceof MailError ? e : new MailError('rejected', 'unexpected', { name: 'unknown', message: String((e as Error)?.message ?? e) })
+    log('error', 'verification.send.failed', {
+      ...who,
+      cause: err.code,
+      provider: err.provider.name,
+      providerStatus: err.provider.status,
+      providerError: err.provider.errorName,
+      providerMessage: err.provider.message ? scrub(err.provider.message) : undefined,
+      missingSettings: err.provider.missing,
+    })
+    const error = err.code === 'not_configured' ? 'email_not_configured' : err.code === 'invalid_recipient' ? 'invalid_email' : err.code === 'rate_limited' ? 'rate_limited' : 'email_send_failed'
+    return { ok: false, error }
   }
 
   // the new code replaces any earlier one, which becomes invalid
@@ -94,13 +119,18 @@ export type CheckResult =
 
 export async function checkCode(deps: Deps, input: { email: string; code: string }): Promise<CheckResult> {
   const now = (deps.now ?? Date.now)()
+  const who = { ref: deps.ref, ...recipientTag(input.email) }
   if (!isEmail(input.email)) return { ok: false, error: 'invalid_email' }
   const email = normEmail(input.email)
   const key = keyFor(email)
   const rec = await deps.store.get<CodeRecord>(key)
-  if (!rec || !rec.mac) return { ok: false, error: 'no_code' }
-  if (now > rec.expiresAt) return { ok: false, error: 'expired' }
-  if (rec.attempts >= MAX_ATTEMPTS) return { ok: false, error: 'too_many_attempts' }
+  const fail = (error: 'no_code' | 'expired' | 'too_many_attempts' | 'invalid_code', extra: Record<string, unknown> = {}) => {
+    log('info', `verification.check.${error}`, { ...who, ...extra })
+    return { ok: false as const, error, ...extra }
+  }
+  if (!rec || !rec.mac) return fail('no_code')
+  if (now > rec.expiresAt) return fail('expired')
+  if (rec.attempts >= MAX_ATTEMPTS) return fail('too_many_attempts')
 
   const code = String(input.code ?? '').trim()
   const expected = Buffer.from(rec.mac, 'hex')
@@ -108,9 +138,10 @@ export async function checkCode(deps: Deps, input: { email: string; code: string
   if (!/^\d{6}$/.test(code) || !timingSafeEqual(expected, given)) {
     const attempts = rec.attempts + 1
     await deps.store.set(key, { ...rec, attempts })
-    return attempts >= MAX_ATTEMPTS ? { ok: false, error: 'too_many_attempts' } : { ok: false, error: 'invalid_code', attemptsLeft: MAX_ATTEMPTS - attempts }
+    return attempts >= MAX_ATTEMPTS ? fail('too_many_attempts') : fail('invalid_code', { attemptsLeft: MAX_ATTEMPTS - attempts })
   }
   // one use only: keep the send history for rate limiting, drop the code
   await deps.store.set(key, { ...rec, mac: '', expiresAt: 0, attempts: MAX_ATTEMPTS })
+  log('info', 'verification.check.verified', who)
   return { ok: true, email, verifiedAt: now }
 }

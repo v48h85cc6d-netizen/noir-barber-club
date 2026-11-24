@@ -68,6 +68,8 @@ export interface AuthService {
    */
   completeRegistration(email: string): AuthResult
   pendingRegistration(email: string): { email: string; name: string } | null
+  /** Drop a pending registration (e.g. when the verification email could not be sent). */
+  cancelPendingRegistration(email: string): void
   /** The most recent registration waiting for verification in this browser, if any. */
   latestPendingRegistration(): { email: string; name: string } | null
   signOut(): void
@@ -218,6 +220,12 @@ export const localDemoAuth: AuthService = {
   pendingRegistration(email) {
     const p = readPending()[normEmail(email)]
     return p ? { email: p.email, name: p.name } : null
+  },
+
+  cancelPendingRegistration(email) {
+    const all = readPending()
+    delete all[normEmail(email)]
+    writePending(all)
   },
 
   latestPendingRegistration() {

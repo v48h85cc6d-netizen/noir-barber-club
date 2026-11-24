@@ -13,12 +13,14 @@ import { readFile, stat } from 'node:fs/promises'
 import { extname, join, normalize } from 'node:path'
 import send from '../netlify/functions/verification-send.mts'
 import verify from '../netlify/functions/verification-verify.mts'
+import status from '../netlify/functions/verification-status.mts'
 
 const PORT = Number(process.env.PORT ?? 8888)
 const ROOT = join(import.meta.dirname, '..', 'dist')
 const routes: Record<string, (req: Request, ctx: never) => Promise<Response>> = {
   '/api/verification/send': send as never,
   '/api/verification/verify': verify as never,
+  '/api/verification/status': status as never,
 }
 const types: Record<string, string> = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.json': 'application/json', '.woff2': 'font/woff2', '.ico': 'image/x-icon' }
 

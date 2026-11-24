@@ -7,7 +7,7 @@
 import { createServer } from 'node:http'
 import type { AddressInfo } from 'node:net'
 import { checkCode, sendCode, MAX_ATTEMPTS, type CodeRecord, type Deps, type KV } from '../netlify/lib/verification'
-import { mailerFromEnv, sender, type MailMessage } from '../netlify/lib/mailer'
+import { classifyResend, MailError, mailerFromEnv, sender, type MailMessage } from '../netlify/lib/mailer'
 
 let pass = 0
 let fail = 0
@@ -90,11 +90,39 @@ for (let i = 0; i < 8; i++) {
 ok(sent === 5, `at most 5 codes per email per hour (${sent} sent of 8 requests)`)
 
 // failure to send is reported, nothing stored
-const failing: Deps = { ...deps, mailer: { send: async () => Promise.reject(Object.assign(new Error('no key'), { code: 'not_configured' })) } }
+const failing: Deps = { ...deps, mailer: { send: async () => Promise.reject(new MailError('not_configured', 'no key', { name: 'resend', missing: ['RESEND_API_KEY'] })) } }
 r = await sendCode(failing, { email: 'nobody@example.com' })
 ok(!r.ok && r.error === 'email_not_configured', 'missing email configuration is reported, not hidden')
 c = await checkCode(deps, { email: 'nobody@example.com', code: '123456' })
 ok(!c.ok && c.error === 'no_code', 'when sending fails no code exists')
+
+// ——— provider error causes ———
+ok(classifyResend(403, 'validation_error', 'The veltri-x-agency.com domain is not verified.') === 'sender', 'Resend 403 “domain not verified” → sender problem')
+ok(classifyResend(403, 'validation_error', 'You can only send testing emails to your own email address') === 'sender', 'Resend testing restriction → sender problem')
+ok(classifyResend(422, 'validation_error', 'Invalid `to` field.') === 'invalid_recipient', 'Resend 422 invalid `to` → invalid recipient')
+ok(classifyResend(429, 'rate_limit_exceeded') === 'rate_limited' && classifyResend(429, 'daily_quota_exceeded') === 'rate_limited', 'Resend 429 / quota → rate limited')
+ok(classifyResend(401, 'restricted_api_key') === 'auth', 'Resend 401 / restricted key → key problem')
+ok(classifyResend(503) === 'unavailable', 'Resend 5xx → provider unavailable')
+const badTo: Deps = { ...deps, mailer: { send: async () => Promise.reject(new MailError('invalid_recipient', 'Resend 422', { name: 'resend', status: 422 })) } }
+r = await sendCode(badTo, { email: 'typo@exmaple.con' })
+ok(!r.ok && r.error === 'invalid_email', 'provider-rejected recipient is shown as an invalid address, nothing stored')
+
+// ——— logs never contain the code, the full address or a key ———
+const logged: string[] = []
+const orig = { log: console.log, warn: console.warn, error: console.error }
+console.log = console.warn = console.error = (...a: unknown[]) => void logged.push(a.map(String).join(' '))
+clock += 3_600_000
+const LOGME = 'privacy.check@example.com'
+await sendCode({ ...deps, ref: 'testref' }, { email: LOGME })
+const codeP = lastCode()
+await checkCode({ ...deps, ref: 'testref' }, { email: LOGME, code: codeP === '000000' ? '111111' : '000000' })
+await checkCode({ ...deps, ref: 'testref' }, { email: LOGME, code: codeP })
+await sendCode({ ...deps, ref: 'testref', mailer: { send: async () => Promise.reject(new MailError('sender', 'Resend 403', { name: 'resend', status: 403, errorName: 'validation_error', message: 'Cannot send to privacy.check@example.com with key re_abcdefghijklmnop code 123456' })) } }, { email: 'other.person@example.com' })
+Object.assign(console, orig)
+const all = logged.join('\n')
+ok(logged.length >= 4 && all.includes('verification.send.accepted') && all.includes('verification.check.invalid_code') && all.includes('verification.check.verified') && all.includes('verification.send.failed'), `structured log lines for each step (${logged.length})`)
+ok(all.includes('"providerStatus":403') && all.includes('"cause":"sender"') && all.includes('"recipientDomain":"example.com"') && all.includes('"ref":"testref"'), 'failure log has cause, provider status, recipient domain and request ref')
+ok(!all.includes(codeP) && !all.includes('123456') && !all.includes(LOGME) && !all.includes('re_abcdefghijklmnop') && !all.includes(deps.secret), 'logs contain no code, no full email address, no key, no secret')
 
 // ——— sender + provider request (local capture server, no real email) ———
 ok(sender().address === 'projects@veltri-x-agency.com' && sender().name === 'NOIR BARBER CLUB', 'sender is NOIR BARBER CLUB <projects@veltri-x-agency.com>')
@@ -119,6 +147,25 @@ process.env.RESEND_API_URL = `http://127.0.0.1:${(srv.address() as AddressInfo).
 const res = await mailerFromEnv().send({ to: 'a@example.com', subject: 'Subject', text: 'Text', html: '<p>Html</p>' })
 ok(res.id === 'test-id' && captured.body?.from === 'NOIR BARBER CLUB <projects@veltri-x-agency.com>' && captured.auth === 'Bearer re_test_dummy', 'Resend request: correct From header, key only in the server-side Authorization header')
 srv.close()
+
+// one retry on a provider outage, none on a real rejection
+let calls = 0
+const flaky = createServer((req, res) => {
+  req.resume()
+  req.on('end', () => {
+    calls++
+    if (calls === 1) res.writeHead(503, { 'Content-Type': 'application/json' }).end(JSON.stringify({ name: 'internal_server_error', message: 'busy' }))
+    else if (calls === 2) res.writeHead(200, { 'Content-Type': 'application/json' }).end(JSON.stringify({ id: 'after-retry' }))
+    else res.writeHead(422, { 'Content-Type': 'application/json' }).end(JSON.stringify({ name: 'validation_error', message: 'Invalid `to` field.' }))
+  })
+}).listen(0)
+await new Promise((r2) => flaky.once('listening', r2))
+process.env.RESEND_API_URL = `http://127.0.0.1:${(flaky.address() as AddressInfo).port}/emails`
+const retried = await mailerFromEnv().send({ to: 'a@example.com', subject: 's', text: 't', html: 'h' })
+ok(retried.id === 'after-retry' && calls === 2, 'a provider outage (503) is retried once and then succeeds')
+const before422 = calls
+await mailerFromEnv().send({ to: 'bad', subject: 's', text: 't', html: 'h' }).catch((e) => ok(e instanceof MailError && e.code === 'invalid_recipient' && calls === before422 + 1, 'an invalid recipient (422) is not retried and is classified'))
+flaky.close()
 
 console.log(`\n${pass} passed, ${fail} failed`)
 process.exit(fail ? 1 : 0)

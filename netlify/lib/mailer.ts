@@ -21,13 +21,47 @@ export interface Mailer {
   send(msg: MailMessage): Promise<{ id: string }>
 }
 
-class MailError extends Error {
+/**
+ * not_configured     key / SMTP settings missing in this deploy
+ * auth               the provider refused the key (revoked, restricted, wrong)
+ * sender             the sender address or domain is not allowed (domain not verified, testing restriction)
+ * invalid_recipient  the provider says the recipient address is invalid
+ * rate_limited       the provider's own rate limit or quota
+ * unavailable        network error or provider 5xx (after one retry)
+ * rejected           anything else
+ */
+export type MailErrorCode = 'not_configured' | 'auth' | 'sender' | 'invalid_recipient' | 'rate_limited' | 'unavailable' | 'rejected'
+
+export class MailError extends Error {
   constructor(
-    public code: 'not_configured' | 'rejected',
+    public code: MailErrorCode,
     message: string,
+    /** provider details for the logs (never the key) */
+    public provider: { name: string; status?: number; errorName?: string; message?: string; missing?: string[] },
   ) {
     super(message)
   }
+}
+
+/** Map a Resend error response to a cause (https://resend.com/docs/api-reference/errors). */
+export function classifyResend(status: number, name = '', message = ''): MailErrorCode {
+  const m = message.toLowerCase()
+  if (status === 401 || name === 'missing_api_key' || name === 'invalid_api_key' || name === 'restricted_api_key') return 'auth'
+  if (status === 429 || name === 'rate_limit_exceeded' || name === 'daily_quota_exceeded' || name === 'monthly_quota_exceeded') return 'rate_limited'
+  if (status >= 500) return 'unavailable'
+  if (status === 403 || m.includes('domain is not verified') || m.includes('testing emails') || name === 'invalid_from_address') return 'sender'
+  if (status === 422 && (m.includes('`to`') || m.includes(' to ') || m.includes('recipient') || m.includes('email address'))) return 'invalid_recipient'
+  return 'rejected'
+}
+
+const pause = (ms: number) => new Promise((r) => setTimeout(r, ms))
+
+/** Which settings this deploy is missing (names only). */
+export function missingMailSettings(): string[] {
+  const provider = env('EMAIL_PROVIDER') || (env('RESEND_API_KEY') ? 'resend' : env('SMTP_HOST') ? 'smtp' : '')
+  if (provider === 'resend') return env('RESEND_API_KEY') ? [] : ['RESEND_API_KEY']
+  if (provider === 'smtp') return ['SMTP_HOST', 'SMTP_USER', 'SMTP_PASS'].filter((k) => !env(k))
+  return ['RESEND_API_KEY (or SMTP_HOST/SMTP_USER/SMTP_PASS)']
 }
 
 const env = (k: string) => (process.env[k] ?? '').trim()
@@ -44,15 +78,32 @@ export function mailerFromEnv(): Mailer {
     return {
       async send(msg) {
         const key = env('RESEND_API_KEY')
-        if (!key) throw new MailError('not_configured', 'RESEND_API_KEY is not set')
-        const res = await fetch(env('RESEND_API_URL') || 'https://api.resend.com/emails', {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ from: `${from.name} <${from.address}>`, to: [msg.to], subject: msg.subject, text: msg.text, html: msg.html }),
-        })
-        const body = (await res.json().catch(() => ({}))) as { id?: string; message?: string; name?: string }
-        if (!res.ok || !body.id) throw new MailError('rejected', `Resend ${res.status}: ${body.name ?? ''} ${body.message ?? ''}`.trim())
-        return { id: body.id }
+        if (!key) throw new MailError('not_configured', 'RESEND_API_KEY is not set', { name: 'resend', missing: ['RESEND_API_KEY'] })
+        const attempt = async () => {
+          const res = await fetch(env('RESEND_API_URL') || 'https://api.resend.com/emails', {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ from: `${from.name} <${from.address}>`, to: [msg.to], subject: msg.subject, text: msg.text, html: msg.html }),
+          })
+          const body = (await res.json().catch(() => ({}))) as { id?: string; message?: string; name?: string }
+          if (res.ok && body.id) return { id: body.id }
+          const code = res.ok ? 'rejected' : classifyResend(res.status, body.name, body.message)
+          throw new MailError(code, `Resend ${res.status}`, { name: 'resend', status: res.status, errorName: body.name, message: body.message })
+        }
+        try {
+          return await attempt()
+        } catch (e) {
+          // one retry for network errors and provider outages only
+          const transient = !(e instanceof MailError) || e.code === 'unavailable'
+          if (!transient) throw e
+          await pause(600)
+          try {
+            return await attempt()
+          } catch (e2) {
+            if (e2 instanceof MailError) throw e2
+            throw new MailError('unavailable', 'network error', { name: 'resend', message: (e2 as Error).message })
+          }
+        }
       },
     }
   }
@@ -60,7 +111,7 @@ export function mailerFromEnv(): Mailer {
   if (provider === 'smtp') {
     return {
       async send(msg) {
-        if (!env('SMTP_HOST') || !env('SMTP_USER') || !env('SMTP_PASS')) throw new MailError('not_configured', 'SMTP_HOST / SMTP_USER / SMTP_PASS are not set')
+        if (!env('SMTP_HOST') || !env('SMTP_USER') || !env('SMTP_PASS')) throw new MailError('not_configured', 'SMTP settings missing', { name: 'smtp', missing: missingMailSettings() })
         const port = Number(env('SMTP_PORT') || 587)
         const transport = nodemailer.createTransport({
           host: env('SMTP_HOST'),
@@ -72,7 +123,10 @@ export function mailerFromEnv(): Mailer {
           const info = await transport.sendMail({ from: { name: from.name, address: from.address }, to: msg.to, subject: msg.subject, text: msg.text, html: msg.html })
           return { id: info.messageId }
         } catch (e) {
-          throw new MailError('rejected', `SMTP: ${(e as Error).message}`)
+          const err = e as { responseCode?: number; code?: string; message?: string }
+          const rc = err.responseCode ?? 0
+          const code: MailErrorCode = rc === 535 ? 'auth' : rc === 550 || rc === 553 ? 'invalid_recipient' : rc === 421 || rc === 450 || rc === 451 || err.code === 'ECONNECTION' || err.code === 'ETIMEDOUT' ? 'unavailable' : 'rejected'
+          throw new MailError(code, 'SMTP error', { name: 'smtp', status: rc || undefined, errorName: err.code, message: err.message })
         }
       },
     }
@@ -80,7 +134,7 @@ export function mailerFromEnv(): Mailer {
 
   return {
     async send() {
-      throw new MailError('not_configured', 'No email provider configured (set RESEND_API_KEY or SMTP_* environment variables)')
+      throw new MailError('not_configured', 'No email provider configured', { name: 'none', missing: missingMailSettings() })
     },
   }
 }

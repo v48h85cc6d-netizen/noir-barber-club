@@ -140,7 +140,11 @@ export function RegisterPage() {
     setBusy(true)
     const sent = await sendVerificationCode(r.value.email, r.value.name, locale)
     setBusy(false)
-    if (!sent.ok && sent.error !== 'cooldown') return setAlert(sendError(a, sent))
+    if (!sent.ok && sent.error !== 'cooldown') {
+      // no email → nothing may stay behind: drop the pending registration (no account was created)
+      auth.cancelPendingRegistration(r.value.email)
+      return setAlert(sendError(a, sent))
+    }
     saveTiming(r.value.email, sent)
     // 5: the verification screen
     nav(`/verify${qs}`, { state: { email: r.value.email } })
@@ -292,7 +296,8 @@ function readTiming(email: string): Timing | null {
 function sendError(a: AccountDict, r: SendOutcome) {
   if (r.ok) return ''
   if (r.error === 'cooldown') return a.verify.errors.cooldown(Math.max(1, Math.ceil(((r.retryAt ?? Date.now()) - Date.now()) / 1000)))
-  return a.verify.errors[r.error]
+  // the reference lets the shop find this exact request in the server logs
+  return r.ref ? `${a.verify.errors[r.error]} (Ref ${r.ref})` : a.verify.errors[r.error]
 }
 
 const mmss = (ms: number) => {
@@ -383,7 +388,8 @@ export function VerifyPage() {
     keep(WELCOME_KEY, null)
     setDigits(['', '', '', '', '', ''])
     boxes.current[0]?.focus()
-    setMsg({ tone: 'error', text: r.error === 'invalid_code' ? a.verify.errors.invalid_code(r.attemptsLeft ?? 0) : a.verify.errors[r.error] })
+    const text = r.error === 'invalid_code' ? a.verify.errors.invalid_code(r.attemptsLeft ?? 0) : a.verify.errors[r.error]
+    setMsg({ tone: 'error', text: r.ref && (r.error === 'email_not_configured' || r.error === 'service_unavailable') ? `${text} (Ref ${r.ref})` : text })
   }
 
   const resend = async () => {

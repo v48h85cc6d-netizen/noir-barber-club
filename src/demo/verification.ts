@@ -7,9 +7,10 @@
 import { auth, type AuthResult } from './auth'
 
 export type SendError = 'invalid_email' | 'rate_limited' | 'cooldown' | 'email_not_configured' | 'email_send_failed' | 'service_unavailable'
-export type SendOutcome = { ok: true; expiresAt: number; resendAvailableAt: number } | { ok: false; error: SendError; retryAt?: number }
+/** `ref` is the server's request reference (matches the function logs). */
+export type SendOutcome = { ok: true; expiresAt: number; resendAvailableAt: number; ref?: string } | { ok: false; error: SendError; retryAt?: number; ref?: string }
 export type VerifyError = 'invalid_email' | 'no_code' | 'expired' | 'too_many_attempts' | 'invalid_code' | 'email_not_configured' | 'service_unavailable' | 'no_pending'
-export type VerifyOutcome = { ok: true } | { ok: false; error: VerifyError; attemptsLeft?: number }
+export type VerifyOutcome = { ok: true } | { ok: false; error: VerifyError; attemptsLeft?: number; ref?: string }
 
 async function post<T>(path: string, body: unknown): Promise<T | { ok: false; error: 'service_unavailable' }> {
   try {

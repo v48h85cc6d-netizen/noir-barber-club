@@ -68,6 +68,8 @@ export interface AuthService {
    */
   completeRegistration(email: string): AuthResult
   pendingRegistration(email: string): { email: string; name: string } | null
+  /** The most recent registration waiting for verification in this browser, if any. */
+  latestPendingRegistration(): { email: string; name: string } | null
   signOut(): void
   /** Demo: returns the reset code instead of emailing it (null when no customer account has that email). */
   requestPasswordReset(email: string): { demoCode: string | null }
@@ -215,6 +217,11 @@ export const localDemoAuth: AuthService = {
 
   pendingRegistration(email) {
     const p = readPending()[normEmail(email)]
+    return p ? { email: p.email, name: p.name } : null
+  },
+
+  latestPendingRegistration() {
+    const p = Object.values(readPending()).sort((x, y) => y.createdAt - x.createdAt)[0]
     return p ? { email: p.email, name: p.name } : null
   },
 

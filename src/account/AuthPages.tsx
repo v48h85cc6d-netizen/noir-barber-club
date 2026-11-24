@@ -311,9 +311,11 @@ export function VerifyPage() {
   const [email] = useState(() => {
     if (stateEmail) return stateEmail
     try {
-      return (JSON.parse(sessionStorage.getItem(TIMING_KEY) ?? 'null') as Timing | null)?.email ?? ''
+      const fromTab = (JSON.parse(sessionStorage.getItem(TIMING_KEY) ?? 'null') as Timing | null)?.email
+      // new tab or restarted browser: continue the registration waiting in this browser
+      return fromTab ?? auth.latestPendingRegistration()?.email ?? ''
     } catch {
-      return ''
+      return auth.latestPendingRegistration()?.email ?? ''
     }
   })
   const pending = email ? auth.pendingRegistration(email) : null

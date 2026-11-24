@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useMemo, type ReactNode } from 'react'
 import { hashPassword, isEmail, isPhone, MIN_PASSWORD, normEmail } from '../../demo/auth'
-import { resetDb, shortId, updateDb, useDb } from '../../demo/db'
+import { readDb, resetDb, shortId, updateDb, useDb } from '../../demo/db'
 import type {
   Appointment,
   AppointmentStatus,
@@ -30,7 +30,7 @@ export interface Session {
   barberId?: BarberId
 }
 
-type Result = { ok: true } | { ok: false; reason: 'forbidden' | 'invalid' | 'taken'; detail?: StatusRefusal | 'not_found' }
+export type Result = { ok: true } | { ok: false; reason: 'forbidden' | 'invalid' | 'taken'; detail?: StatusRefusal | 'not_found' | 'no_profile' }
 
 /** Status changes a barber may make on their own appointments (the workflow). */
 export const BARBER_TRANSITIONS: Record<AppointmentStatus, AppointmentStatus[]> = {
@@ -69,6 +69,35 @@ export function barberStatusCheck(a: Appointment, to: AppointmentStatus, barberI
   return null
 }
 
+/**
+ * Authorization for ANY appointment status change, shared by every account
+ * (no individual barber is special-cased). The acting barber is resolved from
+ * the data on every call: session → account → linked barber profile; the
+ * appointment must be assigned to that profile. Owners may change anything.
+ * Mirrors the database guard (guard_appointment_update + RLS appts_barber_update).
+ */
+export function authorizeStatusChange(
+  data: DemoData,
+  session: Pick<Session, 'userId' | 'role'>,
+  appointmentId: string,
+  to: AppointmentStatus,
+  now = new Date(),
+): Result {
+  const a = data.appointments.find((x) => x.id === appointmentId)
+  if (!a) return { ok: false, reason: 'invalid', detail: 'not_found' }
+  const account = data.accounts.find((x) => x.id === session.userId)
+  // the account must still exist, be active and carry the role the session claims
+  if (!account || !account.active || account.role !== session.role) return { ok: false, reason: 'forbidden' }
+  if (account.role === 'owner') return { ok: true }
+  if (account.role !== 'barber') return { ok: false, reason: 'forbidden' }
+  // the barber profile linked to THIS account (not a name, not a fixed id)
+  const profile = account.barberId ? data.barbers.find((b) => b.id === account.barberId && b.active) : undefined
+  if (!profile) return { ok: false, reason: 'forbidden', detail: 'no_profile' }
+  if (a.status === to) return { ok: true }
+  const refusal = barberStatusCheck(a, to, profile.id, now)
+  return refusal ? { ok: false, reason: refusal === 'not_yours' ? 'forbidden' : 'invalid', detail: refusal } : { ok: true }
+}
+
 /** The moves a barber may make right now on an appointment of their own. */
 export function barberOptions(a: Appointment, now = new Date()): AppointmentStatus[] {
   return BARBER_TRANSITIONS[a.status].filter((to) => barberStatusCheck(a, to, a.barberId, now) === null)
@@ -92,6 +121,8 @@ interface Ctx {
   addTimeOff: (id: BarberId, from: string, to: string, reason: string) => Result
   updateProfile: (id: BarberId, patch: ProfilePatch) => Result
   createBarber: (input: { name: string; email: string; phone: string; password: string }) => Result
+  /** Give an EXISTING barber profile its own login (owner only). */
+  createBarberLogin: (barberId: BarberId, email: string, password: string) => Result
   updateBarber: (id: BarberId, patch: BarberPatch) => Result
   confirmGiftPayment: (ref: string) => Result
   cancelGift: (ref: string) => Result
@@ -148,14 +179,12 @@ export function DemoStoreProvider({ session, children }: { session: Session; chi
     session,
     data,
     setStatus: (id, status) => {
-      const a = raw.appointments.find((x) => x.id === id)
-      if (!a) return { ok: false, reason: 'invalid', detail: 'not_found' }
+      // checked against the latest stored data (not the rendered copy), for owners and barbers alike
+      const fresh = readDb()
+      const verdict = authorizeStatusChange(fresh, session, id, status)
+      if (!verdict.ok) return verdict
+      const a = fresh.appointments.find((x) => x.id === id)!
       if (a.status === status) return ok
-      if (!isOwner) {
-        // a barber: own appointments only, along the workflow and the booking rules
-        const refusal = barberStatusCheck(a, status, session.barberId)
-        if (refusal) return { ok: false, reason: refusal === 'not_yours' ? 'forbidden' : 'invalid', detail: refusal }
-      }
       mutate('appointment.status', `${a.ref ?? a.id} · ${status}`, (d) => {
         const t = d.appointments.find((x) => x.id === id)!
         t.status = status
@@ -257,6 +286,24 @@ export function DemoStoreProvider({ session, children }: { session: Session; chi
         const accountId = `u-${id}`
         d.staff.push({ id: accountId, name: name.trim(), email: e, role: 'barber', barberId: id, active: true, invitedAt: now })
         d.accounts.push({ id: accountId, role: 'barber', email: e, name: name.trim(), phone: phone.trim(), passwordHash: hashPassword(e, password), createdAt: now, active: true, barberId: id })
+      })
+      return ok
+    },
+    createBarberLogin: (barberId, email, password) => {
+      if (!isOwner) return forbidden
+      const b = raw.barbers.find((x) => x.id === barberId)
+      const e = normEmail(email)
+      if (!b || !isEmail(e) || password.length < MIN_PASSWORD) return invalid
+      if (raw.accounts.some((x) => x.barberId === barberId)) return invalid // already has a login
+      if (raw.accounts.some((x) => x.email === e)) return taken
+      const now = new Date().toISOString()
+      mutate('staff.login', `${barberId} · ${e}`, (d) => {
+        const staff = d.staff.find((x) => x.barberId === barberId)
+        const id = staff?.id ?? `u-${barberId}`
+        if (staff) Object.assign(staff, { email: e, active: b.active })
+        else d.staff.push({ id, name: b.name, email: e, role: 'barber', barberId, active: b.active, invitedAt: now })
+        d.barbers.find((x) => x.id === barberId)!.email = e
+        d.accounts.push({ id, role: 'barber', email: e, name: b.name, phone: b.phone, passwordHash: hashPassword(e, password), createdAt: now, active: b.active, barberId })
       })
       return ok
     },

@@ -22,12 +22,27 @@ const tabs: { key: 'today' | 'calendar' | 'myClients' | 'schedule' | 'profile'; 
 
 export default function BarberApp({ onSignOut }: { onSignOut: () => void }) {
   const { t } = useAdminT()
-  const { data } = useStore()
-  const me = data.barbers[0]
+  const { data, session } = useStore()
+  // the profile linked to the signed-in account (the store already limits data to it)
+  const me = data.barbers.find((b) => b.id === session.barberId && b.active)
   const loc = useLocation()
   useEffect(() => {
     window.scrollTo(0, 0)
   }, [loc.pathname])
+
+  if (!me) {
+    return (
+      <div className="relative grid min-h-svh place-items-center px-4 text-paper">
+        <div aria-hidden className="cc-backdrop" />
+        <div className="glass relative max-w-md rounded-[28px] p-8 text-center">
+          <p className="text-paper/75">{t.common.noProfile}</p>
+          <button type="button" onClick={onSignOut} className="mt-6 h-11 rounded-full bg-paper px-6 text-sm font-medium text-ink">
+            {t.common.signOut}
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="relative min-h-svh text-paper">

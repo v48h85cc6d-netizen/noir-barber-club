@@ -332,6 +332,7 @@ export function useAct() {
     not_started: t.common.notStarted,
     not_today: t.common.notToday,
     not_found: t.common.notFound,
+    no_profile: t.common.noProfile,
   } as const
   return (r: { ok: true } | { ok: false; reason: 'forbidden' | 'invalid' | 'taken'; detail?: keyof typeof details }, okText?: string) => {
     if (r.ok) toast(okText ?? t.common.savedDemo)

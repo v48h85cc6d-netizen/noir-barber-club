@@ -11,13 +11,14 @@ const ORDER = [1, 2, 3, 4, 5, 6, 0]
 
 export function Barbers() {
   const { t, fmt, pub, person } = useAdminT()
-  const { data, setBarberActive, setBarberHours, addTimeOff, createBarber, updateBarber } = useStore()
+  const { data, setBarberActive, setBarberHours, addTimeOff, createBarber, updateBarber, createBarberLogin } = useStore()
   const act = useAct()
   const [openId, setOpenId] = useState<BarberId | null>(null)
   const [invite, setInvite] = useState(false)
   const [inv, setInv] = useState({ name: '', email: '', phone: '', password: '' })
   const [info, setInfo] = useState<{ id: string; name: string; email: string; phone: string; specialty: string; bio: string; years: string } | null>(null)
   const [off, setOff] = useState({ from: '', to: '', reason: '' })
+  const [login, setLogin] = useState({ email: '', password: '' })
   const wk = startOfWeek(useNow())
   const b = data.barbers.find((x) => x.id === openId)
   const bAcc = b ? data.accounts.find((a) => a.barberId === b.id) : undefined
@@ -51,6 +52,7 @@ export function Barbers() {
             <button key={x.id} type="button" onClick={() => {
               setOpenId(x.id)
               setInfo(null)
+              setLogin({ email: '', password: '' })
             }} className="group overflow-hidden rounded-2xl border border-paper/[0.07] bg-white/60 text-left transition-[border-color,transform] hover:-translate-y-0.5 hover:border-[#d2b07a]/40">
               <div className="relative aspect-[4/3] overflow-hidden">
                 {x.image ? (
@@ -163,6 +165,26 @@ export function Barbers() {
                   {b.active ? t.barbers.deactivate : t.barbers.activate}
                 </Btn>
               </div>
+              {!bAcc && (
+                <form
+                  className="mt-3 grid gap-3 rounded-xl border border-dashed border-[#b8935a]/40 bg-[#d2b07a]/[0.06] p-4 sm:grid-cols-2"
+                  onSubmit={(e) => {
+                    e.preventDefault()
+                    if (act(createBarberLogin(b.id, login.email || b.email, login.password), t.barbers.loginCreated)) setLogin({ email: '', password: '' })
+                  }}
+                >
+                  <p className="text-sm text-paper/65 sm:col-span-2">{t.barbers.createLoginNote}</p>
+                  <Field label={t.barbers.email}>
+                    <input type="email" required autoComplete="off" value={login.email || b.email} maxLength={254} onChange={(e) => setLogin({ ...login, email: e.target.value })} className={inputCls} />
+                  </Field>
+                  <Field label={t.barbers.password}>
+                    <input type="text" required minLength={8} autoComplete="new-password" value={login.password} maxLength={128} onChange={(e) => setLogin({ ...login, password: e.target.value })} className={inputCls} />
+                  </Field>
+                  <Btn type="submit" tone="gold" className="sm:col-span-2">
+                    {t.barbers.createLogin}
+                  </Btn>
+                </form>
+              )}
             </section>
 
             <section>

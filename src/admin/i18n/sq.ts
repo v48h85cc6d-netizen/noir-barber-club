@@ -54,6 +54,7 @@ const sq: AdminDict = {
     notStarted: "E mundur pasi termini të ketë filluar (ose klienti të jetë në karrige).",
     notToday: "Mbërritja dhe fillimi regjistrohen vetëm në ditën e terminit.",
     notFound: "Ky termin nuk ekziston më.",
+    noProfile: "Kjo llogari nuk është e lidhur me një profil aktiv berberi. Pyesni pronarin.",
   },
   login: {
     eyebrow: "Privat · vetëm për stafin",
@@ -210,6 +211,9 @@ const sq: AdminDict = {
     builtIn: "Hyrje demo e integruar — emaili nuk mund të ndryshohet",
     canSignIn: "Mund të hyjë",
     noLogin: "Pa hyrje",
+    createLogin: "Krijo hyrje",
+    createLoginNote: "Ky berber nuk ka ende hyrje. Jepini emailin e tij dhe një fjalëkalim fillestar — pastaj hyn te hyrja e berberit.",
+    loginCreated: "Hyrja u krijua. Jepjani vetë berberit fjalëkalimin fillestar.",
   },
   clients: {
     title: 'Klientët',

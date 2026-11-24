@@ -54,6 +54,7 @@ const de: AdminDict = {
     notStarted: "Möglich, sobald der Termin begonnen hat (oder der Kunde im Stuhl sitzt).",
     notToday: "Ankunft und Beginn können nur am Tag des Termins erfasst werden.",
     notFound: "Diesen Termin gibt es nicht mehr.",
+    noProfile: "Dieses Konto ist mit keinem aktiven Barber-Profil verknüpft. Frag den Inhaber.",
   },
   login: {
     eyebrow: "Privat · nur für Mitarbeiter",
@@ -210,6 +211,9 @@ const de: AdminDict = {
     builtIn: "Eingebauter Demo-Login – die E-Mail kann nicht geändert werden",
     canSignIn: "Kann sich anmelden",
     noLogin: "Kein Login",
+    createLogin: "Login anlegen",
+    createLoginNote: "Dieser Barber hat noch keinen Login. Lege eine eigene E-Mail und ein Startpasswort fest – danach meldet er sich beim Barbier-Login an.",
+    loginCreated: "Login angelegt. Gib dem Barber das Startpasswort selbst weiter.",
   },
   clients: {
     title: 'Kunden',

@@ -52,6 +52,7 @@ const en = {
     notStarted: "Possible once the appointment has started (or the client is in the chair).",
     notToday: "Arrival and start can only be recorded on the day of the appointment.",
     notFound: "This appointment no longer exists.",
+    noProfile: "This account is not linked to an active barber profile. Ask the owner.",
   },
   login: {
     eyebrow: "Private · staff only",
@@ -208,6 +209,9 @@ const en = {
     builtIn: "Built-in demo login — the email cannot be changed",
     canSignIn: "Can sign in",
     noLogin: "No login",
+    createLogin: "Create login",
+    createLoginNote: "This barber has no login yet. Give them their own email and starting password — they can then sign in at the barber login.",
+    loginCreated: "Login created. Share the starting password with the barber yourself.",
   },
   clients: {
     title: 'Clients',

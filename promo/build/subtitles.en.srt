@@ -1,0 +1,135 @@
+1
+00:00:03,040 --> 00:00:05,920
+Welcome to NOIR BARBER CLUB.
+
+2
+00:00:05,970 --> 00:00:09,640
+A premium digital home for a modern barbershop.
+
+3
+00:00:09,690 --> 00:00:14,610
+Visitors meet the barbers, explore every service and price,
+
+4
+00:00:14,660 --> 00:00:18,470
+browse the gallery, memberships and gift cards,
+
+5
+00:00:18,520 --> 00:00:20,590
+and find the way to the shop.
+
+6
+00:00:20,640 --> 00:00:24,810
+In three languages, on desktop and mobile.
+
+7
+00:00:25,800 --> 00:00:29,240
+Behind it runs a private management system.
+
+8
+00:00:29,290 --> 00:00:32,290
+The owner signs in through the staff entrance,
+
+9
+00:00:32,340 --> 00:00:38,200
+and sees today's revenue, bookings and chair utilisation at a glance.
+
+10
+00:00:38,250 --> 00:00:41,610
+Every appointment sits on a live day board.
+
+11
+00:00:41,660 --> 00:00:47,710
+The owner manages customers, creates barber accounts and sets working hours,
+
+12
+00:00:47,760 --> 00:00:50,590
+updates services and prices,
+
+13
+00:00:50,640 --> 00:00:55,900
+reviews revenue, gift cards and memberships.
+
+14
+00:00:55,950 --> 00:00:57,970
+One central workspace.
+
+15
+00:00:58,960 --> 00:01:01,910
+Each barber signs in to a personal workspace,
+
+16
+00:01:01,960 --> 00:01:03,900
+not the owner's dashboard.
+
+17
+00:01:03,950 --> 00:01:09,770
+The day opens with the next client: name, service, time and notes.
+
+18
+00:01:09,820 --> 00:01:14,860
+One tap marks them arrived, starts the service, and completes it.
+
+19
+00:01:14,910 --> 00:01:18,810
+Calendar and schedule show only their own appointments.
+
+20
+00:01:19,650 --> 00:01:23,220
+For customers, it starts on their phone.
+
+21
+00:01:23,270 --> 00:01:29,450
+They create an account with their name, email, phone number and password.
+
+22
+00:01:29,500 --> 00:01:32,820
+A six-digit code is sent to their email.
+
+23
+00:01:32,870 --> 00:01:36,350
+They enter it, and the account is verified.
+
+24
+00:01:36,400 --> 00:01:39,830
+Then they sign in with their email and password.
+
+25
+00:01:39,880 --> 00:01:42,290
+To book, they choose a barber,
+
+26
+00:01:42,340 --> 00:01:44,650
+then a service and its price,
+
+27
+00:01:44,700 --> 00:01:46,940
+pick a date and an available time,
+
+28
+00:01:46,990 --> 00:01:49,110
+review, and confirm.
+
+29
+00:01:49,160 --> 00:01:51,930
+The booking gets its own reference.
+
+30
+00:01:51,980 --> 00:01:56,610
+In My appointments, they see their visits, open the details,
+
+31
+00:01:56,660 --> 00:02:00,660
+and can cancel online up to a day before.
+
+32
+00:02:01,950 --> 00:02:03,670
+NOIR BARBER CLUB.
+
+33
+00:02:03,720 --> 00:02:06,590
+One platform. Three experiences.
+
+34
+00:02:06,640 --> 00:02:09,960
+A smarter way to manage, work, and book.

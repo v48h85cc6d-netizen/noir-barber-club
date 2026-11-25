@@ -1,0 +1,13 @@
+{
+  "name": "noir-promo",
+  "private": true,
+  "description": "Isolated promo-video tooling for NOIR BARBER CLUB (not part of the app build).",
+  "scripts": {
+    "build": "esbuild compositor/main.js --bundle --outfile=compositor/dist/main.js --minify --loader:.svg=text --format=esm --target=es2022"
+  },
+  "devDependencies": {
+    "esbuild": "0.24.2",
+    "gsap": "3.12.7",
+    "three": "0.171.0"
+  }
+}

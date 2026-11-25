@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>NOIR Promo Compositor</title>
+<style>
+  @font-face { font-family: 'Archivo'; src: url(assets/archivo-latin-wdth-normal.woff2) format('woff2'); font-weight: 100 900; font-stretch: 62% 125%; }
+  @font-face { font-family: 'JBM'; src: url(assets/jetbrains-mono-latin-500-normal.woff2) format('woff2'); font-weight: 500; }
+  :root { --gold: #d6b67f; --ink: #f4efe6; }
+  html, body { margin: 0; background: #070605; overflow: hidden; }
+  #stage { position: relative; overflow: hidden; }
+  canvas { display: block; }
+  .ov { position: absolute; pointer-events: none; color: var(--ink); font-family: 'Archivo', sans-serif; }
+  #chapters { display: flex; gap: 34px; font: 500 15px/1 'JBM', monospace; letter-spacing: .16em; text-transform: uppercase; color: rgba(244,239,230,.42); }
+  #chapters span { display: flex; gap: 10px; align-items: center; transition: none; }
+  #chapters i { font-style: normal; color: rgba(214,182,127,.5); }
+  #chapters span.on { color: var(--ink); }
+  #chapters span.on i { color: var(--gold); }
+  #chapters span.on::after { content: ''; width: 26px; height: 1px; background: var(--gold); margin-left: 4px; }
+  #label { font: 500 15px/1 'JBM', monospace; letter-spacing: .18em; text-transform: uppercase; color: var(--gold); }
+  #note { font: 500 13px/1.3 'JBM', monospace; letter-spacing: .06em; color: rgba(244,239,230,.55); }
+  #title { text-align: center; text-transform: uppercase; }
+  #title::before { content: ''; position: absolute; inset: -160px -260px; background: radial-gradient(closest-side, rgba(6,5,4,.78), rgba(6,5,4,0)); z-index: -1; }
+  #tnum { font: 500 22px/1 'JBM', monospace; color: var(--gold); letter-spacing: .3em; margin-bottom: 18px; }
+  #tname { font-weight: 800; font-stretch: 125%; font-size: 108px; line-height: .95; letter-spacing: inherit; }
+  #sub { text-align: center; }
+  #sub span { display: inline; padding: .14em .5em; line-height: 1.55; border-radius: 10px; background: rgba(8,7,6,.62); box-decoration-break: clone; -webkit-box-decoration-break: clone; font-weight: 500; font-stretch: 100%; text-shadow: 0 1px 2px rgba(0,0,0,.6); }
+  #step #snum { font: 500 22px/1 'JBM', monospace; color: var(--gold); letter-spacing: .3em; margin-bottom: 16px; min-height: 22px; }
+  #step #sname { font-weight: 800; font-stretch: 125%; line-height: .98; text-transform: uppercase; }
+  #end { inset: 0; }
+  #endA, #endB, #three { position: absolute; left: 0; right: 0; text-align: center; text-transform: uppercase; }
+  #endA { font: 500 30px/1 'JBM', monospace; letter-spacing: .62em; color: var(--ink); }
+  #endB .a { font: 500 30px/1 'JBM', monospace; letter-spacing: .62em; }
+  #endB .rule { width: 90px; height: 1px; background: var(--gold); margin: 34px auto; }
+  #endB .b { font-weight: 700; font-stretch: 112%; color: var(--gold); letter-spacing: inherit; }
+  #three { font: 500 18px/1 'JBM', monospace; letter-spacing: .34em; color: var(--gold); }
+  #three b { color: rgba(244,239,230,.35); font-weight: 500; margin: 0 .8em; }
+  .tap { position: absolute; width: 46px; height: 46px; margin: -23px 0 0 -23px; border-radius: 50%; opacity: 0;
+         background: radial-gradient(circle, rgba(255,246,228,.55) 0 34%, rgba(214,182,127,.0) 36%);
+         box-shadow: 0 0 0 2px rgba(214,182,127,.9), 0 0 22px rgba(214,182,127,.6);
+         transform: scale(calc(var(--r, 1) * var(--c, 1))); }
+  /* 16:9 */
+  .h #chapters { top: 46px; left: 66px; }
+  .h #label { top: 46px; right: 66px; }
+  .h #note { bottom: 92px; right: 66px; text-align: right; max-width: 460px; }
+  .h #title { left: 0; right: 0; top: 410px; }
+  .h #sub { left: 160px; right: 160px; bottom: 34px; font-size: 34px; }
+  .h #step { left: 150px; top: 390px; width: 800px; }
+  .h #sname { font-size: 80px; }
+  .h #endA { top: 660px; }
+  .h #endB { top: 548px; }
+  .h #endB .b { font-size: 34px; }
+  .h #three { top: 318px; }
+  /* 9:16 */
+  .v #chapters { top: 70px; left: 0; right: 0; justify-content: center; gap: 22px; font-size: 15px; }
+  .v #label { top: 116px; left: 0; right: 0; text-align: center; }
+  .v #note { top: 1835px; left: 70px; right: 70px; text-align: center; font-size: 17px; }
+  .v #title { left: 0; right: 0; top: 820px; }
+  .v #tname { font-size: 96px; }
+  .v #sub { left: 60px; right: 60px; top: 1690px; font-size: 40px; }
+  .v #step { left: 60px; right: 60px; top: 180px; text-align: center; }
+  .v #sname { font-size: 58px; }
+  .v #endA { top: 1080px; font-size: 26px; }
+  .v #endB { top: 935px; }
+  .v #endB .a { font-size: 26px; }
+  .v #endB .b { font-size: 34px; line-height: 1.35; padding: 0 70px; }
+  .v #three { top: 420px; font-size: 18px; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="gl"></canvas>
+  <div class="ov" id="chapters"></div>
+  <div class="ov" id="label"></div>
+  <div class="ov" id="note"></div>
+  <div class="ov" id="step"><div id="snum"></div><div id="sname"></div></div>
+  <div class="ov" id="title"><div id="tnum"></div><div id="tname"></div></div>
+  <div class="ov" id="end">
+    <div id="endA">Barber&nbsp;Club</div>
+    <div id="three">Owner<b>·</b>Barber<b>·</b>Customer</div>
+    <div id="endB"><div class="a">Barber&nbsp;Club</div><div class="rule"></div><div class="b">The future of the barbershop experience.</div></div>
+  </div>
+  <div class="ov" id="taps" style="inset:0"></div>
+  <div class="ov" id="sub"></div>
+</div>
+<script>
+  const q = new URLSearchParams(location.search);
+  const st = document.getElementById('stage');
+  st.style.width = (q.get('w') || 1920) + 'px'; st.style.height = (q.get('h') || 1080) + 'px';
+</script>
+<script type="module" src="dist/main.js"></script>
+</body>
+</html>

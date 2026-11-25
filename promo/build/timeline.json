@@ -1,0 +1,226 @@
+{
+ "total": 132.96,
+ "fps": 30,
+ "chapters": [
+  {
+   "id": "website",
+   "num": "01",
+   "title": "The Website",
+   "vo": "vo1",
+   "start": 3.0,
+   "voDur": 21.36,
+   "cues": [
+    {
+     "text": "Welcome to NOIR BARBER CLUB.",
+     "start": 3.04,
+     "end": 5.45
+    },
+    {
+     "text": "A premium digital home for a modern barbershop.",
+     "start": 5.97,
+     "end": 9.17
+    },
+    {
+     "text": "Visitors meet the barbers, explore every service and price,",
+     "start": 9.69,
+     "end": 14.06
+    },
+    {
+     "text": "browse the gallery, memberships and gift cards,",
+     "start": 14.66,
+     "end": 17.96
+    },
+    {
+     "text": "and find the way to the shop.",
+     "start": 18.52,
+     "end": 20.12
+    },
+    {
+     "text": "In three languages, on desktop and mobile.",
+     "start": 20.64,
+     "end": 24.21
+    }
+   ]
+  },
+  {
+   "id": "owner",
+   "num": "02",
+   "title": "The Owner",
+   "vo": "vo2",
+   "start": 25.76,
+   "voDur": 31.76,
+   "cues": [
+    {
+     "text": "Behind it runs a private management system.",
+     "start": 25.8,
+     "end": 28.77
+    },
+    {
+     "text": "The owner signs in through the staff entrance,",
+     "start": 29.29,
+     "end": 31.95
+    },
+    {
+     "text": "and sees today's revenue, bookings and chair utilisation at a glance.",
+     "start": 32.34,
+     "end": 37.66
+    },
+    {
+     "text": "Every appointment sits on a live day board.",
+     "start": 38.25,
+     "end": 41.14
+    },
+    {
+     "text": "The owner manages customers, creates barber accounts and sets working hours,",
+     "start": 41.66,
+     "end": 47.24
+    },
+    {
+     "text": "updates services and prices,",
+     "start": 47.76,
+     "end": 50.12
+    },
+    {
+     "text": "reviews revenue, gift cards and memberships.",
+     "start": 50.64,
+     "end": 55.43
+    },
+    {
+     "text": "One central workspace.",
+     "start": 55.95,
+     "end": 57.37
+    }
+   ]
+  },
+  {
+   "id": "barber",
+   "num": "03",
+   "title": "The Barber",
+   "vo": "vo3",
+   "start": 58.92,
+   "voDur": 19.29,
+   "cues": [
+    {
+     "text": "Each barber signs in to a personal workspace,",
+     "start": 58.96,
+     "end": 61.69
+    },
+    {
+     "text": "not the owner's dashboard.",
+     "start": 61.96,
+     "end": 63.43
+    },
+    {
+     "text": "The day opens with the next client: name, service, time and notes.",
+     "start": 63.95,
+     "end": 69.3
+    },
+    {
+     "text": "One tap marks them arrived, starts the service, and completes it.",
+     "start": 69.82,
+     "end": 74.39
+    },
+    {
+     "text": "Calendar and schedule show only their own appointments.",
+     "start": 74.91,
+     "end": 78.21
+    }
+   ]
+  },
+  {
+   "id": "customer",
+   "num": "04",
+   "title": "The Customer",
+   "vo": "vo4",
+   "start": 79.61,
+   "voDur": 40.6,
+   "cues": [
+    {
+     "text": "For customers, it starts on their phone.",
+     "start": 79.65,
+     "end": 82.75
+    },
+    {
+     "text": "They create an account with their name, email, phone number and password.",
+     "start": 83.27,
+     "end": 88.98
+    },
+    {
+     "text": "A six-digit code is sent to their email.",
+     "start": 89.5,
+     "end": 92.35
+    },
+    {
+     "text": "They enter it, and the account is verified.",
+     "start": 92.87,
+     "end": 95.88
+    },
+    {
+     "text": "Then they sign in with their email and password.",
+     "start": 96.4,
+     "end": 99.36
+    },
+    {
+     "text": "To book, they choose a barber,",
+     "start": 99.88,
+     "end": 101.87
+    },
+    {
+     "text": "then a service and its price,",
+     "start": 102.34,
+     "end": 104.14
+    },
+    {
+     "text": "pick a date and an available time,",
+     "start": 104.7,
+     "end": 106.85
+    },
+    {
+     "text": "review, and confirm.",
+     "start": 106.99,
+     "end": 108.64
+    },
+    {
+     "text": "The booking gets its own reference.",
+     "start": 109.16,
+     "end": 111.46
+    },
+    {
+     "text": "In My appointments, they see their visits, open the details,",
+     "start": 111.98,
+     "end": 116.28
+    },
+    {
+     "text": "and can cancel online up to a day before.",
+     "start": 116.66,
+     "end": 120.06
+    }
+   ]
+  },
+  {
+   "id": "end",
+   "num": "",
+   "title": "",
+   "vo": "vo5",
+   "start": 121.91,
+   "voDur": 7.45,
+   "cues": [
+    {
+     "text": "NOIR BARBER CLUB.",
+     "start": 121.95,
+     "end": 123.23
+    },
+    {
+     "text": "One platform. Three experiences.",
+     "start": 123.72,
+     "end": 126.2
+    },
+    {
+     "text": "A smarter way to manage, work, and book.",
+     "start": 126.64,
+     "end": 129.36
+    }
+   ]
+  }
+ ]
+}

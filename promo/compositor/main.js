@@ -357,97 +357,84 @@ const KB = [0.035, 0.035, 0.93, 0.93]
 // [start, end, frames, focus16 [from,to], focus9 [from,to], opts]
 const S = []
 const shot = (start, end, frames, f16, f9, o = {}) => S.push({ start, end, frames: typeof frames === 'string' ? [[start, frames]] : frames, f16, f9, ...o })
-// 01 WEBSITE
+// 01 WEBSITE — "Meet NOIR BARBER CLUB — a premium website … desktop and mobile."
 const ws = CH.website.start
-shot(ws - 0.35, cue('website', 2), 'web-hero', [FULL, KB], [[0, 0, 0.5, 1], [0.5, 0, 0.5, 1]], { label: 'Home' })
-shot(cue('website', 2), cue('website', 2) + 2.3, 'web-barbers', [FULL, KB], [[0.0, 0, 0.56, 1], [0.44, 0, 0.56, 1]], { label: 'The barbers' })
-shot(cue('website', 2) + 2.3, cue('website', 3), 'web-services', [KB, [0, 0.02, 0.9, 0.9]], [[0, 0.02, 0.6, 0.96], [0, 0.1, 0.5, 0.85]], { label: 'Services & prices' })
+shot(ws - 0.35, cue('website', 1), 'web-hero', [FULL, KB], [[0, 0, 0.5, 1], [0.5, 0, 0.5, 1]], { label: 'Home' })
+shot(cue('website', 1), cue('website', 2), 'web-services', [KB, [0, 0.02, 0.9, 0.9]], [[0, 0.02, 0.6, 0.96], [0, 0.1, 0.5, 0.85]], { label: 'Services & prices' })
 {
-  const a = cue('website', 3), b = cue('website', 4), d = (b - a) / 3
+  const a = cue('website', 2), b = cue('website', 3), d = (b - a) / 3
   shot(a, a + d, 'web-gallery', [FULL, KB], [[0.25, 0, 0.6, 1], [0.38, 0, 0.6, 1]], { label: 'Gallery' })
-  shot(a + d, a + 2 * d, 'web-membership', [FULL, KB], [[0, 0, 0.55, 1], [0.2, 0, 0.55, 1]], { label: 'Membership' })
-  shot(a + 2 * d, b, 'web-gift-cards', [FULL, KB], [[0.0, 0, 0.55, 1], [0.45, 0, 0.55, 1]], { label: 'Gift cards' })
+  shot(a + d, a + 2 * d, 'web-barbers', [FULL, KB], [[0.0, 0, 0.56, 1], [0.44, 0, 0.56, 1]], { label: 'The barbers' })
+  shot(a + 2 * d, b, 'web-membership', [FULL, KB], [[0, 0, 0.55, 1], [0.2, 0, 0.55, 1]], { label: 'Membership' })
 }
-shot(cue('website', 4), cue('website', 5), 'web-visit', [FULL, KB], [[0, 0, 0.55, 1], [0.45, 0, 0.55, 1]], { label: 'Find the shop' })
-// languages, then desktop + phone (special layout)
-shot(cue('website', 5), CH.owner.start - 0.1,
-  [[cue('website', 5), 'web-hero'], [cue('website', 5) + 0.7, 'web-hero-de'], [cue('website', 5) + 1.5, 'web-hero-sq'], [cue('website', 5) + 2.3, 'web-hero']],
-  [FULL, FULL], [[0, 0, 0.55, 1], [0, 0, 0.55, 1]], { label: 'EN · DE · SQ', duo: true })
-// 02 OWNER
+shot(cue('website', 3), CH.owner.start - 0.1, 'web-hero', [FULL, FULL], [[0, 0, 0.55, 1], [0, 0, 0.55, 1]], { label: 'Desktop · mobile', duo: true, duoAt: 0.25 })
+// 02 OWNER — "Behind the website, the owner has a dedicated dashboard …"
 const os = CH.owner.start
-shot(os - 0.35, cue('owner', 1), 'own-login', [FULL, [0.4, 0.04, 0.6, 0.6]], [[0.5, 0.0, 0.5, 1], [0.58, 0.12, 0.38, 0.7]], { label: 'Staff sign in' })
-shot(cue('owner', 1), cue('owner', 2), 'own-login-filled', [[0.4, 0.04, 0.6, 0.6], [0.5, 0.1, 0.5, 0.6]], [[0.58, 0.12, 0.38, 0.7], [0.6, 0.15, 0.36, 0.65]], { label: 'Staff sign in', taps: [[cue('owner', 2) - 0.45, 'own-login-filled', 0]] })
-shot(cue('owner', 2), cue('owner', 3), 'own-overview', [FULL, [0.17, 0.0, 0.83, 0.62]], [[0.2, 0.06, 0.42, 0.6], [0.56, 0.06, 0.42, 0.6]], { label: 'Overview' })
-shot(cue('owner', 3), cue('owner', 4), 'own-appointments', [FULL, [0.2, 0.04, 0.8, 0.5]], [[0.22, 0.04, 0.4, 0.5], [0.58, 0.04, 0.4, 0.5]], { label: 'Appointments · day board' })
+shot(os - 0.35, cue('owner', 1) + 0.75, 'own-login-filled', [[0.4, 0.04, 0.6, 0.6], [0.5, 0.1, 0.5, 0.6]], [[0.58, 0.12, 0.38, 0.7], [0.6, 0.15, 0.36, 0.65]], { label: 'Staff sign in', taps: [[cue('owner', 1) + 0.3, 'own-login-filled', 0]] })
+shot(cue('owner', 1) + 0.75, cue('owner', 2), 'own-overview', [FULL, [0.17, 0.0, 0.83, 0.62]], [[0.2, 0.06, 0.42, 0.6], [0.56, 0.06, 0.42, 0.6]], { label: 'Overview · business at a glance' })
 {
-  const a = cue('owner', 4), b = cue('owner', 5), d = (b - a) / 3
-  shot(a, a + d, 'own-clients', [FULL, KB], [[0.06, 0.1, 0.45, 0.9], [0.3, 0.1, 0.45, 0.9]], { label: 'Clients' })
-  shot(a + d, b, [[a + d, 'own-barbers'], [a + 2 * d, 'own-barbers-create']], [FULL, [0.2, 0, 0.8, 0.8]], [[0.14, 0.1, 0.46, 0.9], [0.55, 0.0, 0.45, 1]], { label: 'Barbers · accounts & hours', taps: [[a + 2 * d - 0.35, 'own-barbers-create', 0]] })
+  const a = cue('owner', 2), b = cue('owner', 3)
+  shot(a, a + 1.13, 'own-appointments', [FULL, [0.2, 0.04, 0.8, 0.5]], [[0.22, 0.04, 0.4, 0.5], [0.45, 0.04, 0.4, 0.5]], { label: 'Appointments' })
+  shot(a + 1.13, a + 2.28, 'own-clients', [FULL, KB], [[0.06, 0.1, 0.45, 0.9], [0.2, 0.1, 0.45, 0.9]], { label: 'Customers' })
+  shot(a + 2.28, b, [[a + 2.28, 'own-barbers'], [a + 2.85, 'own-barbers-create']], [FULL, [0.2, 0, 0.8, 0.8]], [[0.14, 0.1, 0.46, 0.9], [0.55, 0.0, 0.45, 1]], { label: 'Staff · barber accounts', taps: [[a + 2.62, 'own-barbers-create', 0]] })
 }
-shot(cue('owner', 5), cue('owner', 6), 'own-services', [FULL, [0.18, 0.05, 0.82, 0.82]], [[0.2, 0.1, 0.45, 0.85], [0.5, 0.1, 0.45, 0.85]], { label: 'Services & prices' })
 {
-  const a = cue('owner', 6), b = cue('owner', 7), d = (b - a) / 3
-  shot(a, a + d, 'own-revenue', [FULL, KB], [[0.18, 0.08, 0.5, 0.62], [0.48, 0.08, 0.5, 0.62]], { label: 'Revenue' })
-  shot(a + d, a + 2 * d, 'own-gift-cards', [FULL, KB], [[0.18, 0.08, 0.5, 0.62], [0.48, 0.08, 0.5, 0.62]], { label: 'Gift cards' })
-  shot(a + 2 * d, b, 'own-memberships', [FULL, KB], [[0.18, 0.08, 0.5, 0.62], [0.48, 0.08, 0.5, 0.62]], { label: 'Memberships' })
+  const a = cue('owner', 3), b = cue('owner', 4)
+  shot(a, a + 1.6, 'own-services', [FULL, [0.18, 0.05, 0.82, 0.82]], [[0.2, 0.1, 0.45, 0.85], [0.5, 0.1, 0.45, 0.85]], { label: 'Services & prices' })
+  shot(a + 1.6, b, 'own-revenue', [FULL, KB], [[0.18, 0.08, 0.5, 0.62], [0.48, 0.08, 0.5, 0.62]], { label: 'Business performance' })
 }
-shot(cue('owner', 7), CH.barber.start - 0.1, 'own-overview', [FULL, FULL], [FULL, FULL], { label: 'One workspace', ensemble: true })
-// 03 BARBER
+shot(cue('owner', 4), CH.barber.start - 0.1, 'own-overview', [FULL, FULL], [FULL, FULL], { label: 'One place', ensemble: true })
+// 03 BARBER — "Every barber has a personal account and dashboard …"
 const bs = CH.barber.start
 const BCARD16 = [0.2, 0.06, 0.6, 0.64]
 const BCARD9 = [0.3, 0.08, 0.4, 0.58]
-shot(bs - 0.35, cue('barber', 1), 'bar-login-filled', [FULL, [0.4, 0.04, 0.6, 0.6]], [[0.5, 0.0, 0.5, 1], [0.58, 0.12, 0.38, 0.7]], { label: 'Staff sign in', taps: [[cue('barber', 1) - 0.5, 'bar-login-filled', 0]] })
-shot(cue('barber', 1), cue('barber', 2), 'bar-today', [FULL, [0.1, 0, 0.8, 0.62]], [[0.28, 0, 0.44, 0.75], [0.3, 0.0, 0.42, 0.7]], { label: 'Idris · own workspace' })
+shot(bs - 0.35, bs + 1.45, 'bar-login-filled', [[0.4, 0.04, 0.6, 0.6], [0.5, 0.1, 0.5, 0.6]], [[0.58, 0.12, 0.38, 0.7], [0.6, 0.15, 0.36, 0.65]], { label: 'Personal account', taps: [[bs + 0.95, 'bar-login-filled', 0]] })
+shot(bs + 1.45, cue('barber', 1), 'bar-today', [FULL, [0.1, 0, 0.8, 0.62]], [[0.28, 0, 0.44, 0.75], [0.3, 0.0, 0.42, 0.7]], { label: 'Idris · own dashboard' })
+shot(cue('barber', 1), cue('barber', 2), 'bar-calendar', [FULL, KB], [[0.27, 0, 0.46, 0.9], [0.27, 0.05, 0.46, 0.9]], { label: 'Assigned appointments' })
+shot(cue('barber', 2), cue('barber', 3), 'bar-step1', [[0.2, 0.04, 0.6, 0.66], BCARD16], [BCARD9, BCARD9], { label: 'Customer & service details' })
+shot(cue('barber', 3), cue('barber', 4), 'bar-schedule', [FULL, KB], [[0.27, 0, 0.46, 0.9], [0.27, 0.05, 0.46, 0.9]], { label: 'Schedule' })
 {
-  const a = cue('barber', 3), b = cue('barber', 4)
-  shot(cue('barber', 2), b,
-    [[cue('barber', 2), 'bar-step1'], [a + 1.25, 'bar-step2'], [a + 2.6, 'bar-step3'], [a + 3.95, 'bar-step4']],
-    [[0.2, 0.04, 0.6, 0.66], BCARD16], [BCARD9, BCARD9],
-    { label: 'Today · next client', taps: [[a + 0.8, 'bar-step2', 0], [a + 2.15, 'bar-step3', 0], [a + 3.5, 'bar-step4', 0]] })
+  const a = cue('barber', 4)
+  shot(a, CH.customer.start - 0.1,
+    [[a, 'bar-step1'], [a + 0.6, 'bar-step2'], [a + 1.35, 'bar-step3'], [a + 2.1, 'bar-step4']],
+    [BCARD16, BCARD16], [BCARD9, BCARD9],
+    { label: 'Arrived → Start → Done', taps: [[a + 0.35, 'bar-step2', 0], [a + 1.1, 'bar-step3', 0], [a + 1.85, 'bar-step4', 0]] })
 }
-shot(cue('barber', 4), cue('barber', 4) + 1.9, 'bar-calendar', [FULL, KB], [[0.27, 0, 0.46, 0.9], [0.27, 0.05, 0.46, 0.9]], { label: 'Calendar' })
-shot(cue('barber', 4) + 1.9, CH.customer.start - 0.1, 'bar-schedule', [FULL, KB], [[0.27, 0, 0.46, 0.9], [0.27, 0.05, 0.46, 0.9]], { label: 'Schedule' })
 
 // 04 CUSTOMER — phone frames [time, screenshot]
 const cs = CH.customer.start
+const c = (i) => cue('customer', i)
 const PF = [
-  [cs - 0.4, 'cus-register'],
-  [cue('customer', 1) + 1.2, 'cus-register-filled'],
-  [cue('customer', 2) - 0.2, 'cus-verify'],
-  [cue('customer', 3) + 0.4, 'cus-verify-code'],
-  [cue('customer', 3) + 2.3, 'cus-verified'],
-  [cue('customer', 4), 'cus-login'],
-  [cue('customer', 5), 'cus-b-barber'],
-  [cue('customer', 6) - 0.4, 'cus-b-service'],
-  [cue('customer', 6) + 0.5, 'cus-b-service2'],
-  [cue('customer', 7) - 0.1, 'cus-b-date2'],
-  [cue('customer', 7) + 1.1, 'cus-b-time2'],
-  [cue('customer', 8) - 0.1, 'cus-b-review2'],
-  [cue('customer', 9) - 0.15, 'cus-b-confirmed'],
-  [cue('customer', 10), 'cus-appts'],
-  [cue('customer', 10) + 2.7, 'cus-appt-sheet'],
-  [cue('customer', 11) + 0.1, 'cus-appt-sheet2'],
+  [cs - 0.4, 'cus-register-filled'],
+  [c(1) - 0.1, 'cus-verify-code'],
+  [c(2) - 0.2, 'cus-login'],
+  [c(3) - 0.1, 'cus-b-service'],
+  [c(4) - 0.1, 'cus-b-barber'],
+  [c(5) - 0.1, 'cus-b-date2'],
+  [c(5) + 0.85, 'cus-b-time2'],
+  [c(6) - 0.15, 'cus-b-review2'],
+  [c(6) + 0.95, 'cus-b-confirmed'],
+  [c(7) - 0.1, 'cus-appts'],
+  [c(7) + 1.3, 'cus-appt-sheet2'],
 ]
 const PT = [
-  [cue('customer', 2) - 0.75, 'cus-register-filled'],
-  [cue('customer', 3) + 1.8, 'cus-verify-code'],
-  [cue('customer', 5) - 0.5, 'cus-login'],
-  [cue('customer', 6) - 0.85, 'cus-b-barber'],
-  [cue('customer', 7) - 0.55, 'cus-b-service2'],
-  [cue('customer', 7) + 0.65, 'cus-b-date2'],
-  [cue('customer', 8) - 0.55, 'cus-b-time2'],
-  [cue('customer', 9) - 0.6, 'cus-b-review2'],
-  [cue('customer', 10) + 2.2, 'cus-appts'],
+  [c(1) - 0.45, 'cus-register-filled'],
+  [c(2) - 0.5, 'cus-verify-code'],
+  [c(3) - 0.35, 'cus-login'],
+  [c(5) - 0.45, 'cus-b-barber'],
+  [c(5) + 0.55, 'cus-b-date2'],
+  [c(6) - 0.5, 'cus-b-time2'],
+  [c(6) + 0.7, 'cus-b-review2'],
+  [c(7) + 1.0, 'cus-appts'],
 ]
 const STEPS = [
-  [cs - 0.3, '', 'On their phone'],
-  [cue('customer', 1), '01', 'Create an account'],
-  [cue('customer', 2), '02', 'Verify the email'],
-  [cue('customer', 4), '03', 'Sign in'],
-  [cue('customer', 5), '04', 'Barber · service'],
-  [cue('customer', 7), '05', 'Date · time'],
-  [cue('customer', 8), '06', 'Review · confirm'],
-  [cue('customer', 10), '07', 'My appointments'],
+  [cs - 0.3, '01', 'Create an account'],
+  [c(1), '02', 'Verify the email'],
+  [c(2), '03', 'Log in'],
+  [c(3), '04', 'Services · barber'],
+  [c(5), '05', 'Date · time'],
+  [c(6), '06', 'Confirm'],
+  [c(7), '07', 'Manage bookings'],
 ]
 const ALLTAPS = []
 for (const s of S) for (const tp of s.taps || []) ALLTAPS.push(tp[0])
@@ -513,7 +500,7 @@ async function renderAt(t) {
     let dim = 0
     if (s.duo) {
       // desktop shifts aside so the phone version can join
-      const d = prog(t, s.start + 2.9, s.start + 3.7)
+      const d = prog(t, s.start + s.duoAt, s.start + s.duoAt + 0.8)
       const D = V ? { x: 0, y: 420, w: 1000, h: 560 } : { x: -250, y: 30, w: 1180, h: 680 }
       const L2 = fitFocus(V ? [0, 0, 1, 1] : [0, 0, 1, 1], D)
       L = { w: lerp(L.w, L2.w, d), h: lerp(L.h, L2.h, d), x: lerp(L.x, L2.x, d), y: lerp(L.y, L2.y, d) }
@@ -565,7 +552,7 @@ async function renderAt(t) {
   {
     let P = null
     const duo = S.find((s) => s.duo)
-    const pStartDuo = duo.start + 3.0
+    const pStartDuo = duo.start + duo.duoAt + 0.1
     if (t > pStartDuo - 0.3 && t < duo.end + 0.4) {
       const kin = prog(t, pStartDuo, pStartDuo + 0.9, E.o3)
       const kout = prog(t, duo.end - 0.2, duo.end + 0.4, E.i3)
@@ -606,11 +593,12 @@ async function renderAt(t) {
   {
     const endS = CH.end.start
     if (t < CH.website.start + 0.2) {
-      const k = prog(t, 0, 2.6, E.expo)
-      const out = prog(t, 2.35, 3.15, E.i3)
+      const ws0 = CH.website.start
+      const k = prog(t, 0, ws0 - 0.1, E.expo)
+      const out = prog(t, ws0 - 0.6, ws0 + 0.15, E.i3)
       setLogo({ wpx: (V ? 760 : 1000) * lerp(0.86, 1, k), y: 0, z: lerp(-6, 0, k) + out * 9, ry: lerp(0.75, 0, k) + Math.sin(t) * 0.02, rx: lerp(-0.25, 0, k), opacity: clamp(t / 0.8) * (1 - out) })
       sweep.intensity = 60
-      sweep.position.set(lerp(-14, 12, prog(t, 0.2, 2.8, E.sine)), 3, 6)
+      sweep.position.set(lerp(-14, 12, prog(t, 0.1, ws0, E.sine)), 3, 6)
       logoOn = true
     } else if (t > endS - 0.4) {
       const kin = prog(t, endS - 0.4, endS + 1.4, E.expo)
@@ -655,7 +643,7 @@ async function renderAt(t) {
   let titleOp = 0, tch = null
   for (const id of CHIDS) {
     const c = CH[id].start
-    const o = prog(t, c - 0.45, c + 0.25, E.o3) * (1 - prog(t, c + 2.0, c + 2.6, E.sine))
+    const o = (id === 'website' ? prog(t, c + 0.15, c + 0.65, E.o3) : prog(t, c - 0.45, c + 0.25, E.o3)) * (1 - prog(t, c + 1.4, c + 1.9, E.sine))
     if (o > titleOp) { titleOp = o; tch = CH[id] }
   }
   if (tch) { ui.tnum.textContent = tch.num; ui.tname.textContent = tch.title }
@@ -683,8 +671,8 @@ async function renderAt(t) {
   // honesty notes
   let note = ''
   if (t > CH.owner.start + 0.5 && t < CH.customer.start - 0.3) note = 'Dashboards shown with demo data · demo mode'
-  if (t > cue('customer', 2) - 0.2 && t < cue('customer', 4)) note = 'Recorded locally: the code was read from a test mail capture, not a real inbox'
-  if (t > cue('customer', 9) - 0.2 && t < CH.end.start - 0.5) note = 'Demo booking · stored in the browser · no payment taken'
+  if (t > cue('customer', 1) - 0.3 && t < cue('customer', 3) - 0.2) note = 'Recorded locally: the code was read from a test mail capture, not a real inbox'
+  if (t > cue('customer', 6) + 0.8 && t < CH.end.start - 0.5) note = 'Demo booking · stored in the browser · no payment taken'
   ui.note.textContent = note
   css(ui.note, { opacity: note ? 1 : 0 })
   // customer step
@@ -693,7 +681,7 @@ async function renderAt(t) {
   const stepOp = prog(t, cs - 0.4, cs + 0.4) * (1 - prog(t, CH.end.start - 0.6, CH.end.start - 0.1))
   if (st) { ui.snum.textContent = st[1]; ui.sname.textContent = st[2] }
   const sk = st ? clamp((t - st[0]) / 0.45) : 1
-  css(ui.step, { opacity: stepOp * E.o3(sk), transform: `translateY(${(1 - E.o3(sk)) * 18}px)` })
+  css(ui.step, { opacity: stepOp * E.o3(sk) * (1 - titleOp), transform: `translateY(${(1 - E.o3(sk)) * 18}px)` })
   // end text
   const eA = prog(t, CH.end.start + 0.3, CH.end.start + 1.3) * (1 - prog(t, cue('end', 1) - 0.4, cue('end', 1)))
   const eB = prog(t, cue('end', 2) + 0.2, cue('end', 2) + 1.4)

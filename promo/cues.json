@@ -1,46 +1,72 @@
 {
-  "gap": 1.4,
-  "intro": 3.0,
-  "outroHold": 3.6,
-  "chapters": [
-    { "id": "website", "num": "01", "title": "The Website", "vo": "vo1", "cues": [
-      "Welcome to NOIR BARBER CLUB.",
-      "A premium digital home for a modern barbershop.",
-      "Visitors meet the barbers, explore every service and price,",
-      "browse the gallery, memberships and gift cards,",
-      "and find the way to the shop.",
-      "In three languages, on desktop and mobile." ] },
-    { "id": "owner", "num": "02", "title": "The Owner", "vo": "vo2", "cues": [
-      "Behind it runs a private management system.",
-      "The owner signs in through the staff entrance,",
-      "and sees today's revenue, bookings and chair utilisation at a glance.",
-      "Every appointment sits on a live day board.",
-      "The owner manages customers, creates barber accounts and sets working hours,",
-      "updates services and prices,",
-      "reviews revenue, gift cards and memberships.",
-      "One central workspace." ] },
-    { "id": "barber", "num": "03", "title": "The Barber", "vo": "vo3", "cues": [
-      "Each barber signs in to a personal workspace,",
-      "not the owner's dashboard.",
-      "The day opens with the next client: name, service, time and notes.",
-      "One tap marks them arrived, starts the service, and completes it.",
-      "Calendar and schedule show only their own appointments." ] },
-    { "id": "customer", "num": "04", "title": "The Customer", "vo": "vo4", "cues": [
-      "For customers, it starts on their phone.",
-      "They create an account with their name, email, phone number and password.",
-      "A six-digit code is sent to their email.",
-      "They enter it, and the account is verified.",
-      "Then they sign in with their email and password.",
-      "To book, they choose a barber,",
-      "then a service and its price,",
-      "pick a date and an available time,",
-      "review, and confirm.",
-      "The booking gets its own reference.",
-      "In My appointments, they see their visits, open the details,",
-      "and can cancel online up to a day before." ] },
-    { "id": "end", "num": "", "title": "", "vo": "vo5", "cues": [
-      "NOIR BARBER CLUB.",
-      "One platform. Three experiences.",
-      "A smarter way to manage, work, and book." ] }
-  ]
+ "gap": 0.6,
+ "intro": 1.4,
+ "outroHold": 1.7,
+ "chapters": [
+  {
+   "id": "website",
+   "num": "01",
+   "title": "The Website",
+   "vo": "vo1",
+   "cues": [
+    "Meet NOIR BARBER CLUB —",
+    "a premium website where customers can explore services,",
+    "prices, the gallery, and everything the barbershop offers.",
+    "Beautifully designed for both desktop and mobile."
+   ]
+  },
+  {
+   "id": "owner",
+   "num": "02",
+   "title": "The Owner",
+   "vo": "vo2",
+   "cues": [
+    "Behind the website,",
+    "the owner has a dedicated dashboard to manage the entire business —",
+    "appointments, customers, staff,",
+    "services, prices, and business performance.",
+    "Everything is organized in one place."
+   ]
+  },
+  {
+   "id": "barber",
+   "num": "03",
+   "title": "The Barber",
+   "vo": "vo3",
+   "cues": [
+    "Every barber has a personal account and dashboard.",
+    "They can check their assigned appointments,",
+    "view customer and service details,",
+    "view their schedule,",
+    "and update appointment statuses."
+   ]
+  },
+  {
+   "id": "customer",
+   "num": "04",
+   "title": "The Customer",
+   "vo": "vo4",
+   "cues": [
+    "Customers can create their own account,",
+    "verify their email,",
+    "and log in.",
+    "They can explore services,",
+    "choose their preferred barber,",
+    "select an available date and time,",
+    "and confirm their appointment.",
+    "They can also manage their bookings directly from their phone."
+   ]
+  },
+  {
+   "id": "end",
+   "num": "",
+   "title": "",
+   "vo": "vo5",
+   "cues": [
+    "NOIR BARBER CLUB.",
+    "One platform. Three experiences.",
+    "Complete control."
+   ]
+  }
+ ]
 }

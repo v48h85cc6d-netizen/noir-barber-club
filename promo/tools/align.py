@@ -33,7 +33,7 @@ for ch in cfg['chapters']:
     for i, c in enumerate(cues):
         end = cues[i + 1]['start'] - 0.05 if i + 1 < len(cues) else c['end'] + 0.6
         srt.append(f"{idx}\n{ts(c['start'])} --> {ts(end)}\n{c['text']}\n"); idx += 1
-    t += meta['duration'] + (cfg['gap'] if ch['id'] != 'customer' else cfg['gap'] + 0.3)
+    t += meta['duration'] + cfg['gap'] + (cfg.get('extraBeforeEnd', 0.3) if ch['id'] == 'customer' else 0)
 total = round(chapters[-1]['start'] + chapters[-1]['voDur'] + cfg['outroHold'], 2)
 json.dump({'total': total, 'fps': 30, 'chapters': chapters}, open(f"{OUT}/timeline.json", 'w'), indent=1)
 open(f"{OUT}/subtitles.en.srt", 'w').write('\n'.join(srt))

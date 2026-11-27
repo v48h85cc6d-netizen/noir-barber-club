@@ -29,7 +29,9 @@ vo *= 0.708 / max(1e-6, np.abs(vo).max())
 # ── music: [0, 59.9] + [21.9, 92] (cut before the hits), stretched to the film length ──
 m = load(f"{AD}/music.mp3")
 def seg(a, b): return m[int(a * SR): int(b * SR)]
-A, B = seg(0, 59.9), seg(21.9, 93.5)
+import os
+_segs = [tuple(map(float, x.split('-'))) for x in os.environ.get('MUSIC_SEGS', '0-59.9,21.9-93.5').split(',')]
+A, B = seg(*_segs[0]), seg(*_segs[1])
 xf = int(0.35 * SR); w = np.linspace(0, 1, xf)[:, None]
 music = np.concatenate([A[:-xf], A[-xf:] * (1 - w) + B[:xf] * w, B[xf:]])
 stretch = (TL['total'] + 0.3) / (len(music) / SR - 1.6)
@@ -51,7 +53,7 @@ for i, x in enumerate(e):
     s = a_att * s + (1 - a_att) * x if x > s else a_rel * s + (1 - a_rel) * x
     sm[i] = s
 duck = np.interp(np.arange(N), np.arange(len(sm)) * hop, np.clip(sm / 0.12, 0, 1))
-MUS_FULL, MUS_DUCK = 0.50, 0.25  # relative to normalised music
+MUS_FULL, MUS_DUCK = 0.42, 0.21  # relative to normalised music
 mus_peak = np.abs(music).max()
 # level the music bed (slow RMS levelling so later, louder sections don't crowd the voice)
 mono = mus[:, 0] ** 2

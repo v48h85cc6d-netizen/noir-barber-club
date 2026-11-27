@@ -1,5 +1,5 @@
 {
- "total": 132.96,
+ "total": 69.71,
  "fps": 30,
  "chapters": [
   {
@@ -7,38 +7,28 @@
    "num": "01",
    "title": "The Website",
    "vo": "vo1",
-   "start": 3.0,
-   "voDur": 21.36,
+   "start": 1.4,
+   "voDur": 13.13,
    "cues": [
     {
-     "text": "Welcome to NOIR BARBER CLUB.",
-     "start": 3.04,
-     "end": 5.45
+     "text": "Meet NOIR BARBER CLUB \u2014",
+     "start": 1.44,
+     "end": 2.76
     },
     {
-     "text": "A premium digital home for a modern barbershop.",
-     "start": 5.97,
-     "end": 9.17
+     "text": "a premium website where customers can explore services,",
+     "start": 3.12,
+     "end": 6.62
     },
     {
-     "text": "Visitors meet the barbers, explore every service and price,",
-     "start": 9.69,
-     "end": 14.06
+     "text": "prices, the gallery, and everything the barbershop offers.",
+     "start": 7.0,
+     "end": 11.04
     },
     {
-     "text": "browse the gallery, memberships and gift cards,",
-     "start": 14.66,
-     "end": 17.96
-    },
-    {
-     "text": "and find the way to the shop.",
-     "start": 18.52,
-     "end": 20.12
-    },
-    {
-     "text": "In three languages, on desktop and mobile.",
-     "start": 20.64,
-     "end": 24.21
+     "text": "Beautifully designed for both desktop and mobile.",
+     "start": 11.4,
+     "end": 14.38
     }
    ]
   },
@@ -47,48 +37,33 @@
    "num": "02",
    "title": "The Owner",
    "vo": "vo2",
-   "start": 25.76,
-   "voDur": 31.76,
+   "start": 15.13,
+   "voDur": 16.13,
    "cues": [
     {
-     "text": "Behind it runs a private management system.",
-     "start": 25.8,
-     "end": 28.77
+     "text": "Behind the website,",
+     "start": 15.17,
+     "end": 16.31
     },
     {
-     "text": "The owner signs in through the staff entrance,",
-     "start": 29.29,
-     "end": 31.95
+     "text": "the owner has a dedicated dashboard to manage the entire business \u2014",
+     "start": 16.7,
+     "end": 20.91
     },
     {
-     "text": "and sees today's revenue, bookings and chair utilisation at a glance.",
-     "start": 32.34,
-     "end": 37.66
+     "text": "appointments, customers, staff,",
+     "start": 21.27,
+     "end": 24.35
     },
     {
-     "text": "Every appointment sits on a live day board.",
-     "start": 38.25,
-     "end": 41.14
+     "text": "services, prices, and business performance.",
+     "start": 24.73,
+     "end": 28.51
     },
     {
-     "text": "The owner manages customers, creates barber accounts and sets working hours,",
-     "start": 41.66,
-     "end": 47.24
-    },
-    {
-     "text": "updates services and prices,",
-     "start": 47.76,
-     "end": 50.12
-    },
-    {
-     "text": "reviews revenue, gift cards and memberships.",
-     "start": 50.64,
-     "end": 55.43
-    },
-    {
-     "text": "One central workspace.",
-     "start": 55.95,
-     "end": 57.37
+     "text": "Everything is organized in one place.",
+     "start": 28.87,
+     "end": 31.11
     }
    ]
   },
@@ -97,33 +72,33 @@
    "num": "03",
    "title": "The Barber",
    "vo": "vo3",
-   "start": 58.92,
-   "voDur": 19.29,
+   "start": 31.86,
+   "voDur": 11.992,
    "cues": [
     {
-     "text": "Each barber signs in to a personal workspace,",
-     "start": 58.96,
-     "end": 61.69
+     "text": "Every barber has a personal account and dashboard.",
+     "start": 31.9,
+     "end": 34.9
     },
     {
-     "text": "not the owner's dashboard.",
-     "start": 61.96,
-     "end": 63.43
+     "text": "They can check their assigned appointments,",
+     "start": 35.26,
+     "end": 37.33
     },
     {
-     "text": "The day opens with the next client: name, service, time and notes.",
-     "start": 63.95,
-     "end": 69.3
+     "text": "view customer and service details,",
+     "start": 37.75,
+     "end": 39.96
     },
     {
-     "text": "One tap marks them arrived, starts the service, and completes it.",
-     "start": 69.82,
-     "end": 74.39
+     "text": "view their schedule,",
+     "start": 40.32,
+     "end": 41.45
     },
     {
-     "text": "Calendar and schedule show only their own appointments.",
-     "start": 74.91,
-     "end": 78.21
+     "text": "and update appointment statuses.",
+     "start": 41.81,
+     "end": 43.85
     }
    ]
   },
@@ -132,68 +107,48 @@
    "num": "04",
    "title": "The Customer",
    "vo": "vo4",
-   "start": 79.61,
-   "voDur": 40.6,
+   "start": 44.452,
+   "voDur": 15.487,
    "cues": [
     {
-     "text": "For customers, it starts on their phone.",
-     "start": 79.65,
-     "end": 82.75
+     "text": "Customers can create their own account,",
+     "start": 44.492,
+     "end": 46.452
     },
     {
-     "text": "They create an account with their name, email, phone number and password.",
-     "start": 83.27,
-     "end": 88.98
+     "text": "verify their email,",
+     "start": 46.812,
+     "end": 48.052
     },
     {
-     "text": "A six-digit code is sent to their email.",
-     "start": 89.5,
-     "end": 92.35
+     "text": "and log in.",
+     "start": 48.452,
+     "end": 49.242
     },
     {
-     "text": "They enter it, and the account is verified.",
-     "start": 92.87,
-     "end": 95.88
+     "text": "They can explore services,",
+     "start": 49.602,
+     "end": 50.962
     },
     {
-     "text": "Then they sign in with their email and password.",
-     "start": 96.4,
-     "end": 99.36
+     "text": "choose their preferred barber,",
+     "start": 51.332,
+     "end": 52.642
     },
     {
-     "text": "To book, they choose a barber,",
-     "start": 99.88,
-     "end": 101.87
+     "text": "select an available date and time,",
+     "start": 52.872,
+     "end": 54.672
     },
     {
-     "text": "then a service and its price,",
-     "start": 102.34,
-     "end": 104.14
+     "text": "and confirm their appointment.",
+     "start": 55.022,
+     "end": 56.412
     },
     {
-     "text": "pick a date and an available time,",
-     "start": 104.7,
-     "end": 106.85
-    },
-    {
-     "text": "review, and confirm.",
-     "start": 106.99,
-     "end": 108.64
-    },
-    {
-     "text": "The booking gets its own reference.",
-     "start": 109.16,
-     "end": 111.46
-    },
-    {
-     "text": "In My appointments, they see their visits, open the details,",
-     "start": 111.98,
-     "end": 116.28
-    },
-    {
-     "text": "and can cancel online up to a day before.",
-     "start": 116.66,
-     "end": 120.06
+     "text": "They can also manage their bookings directly from their phone.",
+     "start": 56.772,
+     "end": 59.939
     }
    ]
   },
@@ -202,23 +157,23 @@
    "num": "",
    "title": "",
    "vo": "vo5",
-   "start": 121.91,
-   "voDur": 7.45,
+   "start": 60.839,
+   "voDur": 7.17,
    "cues": [
     {
      "text": "NOIR BARBER CLUB.",
-     "start": 121.95,
-     "end": 123.23
+     "start": 60.879,
+     "end": 62.549
     },
     {
      "text": "One platform. Three experiences.",
-     "start": 123.72,
-     "end": 126.2
+     "start": 62.909,
+     "end": 66.039
     },
     {
-     "text": "A smarter way to manage, work, and book.",
-     "start": 126.64,
-     "end": 129.36
+     "text": "Complete control.",
+     "start": 66.399,
+     "end": 67.859
     }
    ]
   }

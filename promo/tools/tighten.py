@@ -18,7 +18,8 @@ while i < n:
         if (j - i) * 0.01 >= 0.14 or i == 0 or j == n: sil.append((i, j))
         i = j
     else: i += 1
-CAP, KEEP = 0.62, 0.52
+import os
+CAP, KEEP = float(os.environ.get("CAP", 0.62)), float(os.environ.get("KEEP", 0.52))
 out, segs, t, prev = [], [], 0.0, 0
 for k, (s, e) in enumerate(sil):
     speech = a[prev * hop:s * hop]
